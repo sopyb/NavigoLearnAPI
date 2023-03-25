@@ -1,4 +1,4 @@
-# Navigo Learning API
+# Navigo Learning API [![CodeFactor](https://www.codefactor.io/repository/github/navigolearn/api/badge/master)](https://www.codefactor.io/repository/github/navigolearn/api/overview/master)
 
 ## About
 
