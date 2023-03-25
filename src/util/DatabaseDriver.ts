@@ -1,8 +1,7 @@
 import EnvVars from '@src/constants/EnvVars';
 import mariadb, {Pool} from 'mariadb';
 
-
-
+// database credentials
 const {DBCred} = EnvVars;
 
 // config interface
@@ -165,51 +164,11 @@ class Database {
 
     let data: T | null = null;
     if (result) {
-      data = (result as T[])?.[0]  || null;
+      data = (result as T[])?.[0] || null;
     }
     // if result is RowDataPacket return first element else return null
     return data;
   }
-
-  // async getUsers(): Promise<User[]> {
-  //   const users = await this.query('SELECT * FROM users');
-  //   return users;
-  // }
-  //
-  // async createUser(user: User): Promise<number> {
-  //   const userId = await this.insert('users', user);
-  //   return userId;
-  // }
-  //
-  // async updateUser(id: number, user: User): Promise<boolean> {
-  //   const updated = await this.update('users', id, user);
-  //   return updated;
-  // }
-  //
-  // async deleteUser(id: number): Promise<boolean> {
-  //   const deleted = await this.delete('users', id);
-  //   return deleted;
-  // }
-  //
-  // async getPosts(): Promise<Post[]> {
-  //   const posts = await this.query('SELECT * FROM posts');
-  //   return posts;
-  // }
-  //
-  // async createPost(post: Post): Promise<number> {
-  //   const postId = await this.insert('posts', post);
-  //   return postId;
-  // }
-  //
-  // async updatePost(id: number, post: Post): Promise<boolean> {
-  //   const updated = await this.update('posts', id, post);
-  //   return updated;
-  // }
-  //
-  // async deletePost(id: number): Promise<boolean> {
-  //   const deleted = await this.delete('posts', id);
-  //   return deleted;
-  // }
 }
 
 export default Database;

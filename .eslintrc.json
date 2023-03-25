@@ -34,8 +34,7 @@
       { "ignores" : ["modules"] }
     ],
     "node/no-unsupported-features/es-builtins": [
-      "error",
-      { "ignores" : ["modules"] }
+      "error"
     ],
     "node/no-missing-import": 0,
     "node/no-unpublished-import": 0
