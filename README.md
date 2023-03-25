@@ -1,6 +1,8 @@
+# Navigo Learn API
+
 ## About
 
-This project was created with [express-generator-typescript](https://github.com/seanpmaxwell/express-generator-typescript).
+REST api for NavigoLabs. This project is built with Node.js, Express, and MariaDB.
 
 
 ## Available Scripts
