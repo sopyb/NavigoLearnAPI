@@ -20,3 +20,19 @@ export function tick(milliseconds: number): Promise<void> {
     }, milliseconds);
   });
 }
+
+export class Queue<T> {
+  private queue: T[] = [];
+
+  public enqueue(item: T): void {
+    this.queue.push(item);
+  }
+
+  public dequeue(): T | undefined {
+    return this.queue.shift();
+  }
+
+  public isEmpty(): boolean {
+    return this.queue.length === 0;
+  }
+}

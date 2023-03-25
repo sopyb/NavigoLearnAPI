@@ -4,8 +4,7 @@
 
 /* eslint-disable node/no-process-env */
 
-
-export default {
+const EnvVars = {
   NodeEnv: (process.env.NODE_ENV ?? ''),
   Port: (process.env.PORT ?? 0),
   CookieProps: {
@@ -25,4 +24,13 @@ export default {
     Secret: (process.env.JWT_SECRET ??  ''),
     Exp: (process.env.COOKIE_EXP ?? ''), // exp at the same time as the cookie
   },
+  DBCred: {
+    host: (process.env.MARIADB_HOST ?? ''),
+    user: (process.env.MARIADB_USER ?? ''),
+    password: (process.env.MARIADB_PASSWORD ?? ''),
+    database: (process.env.MARIADB_DATABASE ?? ''),
+  },
 } as const;
+
+export default EnvVars;
+export {EnvVars};

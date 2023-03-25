@@ -68,9 +68,12 @@
     "paths": {
       "@src/*": [
         "src/*"
-      ],
+      ]
     },
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "lib": [
+      "es2020"
+    ]
   },
   "include": [
     "src/**/*.ts",

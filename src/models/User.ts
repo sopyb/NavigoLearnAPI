@@ -12,11 +12,13 @@ export enum UserRoles {
 // **** Types **** //
 
 export interface IUser {
-  id: number;
+  id: bigint;
   name: string;
   email: string;
   pwdHash?: string;
   role?: UserRoles;
+  googleId?: bigint;
+  githubId?: bigint;
 }
 
 export interface ISessionUser {
@@ -31,11 +33,13 @@ export interface ISessionUser {
 
 class User implements IUser {
 
-  public id: number;
+  public id: bigint;
   public name: string;
   public email: string;
   public role?: UserRoles;
   public pwdHash?: string;
+  public googleId?: bigint;
+  public githubId?: bigint;
 
   /**
    * Constructor()
@@ -45,13 +49,17 @@ class User implements IUser {
     email?: string,
     role?: UserRoles,
     pwdHash?: string,
-    id?: number, // id last cause usually set by db
+    id?: bigint, // id last cause usually set by db
+    googleId?: bigint,
+    githubId?: bigint,
   ) {
     this.name = (name ?? '');
     this.email = (email ?? '');
     this.role = (role ?? UserRoles.Standard);
     this.pwdHash = (pwdHash ?? '');
-    this.id = (id ?? -1);
+    this.id = BigInt(id ?? -1);
+    this.googleId = BigInt(googleId ?? -1);
+    this.githubId = BigInt(githubId ?? -1);
   }
 
   /**
@@ -64,7 +72,8 @@ class User implements IUser {
     }
     // Get user instance
     const p = param as IUser;
-    return new User(p.name, p.email, p.role, p.pwdHash, p.id);
+    return new User(
+      p.name, p.email, p.role, p.pwdHash, p.id, p.googleId, p.githubId);
   }
 
   /**
@@ -77,7 +86,10 @@ class User implements IUser {
       'id' in arg &&
       'email' in arg &&
       'name' in arg &&
-      'role' in arg
+      'role' in arg &&
+      'pwdHash' in arg &&
+      'googleId' in arg &&
+      'githubId' in arg
     );
   }
 }

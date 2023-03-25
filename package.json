@@ -24,7 +24,7 @@
     "@src": "dist"
   },
   "engines": {
-    "node": ">=8.10.0"
+    "node": ">=18"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
@@ -38,6 +38,7 @@
     "jet-validator": "^1.0.4",
     "jsonfile": "^6.1.0",
     "jsonwebtoken": "^9.0.0",
+    "mariadb": "^3.1.1",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "ts-command-line-args": "^2.4.2"
