@@ -1,8 +1,8 @@
-# Navigo Learn API
+# Navigo Learning API
 
 ## About
 
-REST api for NavigoLabs. This project is built with Node.js, Express, and MariaDB.
+REST api for NavigoLearning. This project is built with Node.js, Express, and MariaDB.
 
 
 ## Available Scripts
