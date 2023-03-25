@@ -4,3 +4,6 @@ dist/
 
 # JetBrains IDEs
 .idea
+
+# ENV
+env
