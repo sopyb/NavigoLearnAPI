@@ -1,39 +1,30 @@
 name: MariaDB
 
-on: [push, pull_request]
-
-env:
-  MYSQL_ROOT_PASSWORD: root
-  DB_USERNAME: ${{ secrets.MARIADB_USER }}
-  DB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
-  DB_DATABASE: ${{ secrets.MARIADB_DATABASE }}
-
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          env-file: ./env/test.env
-      - name: Set up MariaDB
-        uses: docker://mariadb:latest
-        with:
-          args: >
-            -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
-            -e MYSQL_DATABASE=testdb
-            -p 3306:3306
-      - name: Create new user and grant permissions
-        run: |
-          mysql -u root -p$MYSQL_ROOT_PASSWORD <<EOF
-          CREATE DATABASE $DB_DATABASE;
-          CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-          GRANT ALL PRIVILEGES ON $DB_DATABASE.* TO '$DB_USERNAME'@'localhost';
-          EOF
-      # set up node
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+      - name: Set up env
+        run: |
+          cat /env/test.env >> $GITHUB_ENV
+      - name: Setup MariaDB
+        uses: ankane/setup-mariadb@v1
+        run: |
+          mysql << EOF
+          CREATE DATABASE $DB_DATABASE; 
+          CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+          GRANT ALL PRIVILEGES ON $DB_DATABASE.* TO '$DB_USERNAME'@'localhost';
+          EOF
       - name: Install dependencies
         run: npm install
       - name: Run tests
