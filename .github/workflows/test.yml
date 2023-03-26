@@ -26,11 +26,9 @@ jobs:
           root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
       - name: Setup MariaDB environment
         run: |
-          sudo mysql -u root -p << EOF
-          CREATE DATABASE $DB_DATABASE; 
-          CREATE USER '$MARIADB_USERNAME'@'localhost' IDENTIFIED BY '$MARIADB_PASSWORD';
-          GRANT ALL PRIVILEGES ON $MARIADB_DATABASE.* TO '$MARIADB_USERNAME'@'localhost';
-          EOF
+          sudo mysql -u root -e "CREATE DATABASE $MARIADB_DATABASE;"
+          sudo mysql -u root -e "CREATE USER '$MARIADB_USERNAME'@'localhost' IDENTIFIED BY '$MARIADB_PASSWORD';"
+          sudo mysql -u root -e "GRANT ALL PRIVILEGES ON $MARIADB_DATABASE.* TO '$MARIADB_USERNAME'@'localhost';"
       - name: Install dependencies
         run: npm install
       - name: Run tests
