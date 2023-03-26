@@ -16,8 +16,7 @@ jobs:
           node-version: '16.x'
       - name: Set up env
         run: |
-          # report files in folder to the step log
-          ls -al
+          git submodule update --init --recursive
           ls -al ./env
           cat ./env/test.env >> $GITHUB_ENV
       - name: Setup MariaDB
