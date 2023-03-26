@@ -155,7 +155,6 @@ describe('Database Middleware', () => {
 
     // check result
     expect(deletedUser).toBeTruthy();
-    expect(!deletedUser).toBeTruthy();
 
     // get roadmap and user again see if they are deleted
     const deletedRoadmapFromDb = await db.get<Roadmap>('roadmaps', roadmap.id);
