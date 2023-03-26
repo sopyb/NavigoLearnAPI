@@ -19,14 +19,14 @@ jobs:
           node-version: '16.x'
       - name: Set up env
         run: |
-          ls -la .
-          ls -la ./env
           grep -o '^[^#]*' ./env/test.env >> $GITHUB_ENV
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
+        with:
+          root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
       - name: Setup MariaDB environment
         run: |
-          mysql << EOF
+          mysql -u root -p << EOF
           CREATE DATABASE $DB_DATABASE; 
           CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
           GRANT ALL PRIVILEGES ON $DB_DATABASE.* TO '$DB_USERNAME'@'localhost';
