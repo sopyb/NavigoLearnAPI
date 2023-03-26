@@ -19,6 +19,8 @@ jobs:
           node-version: '16.x'
       - name: Set up env
         run: |
+          ls -la .
+          ls -la ./env
           cat ./env/test.env >> $GITHUB_ENV
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
