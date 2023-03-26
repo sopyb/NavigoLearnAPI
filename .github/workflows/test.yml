@@ -11,13 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.envAccessToken }}
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
       - name: Set up env
         run: |
-          git submodule update --init --recursive
-          ls -al ./env
           cat ./env/test.env >> $GITHUB_ENV
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
