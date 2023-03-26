@@ -19,6 +19,7 @@ jobs:
           cat /env/test.env >> $GITHUB_ENV
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
+      - name: Setup MariaDB
         run: |
           mysql << EOF
           CREATE DATABASE $DB_DATABASE; 
