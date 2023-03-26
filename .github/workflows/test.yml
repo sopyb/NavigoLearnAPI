@@ -28,10 +28,10 @@ jobs:
         run: |
           sudo mysql -u root -p << EOF
           CREATE DATABASE $DB_DATABASE; 
-          CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-          GRANT ALL PRIVILEGES ON $DB_DATABASE.* TO '$DB_USERNAME'@'localhost';
+          CREATE USER '$MARIADB_USERNAME'@'localhost' IDENTIFIED BY '$MARIADB_PASSWORD';
+          GRANT ALL PRIVILEGES ON $MARIADB_DATABASE.* TO '$MARIADB_USERNAME'@'localhost';
           EOF
       - name: Install dependencies
         run: npm install
       - name: Run tests
-        run: npm test
+        run: npm run test:no-reloading
