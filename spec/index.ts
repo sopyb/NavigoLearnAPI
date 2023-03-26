@@ -4,7 +4,6 @@ import Jasmine from 'jasmine';
 import { parse } from 'ts-command-line-args';
 import logger from 'jet-logger';
 
-
 // **** Types **** //
 
 interface IArgs {
@@ -70,8 +69,16 @@ if (args.testFile) {
     const info = await execResp;
     if (info.overallStatus === 'passed') {
       logger.info('All tests have passed :)');
+      // exit on completion
+      // eslint-disable-next-line no-process-exit
+      process.exit(0);
     } else {
-      logger.err('At least one test has failed :(');
+      logger.err('One or more tests have failed :(');
+      // exit on error
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
     }
   }
+  
+  
 })();
