@@ -26,7 +26,7 @@ jobs:
           root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
       - name: Setup MariaDB environment
         run: |
-          mysql -u root -p << EOF
+          sudo mysql -u root -p << EOF
           CREATE DATABASE $DB_DATABASE; 
           CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
           GRANT ALL PRIVILEGES ON $DB_DATABASE.* TO '$DB_USERNAME'@'localhost';
