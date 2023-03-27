@@ -7,6 +7,7 @@ export interface IRoadmap {
   ownerId: bigint;
   name: string;
   description: string;
+  tags: string[];
   created: Date;
   updated: Date;
   deleted: Date | null;
@@ -21,6 +22,7 @@ export class Roadmap implements IRoadmap {
   public ownerId: bigint;
   public name: string;
   public description: string;
+  public tags: string[];
   public created: Date;
   public updated: Date;
   public deleted: Date | null;
@@ -35,6 +37,7 @@ export class Roadmap implements IRoadmap {
     ownerId: bigint | number,
     name: string,
     description: string,
+    tags: string[],
     data: string,
     id: bigint | null = null,
     created: Date = new Date(),
@@ -47,6 +50,7 @@ export class Roadmap implements IRoadmap {
     this.ownerId = ownerId as bigint;
     this.name = name;
     this.description = description;
+    this.tags = tags;
     this.created = created;
     this.updated = updated;
     this.deleted = deleted;
@@ -67,6 +71,7 @@ export class Roadmap implements IRoadmap {
       param.ownerId,
       param.name,
       param.description,
+      param.tags,
       param.data,
       param.id,
       param.created,
@@ -84,6 +89,7 @@ export class Roadmap implements IRoadmap {
       'ownerId' in param &&
       'name' in param &&
       'description' in param &&
+      'tags' in param &&
       'created' in param &&
       'updated' in param &&
       'deleted' in param &&
