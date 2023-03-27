@@ -101,11 +101,8 @@ describe('Database Middleware', () => {
       user.id,
       'This is a test roadmap',
       'This is a test description',
+      ['test', 'test2'],
       'aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUQ==',
-      null,
-      new Date(),
-      new Date(),
-      null,
     );
 
     // save roadmap

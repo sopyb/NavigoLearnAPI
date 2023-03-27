@@ -4,6 +4,12 @@ import mariadb, {Pool} from 'mariadb';
 // database credentials
 const {DBCred} = EnvVars;
 
+// data interface
+interface Data {
+  keys: string[];
+  values: unknown[];
+}
+
 // config interface
 interface DatabaseConfig {
   host: string;
@@ -24,6 +30,29 @@ interface ResultSetHeader {
   info: string;
   serverStatus: number;
   warningStatus: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+function processData(data: Object): Data {
+  // get keys and values
+  const keys = Object.keys(data);
+  const values = Object.values(data);
+
+  // remove id from keys and values
+  const idIndex = keys.indexOf('id');
+  if (idIndex > -1) {
+    keys.splice(idIndex, 1);
+    values.splice(idIndex, 1);
+  }
+
+  // if value is array or object stringify it
+  for (let i = 0; i < values.length; i++) {
+    if (Array.isArray(values[i])) {
+      values[i] = `JSON-${JSON.stringify(values[i])}`;
+    }
+  }
+
+  return {keys, values};
 }
 
 class Database {
@@ -58,6 +87,7 @@ class Database {
       id INT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       description VARCHAR(255) NOT NULL,
+      tags TEXT NOT NULL,
       ownerId INT NOT NULL,
       created DATETIME NOT NULL,
       updated DATETIME NOT NULL,
@@ -85,22 +115,14 @@ class Database {
   }
 
   public async insert(table: string, data: object): Promise<bigint> {
-    // get keys and values
-    const keys = Object.keys(data);
-    const values = Object.values(data);
-    // remove id from keys and values
-    const idIndex = keys.indexOf('id');
-    if (idIndex > -1) {
-      keys.splice(idIndex, 1);
-      values.splice(idIndex, 1);
-    }
-
+    const {keys, values} = processData(data);
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')}) 
         VALUES (${values.map(() => '?').join(',')})`;
     // execute query
     const result = await this.query(sql, values);
+
 
     // return insert id
     let insertId = BigInt(-1);
@@ -113,16 +135,7 @@ class Database {
 
   public async update(table: string, id: bigint, data: object):
     Promise<boolean> {
-    // get keys and values
-    const keys = Object.keys(data);
-    const values = Object.values(data);
-
-    // remove id from keys and values
-    const idIndex = keys.indexOf('id');
-    if (idIndex > -1) {
-      keys.splice(idIndex, 1);
-      values.splice(idIndex, 1);
-    }
+    const {keys, values} = processData(data);
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params
@@ -162,11 +175,25 @@ class Database {
     // execute query
     const result = await this.query(sql, [id]);
 
+    // check if T has any properties that are JSON
+    // if so parse them
+    if (result && Object.keys(result).length > 0) {
+      const keys = Object.keys((result as RowDataPacket[])[0]);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value: unknown = (result as RowDataPacket[])[0][key];
+        if (typeof value === 'string' && value.startsWith('JSON-')) {
+          (result as RowDataPacket[])[0][key] =
+            JSON.parse(value.replace('JSON-', ''));
+        }
+      }
+    }
+
     let data: T | null = null;
     if (result) {
       data = (result as T[])?.[0] || null;
     }
-    // if result is RowDataPacket return first element else return null
+
     return data;
   }
 }
