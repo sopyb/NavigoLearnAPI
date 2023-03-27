@@ -4,6 +4,9 @@
 
 REST api for NavigoLearning. This project is built with Node.js, Express, and MariaDB.
 
+## Documentation
+Documentation for the api can be found [here](docs/README.md).
+
 
 ## Available Scripts
 

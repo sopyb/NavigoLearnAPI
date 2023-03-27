@@ -1,0 +1,52 @@
+# Routes
+ - Base URL: /api
+ - [Auth](auth/README.md)
+   - Base URL: /api/auth
+   - Login: /login
+   - GoogleLogin: /google-login
+   - GithubLogin: /github-login
+   - Register: /register
+   - Logout: /logout
+   - ForgotPassword: /forgot-password
+- [Explore](explore/README.md)
+    - Base URL: /api/explore
+    - New: /new
+    - Popular: /popular
+    - Trending: /trending
+    - [Search](explore/search/README.md):
+        - Base URL: /api/explore/search
+        - Users: /users
+        - Roadmaps: /roadmaps
+- [Roadmaps](roadmaps/README.md)
+    - Base URL: /api/roadmaps
+    - Create: /create
+    - Get: /:roadmapId
+    - Update: /:roadmapId
+    - Delete: /:roadmapId
+    - [Progress](roadmaps/progress/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/progress
+        - Get: /:userId?
+        - Update: /
+    - [Rating](roadmaps/rating/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/rating
+        - Get: /:own? # own = true if you want to get your own rating
+        - Update: /
+        - Delete: /
+    - [Issues](roadmaps/issues/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/issues
+        - Create: /create
+        - Get: /:issueId?
+        - Update: /:issueId
+        - Close: /:issueId
+        - [Comments](roadmaps/issues/comments/README.md):
+            - Base URL: /api/roadmaps/:roadmapId/issues/:issueId/comments
+            - Create: /create
+            - Get: /:commentId?
+            - Update: /:commentId
+            - Delete: /:commentId
+ - [Users](users/README.md)
+   - Base URL: /api/users
+   - Me: /me
+   - Get: /:userId
+   - Update: /:userId?
+   - Delete: /:userId?
