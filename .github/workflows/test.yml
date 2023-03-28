@@ -19,7 +19,12 @@ jobs:
           node-version: '16.x'
       - name: Set up env
         run: |
-          grep -o '^[^#]*' ./env/test.env >> $GITHUB_ENV
+          while read -r line; do
+            key=$(echo $line | cut -d= -f1)
+            value=$(echo $line | cut -d= -f2-)
+            echo "::add-mask::$value"
+            echo "$key=$value" >> $GITHUB_ENV
+          done < <(grep -o '^[^#]*' ./env/test.env)
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
         with:
