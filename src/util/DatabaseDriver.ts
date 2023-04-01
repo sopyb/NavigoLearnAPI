@@ -1,8 +1,8 @@
 import EnvVars from '@src/constants/EnvVars';
-import mariadb, {Pool} from 'mariadb';
+import mariadb, { Pool } from 'mariadb';
 
 // database credentials
-const {DBCred} = EnvVars;
+const { DBCred } = EnvVars;
 
 // data interface
 interface Data {
@@ -52,7 +52,7 @@ function processData(data: Object): Data {
     }
   }
 
-  return {keys, values};
+  return { keys, values };
 }
 
 class Database {
@@ -81,6 +81,10 @@ class Database {
     )`;
     this.query(query);
 
+    // create index for users table
+    query = `CREATE INDEX IF NOT EXISTS users_index
+        ON users (email, name)`;
+    this.query(query);
 
     // create roadmaps table
     query = `CREATE TABLE IF NOT EXISTS roadmaps (
@@ -97,11 +101,30 @@ class Database {
       data TEXT NOT NULL,
       PRIMARY KEY (id)
     )`;
+    this.query(query);
 
+    // create index for roadmaps table
+    query = `CREATE INDEX IF NOT EXISTS roadmaps_index
+        ON roadmaps (name, description, ownerId)`;
+    this.query(query);
+
+    // create sessions table
+    query = `CREATE TABLE IF NOT EXISTS sessions (
+      id INT NOT NULL AUTO_INCREMENT,
+      userId INT NOT NULL,
+      token VARCHAR(255) NOT NULL,
+      expires DATETIME NOT NULL,
+      PRIMARY KEY (id)
+    )`;
+    this.query(query);
+
+    // create index for sessions table
+    query = `CREATE INDEX IF NOT EXISTS sessions_index
+        ON sessions (userId, token)`;
     this.query(query);
   }
 
-  private async query(sql: string, params?: unknown[]):
+  public async query(sql: string, params?: unknown[]):
     Promise<ResultSetHeader | RowDataPacket[]> {
     // get connection from pool
     const conn = await Database.pool.getConnection();
@@ -115,7 +138,7 @@ class Database {
   }
 
   public async insert(table: string, data: object): Promise<bigint> {
-    const {keys, values} = processData(data);
+    const { keys, values } = processData(data);
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')}) 
@@ -135,12 +158,12 @@ class Database {
 
   public async update(table: string, id: bigint, data: object):
     Promise<boolean> {
-    const {keys, values} = processData(data);
+    const { keys, values } = processData(data);
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params
-    const sql = `UPDATE ${table} SET ${keys.map(key => `${key} = ?`).join(',')} 
-        WHERE id = ?`;
+    const sqlKeys = keys.map(key => `${key} = ?`).join(',');
+    const sql = `UPDATE ${table} SET ${sqlKeys} WHERE id = ?`;
     // execute query
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await this.query(sql, [...values, id]);
@@ -179,8 +202,37 @@ class Database {
     // if so parse them
     if (result && Object.keys(result).length > 0) {
       const keys = Object.keys((result as RowDataPacket[])[0]);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
+      for (const element of keys) {
+        const key = element;
+        const value: unknown = (result as RowDataPacket[])[0][key];
+        if (typeof value === 'string' && value.startsWith('JSON-')) {
+          (result as RowDataPacket[])[0][key] =
+            JSON.parse(value.replace('JSON-', ''));
+        }
+      }
+    }
+
+    let data: T | null = null;
+    if (result) {
+      data = (result as T[])?.[0] || null;
+    }
+
+    return data;
+  }
+
+  public async getObjByKey<T>(table: string, key: string, value: string):
+    Promise<T | null> {
+    // create sql query - select * from table where id = ?
+    const sql = `SELECT * FROM ${table} WHERE ${key} = ?`;
+    // execute query
+    const result = await this.query(sql, [value]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    if (result && Object.keys(result).length > 0) {
+      const keys = Object.keys((result as RowDataPacket[])[0]);
+      for (const element of keys) {
+        const key = element;
         const value: unknown = (result as RowDataPacket[])[0][key];
         if (typeof value === 'string' && value.startsWith('JSON-')) {
           (result as RowDataPacket[])[0][key] =
