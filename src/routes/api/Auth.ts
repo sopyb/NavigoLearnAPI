@@ -4,9 +4,11 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
 import User, { UserRoles } from '@src/models/User';
+import { randomBytes } from 'crypto';
+import EnvVars from '@src/constants/EnvVars';
+import { NodeEnvs } from '@src/constants/misc';
 
 const AuthRouter = Router();
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getInfoFromRequest(req: any): { email: string, password: string } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -14,6 +16,33 @@ function getInfoFromRequest(req: any): { email: string, password: string } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const password = req?.body?.password as string;
   return { email, password };
+}
+
+async function createSession(user: User): Promise<string> {
+  const token = randomBytes(32).toString('hex');
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // check if token is already in use - statistically unlikely but possible
+  const session = await db.getObjByKey('sessions', 'token', token);
+  if (!!session) {
+    return '';
+  }
+
+  // save session
+  const sessionId = await db.insert('sessions', {
+    token,
+    userId: user.id,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+  });
+
+  // check if session was saved
+  if (sessionId < 0) {
+    return '';
+  }
+
+  return token;
 }
 
 AuthRouter.post(Paths.Auth.Login,
@@ -49,7 +78,20 @@ AuthRouter.post(Paths.Auth.Login,
       });
     }
 
-    // TODO: create session and return cookie
+    const token = await createSession(user);
+    if (!token) {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Could not create session',
+      });
+    }
+
+    // save token in cookie
+    res.cookie('token', token, {
+      httpOnly: false,
+      secure: EnvVars.NodeEnv === NodeEnvs.Production,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
     return res.status(HttpStatusCodes.OK).json({
       message: 'Login successful',
     });
@@ -108,7 +150,20 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 
   // check result
   if (result >= 0) {
-    // TODO: create session and return cookie
+    // create session
+    const token = await createSession(newUser);
+    if (!token) {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Could not create session',
+      });
+    }
+
+    // save token in cookie
+    res.cookie('token', token, {
+      httpOnly: false,
+      secure: EnvVars.NodeEnv === NodeEnvs.Production,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
     return res.status(HttpStatusCodes.OK).json({
       message: 'User created successfully',
     });
@@ -121,8 +176,6 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 });
 
 AuthRouter.delete(Paths.Auth.Logout, (req, res) => {
-  // Remove session TODO
-
   // remove cookie
   res.clearCookie('session');
   return res.status(HttpStatusCodes.OK).json({
@@ -154,7 +207,7 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
     });
   }
 
-  // TODO: send email with reset link
+  // TODO: send email with reset code
 
   return res.status(HttpStatusCodes.OK).json({
     message: 'Password reset email sent',

@@ -124,7 +124,7 @@ class Database {
     this.query(query);
   }
 
-  public async query(sql: string, params?: unknown[]):
+  private async query(sql: string, params?: unknown[]):
     Promise<ResultSetHeader | RowDataPacket[]> {
     // get connection from pool
     const conn = await Database.pool.getConnection();
