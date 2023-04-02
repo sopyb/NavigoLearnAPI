@@ -11,6 +11,7 @@ const Paths = {
     Login: '/login',
     GoogleLogin: '/google-login',
     GithubLogin: '/github-login',
+    GithubCallback: '/github-callback',
     Register: '/register',
     Logout: '/logout',
     ForgotPassword: '/forgot-password',

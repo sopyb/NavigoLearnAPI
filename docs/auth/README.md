@@ -6,11 +6,11 @@
 
 Logs in a user.
 
-## [GoogleLogin](google-login.md) [POST - /api/auth/google-login]
+## [GoogleLogin](google-login.md) [GET - /api/auth/google-login]
 
 Logs in a user using Google OAuth.
 
-## [GithubLogin](github-login.md) [POST - /api/auth/github-login]
+## [GithubLogin](github-login.md) [GET - /api/auth/github-login]
 
 Logs in a user using GitHub OAuth.
 

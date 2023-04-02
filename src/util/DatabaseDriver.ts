@@ -149,8 +149,11 @@ class Database {
     return data;
   }
 
-  public async getObjByKey<T>(table: string, key: string, value: string):
-    Promise<T | null> {
+  public async getObjByKey<T>(
+    table: string,
+    key: string,
+    value: string | bigint,
+  ): Promise<T | null> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT * FROM ${table} WHERE ${key} = ?`;
     // execute query
@@ -181,7 +184,7 @@ class Database {
   private setup() {
     // create users table using the User model
     let query = `CREATE TABLE IF NOT EXISTS users (
-      id INT NOT NULL AUTO_INCREMENT,
+      id BIGINT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL,
       role INT NOT NULL,
@@ -197,13 +200,32 @@ class Database {
         ON users (email, name)`;
     this.query(query);
 
+    // create user info table
+    query = `CREATE TABLE IF NOT EXISTS userInfo (
+        id BIGINT NOT NULL AUTO_INCREMENT,
+        userId BIGINT NOT NULL,
+        profilePictureUrl VARCHAR(255),
+        bio VARCHAR(255),
+        quote VARCHAR(255),
+        blogUrl VARCHAR(255),
+        websiteUrl VARCHAR(255),
+        githubUrl VARCHAR(255),
+        PRIMARY KEY (id)
+    )`;
+    this.query(query);
+
+    // create index for user info table
+    query = `CREATE INDEX IF NOT EXISTS userInfo_index
+        ON userInfo (userId)`;
+    this.query(query);
+
     // create roadmaps table
     query = `CREATE TABLE IF NOT EXISTS roadmaps (
-      id INT NOT NULL AUTO_INCREMENT,
+      id BIGINT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       description VARCHAR(255) NOT NULL,
       tags TEXT NOT NULL,
-      ownerId INT NOT NULL,
+      ownerId BIGINT NOT NULL,
       created DATETIME NOT NULL,
       updated DATETIME NOT NULL,
       deleted DATETIME,
@@ -215,14 +237,29 @@ class Database {
     this.query(query);
 
     // create index for roadmaps table
-    query = `CREATE INDEX IF NOT EXISTS roadmaps_index
-        ON roadmaps (name, description, ownerId)`;
+    query = `CREATE INDEX IF NOT EXISTS roadmaps_name_index
+        ON roadmaps (name)`;
+    this.query(query);
+
+    // create index for roadmaps table by tags
+    query = `CREATE INDEX IF NOT EXISTS roadmaps_tags_index
+        ON roadmaps (tags)`;
+    this.query(query);
+
+    // create index for roadmaps table by description
+    query = `CREATE INDEX IF NOT EXISTS roadmaps_description_index
+        ON roadmaps (description)`;
+    this.query(query);
+
+    // create index for roadmaps table by owner
+    query = `CREATE INDEX IF NOT EXISTS roadmaps_owner_index
+        ON roadmaps (ownerId)`;
     this.query(query);
 
     // create sessions table
     query = `CREATE TABLE IF NOT EXISTS sessions (
-      id INT NOT NULL AUTO_INCREMENT,
-      userId INT NOT NULL,
+      id BIGINT NOT NULL AUTO_INCREMENT,
+      userId BIGINT NOT NULL,
       token VARCHAR(255) NOT NULL,
       expires DATETIME NOT NULL,
       PRIMARY KEY (id)
