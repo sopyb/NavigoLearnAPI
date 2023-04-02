@@ -1,10 +1,5 @@
 # /api/auth/login
 
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
-
 ## POST - /api/auth/login
 
 Logs in a user.
@@ -23,7 +18,6 @@ Logs in a user.
 |------|------------------------|
 | 200  | Logs in a user.        |
 | 400  | Bad Request.           |
-| 401  | Unauthorized.          |
 | 500  | Internal Server Error. |
 
 ### Response

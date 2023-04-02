@@ -16,8 +16,8 @@ export interface IUser {
   email: string;
   pwdHash?: string;
   role?: UserRoles;
-  googleId?: bigint;
-  githubId?: bigint;
+  googleId?: string | null;
+  githubId?: string | null;
 }
 
 export interface ISessionUser {
@@ -36,8 +36,8 @@ class User implements IUser {
   public email: string;
   public role?: UserRoles;
   public pwdHash?: string;
-  public googleId?: bigint;
-  public githubId?: bigint;
+  public googleId?: string | null;
+  public githubId?: string | null;
 
   /**
    * Constructor()
@@ -48,16 +48,16 @@ class User implements IUser {
     role?: UserRoles,
     pwdHash?: string,
     id?: bigint, // id last cause usually set by db
-    googleId?: bigint,
-    githubId?: bigint,
+    googleId?: string | null,
+    githubId?: string | null,
   ) {
     this.name = (name ?? '');
     this.email = (email ?? '');
     this.role = (role ?? UserRoles.Standard);
     this.pwdHash = (pwdHash ?? '');
     this.id = BigInt(id ?? -1);
-    this.googleId = BigInt(googleId ?? -1);
-    this.githubId = BigInt(githubId ?? -1);
+    this.googleId = googleId ?? null;
+    this.githubId = githubId ?? null;
   }
 
   /**
