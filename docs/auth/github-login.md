@@ -5,7 +5,7 @@
     ! Subject to change - Just a rough draft.
 ```
 
-## POST - /api/auth/github-login
+## GET - /api/auth/github-login
 
 Logs in a user using GitHub OAuth.
 

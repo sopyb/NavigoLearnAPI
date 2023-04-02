@@ -23,7 +23,6 @@ Logs in a user.
 |------|------------------------|
 | 200  | Logs in a user.        |
 | 400  | Bad Request.           |
-| 401  | Unauthorized.          |
 | 500  | Internal Server Error. |
 
 ### Response

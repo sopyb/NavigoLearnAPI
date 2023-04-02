@@ -7,8 +7,18 @@ import User, { UserRoles } from '@src/models/User';
 import { randomBytes } from 'crypto';
 import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
+import axios from 'axios';
+import logger from 'jet-logger';
 
 const AuthRouter = Router();
+
+interface GitHubUserData {
+  login: string;
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getInfoFromRequest(req: any): { email: string, password: string } {
@@ -105,11 +115,51 @@ AuthRouter.post(Paths.Auth.GoogleLogin,
       .json({ message: 'Google login successful' });
   });
 
-AuthRouter.post(Paths.Auth.GithubLogin,
+AuthRouter.get(Paths.Auth.GithubLogin,
   (req, res) => {
-    // handle GitHub login TODO
-    return res.status(HttpStatusCodes.OK)
-      .json({ message: 'GitHub login successful' });
+    res.redirect('https://github.com/login/oauth/authorize?client_id='
+      + EnvVars.GitHub.ClientID
+      + '&redirect_uri='
+      + EnvVars.GitHub.RedirectUri);
+
+  });
+
+AuthRouter.get(Paths.Auth.GithubCallback,
+  async (req, res) => {
+    const code = req.query.code;
+    try {
+      const response =
+        await axios.post('https://github.com/login/oauth/access_token', {
+          client_id: EnvVars.GitHub.ClientID,
+          client_secret: EnvVars.GitHub.ClientSecret,
+          code: code,
+          redirect_uri: EnvVars.GitHub.RedirectUri,
+        }, {
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const accessToken = (response?.data?.access_token as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const response1 =
+        await axios.get('https://api.github.com/user', {
+          headers: {
+            Authorization: `token ${accessToken}`,
+            Accept: 'application/json',
+          },
+        });
+
+      const data = response1.data as GitHubUserData;
+      res.send(data);
+
+    } catch (error) {
+      logger.err(error);
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Could not get access token',
+      });
+    }
   });
 
 AuthRouter.post(Paths.Auth.Register, async (req, res) => {
@@ -129,7 +179,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const user = await db.getObjByKey<User>('users', 'email', email);
   // if yes, return error
   if (!!user) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+    return res.status(HttpStatusCodes.UNAUTHORIZED).json({
       error: 'User with this Email already exists',
     });
   }
@@ -173,7 +223,6 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
     error: 'Something went wrong',
   });
-
 });
 
 AuthRouter.delete(Paths.Auth.Logout, (req, res) => {

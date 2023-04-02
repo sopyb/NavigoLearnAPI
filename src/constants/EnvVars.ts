@@ -30,6 +30,11 @@ const EnvVars = {
     password: (process.env.MARIADB_PASSWORD ?? ''),
     database: (process.env.MARIADB_DATABASE ?? ''),
   },
+  GitHub: {
+    ClientID: (process.env.GITHUB_CLIENT_ID ?? ''),
+    ClientSecret: (process.env.GITHUB_CLIENT_SECRET ?? ''),
+    RedirectUri: (process.env.GITHUB_REDIRECT_URI ?? ''),
+  },
 } as const;
 
 export default EnvVars;

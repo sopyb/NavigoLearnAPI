@@ -5,7 +5,7 @@ import AuthRouter from '@src/routes/api/Auth';
 const baseRouter = Router();
 
 // Import all routes at base path
-const { Base, Auth, Explore, Roadmaps, Users } = Paths;
+const { Auth, Explore, Roadmaps, Users } = Paths;
 
 // Auth routes
 baseRouter.use(Auth.Base, AuthRouter);

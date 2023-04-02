@@ -20,7 +20,6 @@ Logs out a user.
 | Code | Description             |
 |------|-------------------------|
 | 200  | Logs out a user.        |
-| 401  | Unauthorized. (No user) |
 | 500  | Internal Server Error.  |
 
 ### Response
