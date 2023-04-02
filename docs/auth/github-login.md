@@ -1,10 +1,5 @@
 # /api/auth/github-login
 
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
-
 ## GET - /api/auth/github-login
 
 Logs in a user using GitHub OAuth.

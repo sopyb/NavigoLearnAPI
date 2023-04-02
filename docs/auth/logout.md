@@ -1,10 +1,5 @@
 # /api/auth/logout
 
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
-
 ## DELETE - /api/auth/logout
 
 Logs out a user.
@@ -17,10 +12,10 @@ Logs out a user.
 
 ### Response Codes
 
-| Code | Description             |
-|------|-------------------------|
-| 200  | Logs out a user.        |
-| 500  | Internal Server Error.  |
+| Code | Description            |
+|------|------------------------|
+| 200  | Logs out a user.       |
+| 500  | Internal Server Error. |
 
 ### Response
 

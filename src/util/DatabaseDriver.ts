@@ -216,7 +216,7 @@ class Database {
 
     // create index for roadmaps table
     query = `CREATE INDEX IF NOT EXISTS roadmaps_index
-        ON roadmaps (name, description, ownerId)`;
+        ON roadmaps (name, description, tags, ownerId)`;
     this.query(query);
 
     // create sessions table

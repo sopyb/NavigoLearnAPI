@@ -1,10 +1,5 @@
 # /api/auth/login
 
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
-
 ## POST - /api/auth/login
 
 Logs in a user.

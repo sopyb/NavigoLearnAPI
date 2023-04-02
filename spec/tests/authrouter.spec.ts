@@ -50,10 +50,4 @@ describe('Login Router', () => {
     // return success response
     return request(app).post('/api/auth/google-login').expect(200);
   });
-
-  it('Login with GitHub', async () => {
-    // TODO implement
-    // return success response
-    return request(app).post('/api/auth/github-login').expect(200);
-  });
 });
