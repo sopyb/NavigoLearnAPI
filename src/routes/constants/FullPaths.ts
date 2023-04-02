@@ -1,13 +1,12 @@
-
 /**
  * Convert paths to full paths.
  */
 
 import Paths, { TPaths } from './Paths';
 
-
 interface IPathObj {
   Base: string;
+
   [key: string]: string | IPathObj;
 }
 
@@ -33,7 +32,6 @@ function getFullPaths(
   // Return
   return retVal;
 }
-
 
 // **** Export default **** //
 

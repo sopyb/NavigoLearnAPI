@@ -1,13 +1,14 @@
 # Routes
- - Base URL: /api
- - [Auth](auth/README.md)
-   - Base URL: /api/auth
-   - Login: /login
-   - GoogleLogin: /google-login
-   - GithubLogin: /github-login
-   - Register: /register
-   - Logout: /logout
-   - ForgotPassword: /forgot-password
+
+- Base URL: /api
+- [Auth](auth/README.md)
+    - Base URL: /api/auth
+    - Login: /login
+    - GoogleLogin: /google-login
+    - GithubLogin: /github-login
+    - Register: /register
+    - Logout: /logout
+    - ForgotPassword: /forgot-password
 - [Explore](explore/README.md)
     - Base URL: /api/explore
     - New: /new
@@ -44,9 +45,9 @@
             - Get: /:commentId?
             - Update: /:commentId
             - Delete: /:commentId
- - [Users](users/README.md)
-   - Base URL: /api/users
-   - Me: /me
-   - Get: /:userId
-   - Update: /:userId?
-   - Delete: /:userId?
+- [Users](users/README.md)
+    - Base URL: /api/users
+    - Me: /me
+    - Get: /:userId
+    - Update: /:userId?
+    - Delete: /:userId?

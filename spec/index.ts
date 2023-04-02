@@ -10,7 +10,6 @@ interface IArgs {
   testFile: string;
 }
 
-
 // **** Setup **** //
 
 // ** Init ** //
@@ -31,6 +30,7 @@ const args = parse<IArgs>({
   },
 });
 
+// ** Setup server ** //
 
 // ** Start Jasmine ** //
 
@@ -54,7 +54,7 @@ if (args.testFile) {
   const testFile = args.testFile;
   find.file(testFile + '.spec.ts', './spec', (files: string[]) => {
     if (files.length === 1) {
-      jasmine.execute([files[0]]);
+      jasmine.execute([ files[0] ]);
     } else {
       logger.err('Test file not found!');
     }
@@ -79,6 +79,5 @@ if (args.testFile) {
       process.exit(1);
     }
   }
-  
-  
+
 })();

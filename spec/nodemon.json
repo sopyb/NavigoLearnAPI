@@ -1,6 +1,10 @@
 {
-  "watch": ["spec"],
+  "watch": [
+    "spec"
+  ],
   "ext": "spec.ts",
-  "ignore": ["spec/support"],
+  "ignore": [
+    "spec/support"
+  ],
   "exec": "./node_modules/.bin/ts-node --files -r tsconfig-paths/register ./spec"
 }

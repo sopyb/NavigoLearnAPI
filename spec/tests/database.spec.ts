@@ -1,6 +1,6 @@
 import Database from '@src/util/DatabaseDriver';
-import User, {IUser, UserRoles} from '@src/models/User';
-import {Roadmap} from '@src/models/Roadmap';
+import User, { IUser, UserRoles } from '@src/models/User';
+import { Roadmap } from '@src/models/Roadmap';
 
 // test for database
 describe('Database Middleware', () => {
@@ -101,7 +101,7 @@ describe('Database Middleware', () => {
       user.id,
       'This is a test roadmap',
       'This is a test description',
-      ['test', 'test2'],
+      [ 'test', 'test2' ],
       'aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUQ==',
     );
 
