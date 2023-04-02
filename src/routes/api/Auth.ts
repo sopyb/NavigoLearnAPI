@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
@@ -7,8 +7,9 @@ import User, { UserRoles } from '@src/models/User';
 import { randomBytes } from 'crypto';
 import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import logger from 'jet-logger';
+import { UserInfo } from '@src/models/UserInfo';
 
 const AuthRouter = Router();
 
@@ -18,6 +19,8 @@ interface GitHubUserData {
   name: string;
   email: string;
   avatar_url: string;
+  bio: string;
+  blog: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,6 +59,29 @@ async function createSession(user: User): Promise<string> {
   return token;
 }
 
+async function saveSession(res: Response, user: User): Promise<void> {
+  // get session token
+  const token = await createSession(user);
+
+  // check if session was created
+  if (!token) {
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'Internal server error',
+    });
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    res.cookie('token', token, {
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+      httpOnly: true,
+      secure: EnvVars.NodeEnv === NodeEnvs.Production,
+    });
+
+    res.status(HttpStatusCodes.OK).json({
+      message: 'Login successful',
+    });
+  }
+}
+
 AuthRouter.post(Paths.Auth.Login,
   async (req, res) => {
     // check if data is valid
@@ -89,23 +115,8 @@ AuthRouter.post(Paths.Auth.Login,
       });
     }
 
-    const token = await createSession(user);
-    if (!token) {
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Could not create session',
-      });
-    }
-
-    // save token in cookie
-    res.cookie('token', token, {
-      httpOnly: false,
-      secure: EnvVars.NodeEnv === NodeEnvs.Production,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-
-    return res.status(HttpStatusCodes.OK).json({
-      message: 'Login successful',
-    });
+    // save session
+    return await saveSession(res, user);
   });
 
 AuthRouter.post(Paths.Auth.GoogleLogin,
@@ -126,7 +137,15 @@ AuthRouter.get(Paths.Auth.GithubLogin,
 
 AuthRouter.get(Paths.Auth.GithubCallback,
   async (req, res) => {
-    const code = req.query.code;
+    const code = req.query.code as string,
+      error = req.query.error as string;
+
+    if (error || !code) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        error: 'Error while logging in with GitHub',
+      });
+    }
+
     try {
       const response =
         await axios.post('https://github.com/login/oauth/access_token', {
@@ -152,13 +171,75 @@ AuthRouter.get(Paths.Auth.GithubCallback,
         });
 
       const data = response1.data as GitHubUserData;
-      res.send(data);
 
+      // get database
+      const db = new DatabaseDriver();
+
+      // check if user exists
+      let user =
+        await db.getObjByKey<User>('users', 'email', data.email);
+
+      if (!user) {
+        // create user
+        const userId = await db.insert('users', {
+          name: data.name,
+          email: data.email,
+          pwdHash: '',
+          role: 0,
+          githubId: data.id,
+        });
+
+        // check if user was created
+        if (userId < 0) throw new Error('Could not create user');
+
+        // get user
+        user = await db.get<User>('users', userId);
+
+        // check if user was retrieved
+        if (!user) throw new Error('Could not get user');
+      }
+
+
+      //check if user has userInfo
+      const userInfo =
+        await db.getObjByKey<UserInfo>(
+          'userInfo',
+          'userId',
+          user.id);
+
+      // if not, create userInfo
+      if (!userInfo) {
+        const userInfoId = await db.insert('userInfo', {
+          userId: user.id,
+          profilePictureUrl: data.avatar_url,
+          bio: data.bio,
+          quote: '',
+          blogUrl: data.blog,
+          websiteUrl: '',
+          githubUrl: `https://github.com/${data.login}`,
+        });
+
+        // check if userInfo was created
+        if (userInfoId < 0) throw new Error('Could not create userInfo');
+      }
+
+      // save session
+      return await saveSession(res, user);
     } catch (error) {
       logger.err(error);
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Could not get access token',
-      });
+      if (error instanceof AxiosError) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: 'Couldn\'t get access token from GitHub',
+        });
+      } else if (error instanceof Error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: error.message,
+        });
+      } else {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: 'Internal server error',
+        });
+      }
     }
   });
 
@@ -201,23 +282,8 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 
   // check result
   if (result >= 0) {
-    // create session
-    const token = await createSession(newUser);
-    if (!token) {
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Could not create session',
-      });
-    }
-
-    // save token in cookie
-    res.cookie('token', token, {
-      httpOnly: false,
-      secure: EnvVars.NodeEnv === NodeEnvs.Production,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-    return res.status(HttpStatusCodes.OK).json({
-      message: 'User created successfully',
-    });
+    // save session
+    return await saveSession(res, newUser);
   }
 
   return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({

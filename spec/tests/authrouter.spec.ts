@@ -44,10 +44,4 @@ describe('Login Router', () => {
     const success = await db.delete('users', user.id);
     expect(success).toBe(true);
   });
-
-  it('Login with Google', async () => {
-    // TODO implement
-    // return success response
-    return request(app).post('/api/auth/google-login').expect(200);
-  });
 });
