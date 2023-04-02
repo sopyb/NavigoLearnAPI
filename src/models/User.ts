@@ -1,13 +1,12 @@
 // **** Variables **** //
 
-const INVALID_CONSTRUCTOR_PARAM = 'nameOrObj arg must a string or an object ' + 
+const INVALID_CONSTRUCTOR_PARAM = 'nameOrObj arg must a string or an object ' +
   'with the appropriate user keys.';
 
 export enum UserRoles {
   Standard,
   Admin,
 }
-
 
 // **** Types **** //
 
@@ -27,7 +26,6 @@ export interface ISessionUser {
   name: string;
   role: IUser['role'];
 }
-
 
 // **** User **** //
 
@@ -93,7 +91,6 @@ class User implements IUser {
     );
   }
 }
-
 
 // **** Export default **** //
 

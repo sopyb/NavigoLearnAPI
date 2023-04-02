@@ -6,7 +6,6 @@ import fs from 'fs-extra';
 import logger from 'jet-logger';
 import childProcess from 'child_process';
 
-
 /**
  * Start
  */
@@ -51,7 +50,7 @@ function copy(src: string, dest: string): Promise<void> {
  */
 function exec(cmd: string, loc: string): Promise<void> {
   return new Promise((res, rej) => {
-    return childProcess.exec(cmd, {cwd: loc}, (err, stdout, stderr) => {
+    return childProcess.exec(cmd, { cwd: loc }, (err, stdout, stderr) => {
       if (!!stdout) {
         logger.info(stdout);
       }

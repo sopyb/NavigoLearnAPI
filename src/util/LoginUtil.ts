@@ -13,7 +13,7 @@ function saltPassword(password: string): string {
 }
 
 function comparePassword(password: string, hash: string): boolean {
-  const [salt, hashFromDb] = hash.split(':');
+  const [ salt, hashFromDb ] = hash.split(':');
   const hashToCompare = bcrypt.hashSync(password, salt);
   return hashToCompare === hashFromDb;
 }
@@ -21,7 +21,6 @@ function comparePassword(password: string, hash: string): boolean {
 export default class LoginUtil {
 
 }
-
 
 export {
   saltPassword,

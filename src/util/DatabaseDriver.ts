@@ -67,6 +67,117 @@ class Database {
     this.setup();
   }
 
+  public async insert(table: string, data: object): Promise<bigint> {
+    const { keys, values } = processData(data);
+    // create sql query - insert into table (keys) values (values)
+    // ? for values to be replaced by params
+    const sql = `INSERT INTO ${table} (${keys.join(',')}) 
+        VALUES (${values.map(() => '?').join(',')})`;
+    // execute query
+    const result = await this.query(sql, values);
+
+    // return insert id
+    let insertId = BigInt(-1);
+    if (result) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      insertId = BigInt((result as ResultSetHeader)?.insertId);
+    }
+    return insertId;
+  }
+
+  public async update(table: string, id: bigint, data: object):
+    Promise<boolean> {
+    const { keys, values } = processData(data);
+
+    // create sql query - update table set key = ?, key = ? where id = ?
+    // ? for values to be replaced by params
+    const sqlKeys = keys.map(key => `${key} = ?`).join(',');
+    const sql = `UPDATE ${table} SET ${sqlKeys} WHERE id = ?`;
+    // execute query
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result = await this.query(sql, [ ...values, id ]);
+
+    let affectedRows = -1;
+    if (result) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
+    }
+
+    // return true if affected rows > 0 else false
+    return affectedRows > 0;
+  }
+
+  public async delete(table: string, id: bigint): Promise<boolean> {
+    const sql = `DELETE FROM ${table} WHERE id = ?`;
+    const result = await this.query(sql, [ id ]);
+
+    let affectedRows = -1;
+    if (result) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
+    }
+
+    // return true if affected rows > 0 else false
+    return affectedRows > 0;
+  }
+
+  public async get<T>(table: string, id: bigint): Promise<T | null> {
+    // create sql query - select * from table where id = ?
+    const sql = `SELECT * FROM ${table} WHERE id = ?`;
+    // execute query
+    const result = await this.query(sql, [ id ]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    if (result && Object.keys(result).length > 0) {
+      const keys = Object.keys((result as RowDataPacket[])[0]);
+      for (const element of keys) {
+        const key = element;
+        const value: unknown = (result as RowDataPacket[])[0][key];
+        if (typeof value === 'string' && value.startsWith('JSON-')) {
+          (result as RowDataPacket[])[0][key] =
+            JSON.parse(value.replace('JSON-', ''));
+        }
+      }
+    }
+
+    let data: T | null = null;
+    if (result) {
+      data = (result as T[])?.[0] || null;
+    }
+
+    return data;
+  }
+
+  public async getObjByKey<T>(table: string, key: string, value: string):
+    Promise<T | null> {
+    // create sql query - select * from table where id = ?
+    const sql = `SELECT * FROM ${table} WHERE ${key} = ?`;
+    // execute query
+    const result = await this.query(sql, [ value ]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    if (result && Object.keys(result).length > 0) {
+      const keys = Object.keys((result as RowDataPacket[])[0]);
+      for (const element of keys) {
+        const key = element;
+        const value: unknown = (result as RowDataPacket[])[0][key];
+        if (typeof value === 'string' && value.startsWith('JSON-')) {
+          (result as RowDataPacket[])[0][key] =
+            JSON.parse(value.replace('JSON-', ''));
+        }
+      }
+    }
+
+    let data: T | null = null;
+    if (result) {
+      data = (result as T[])?.[0] || null;
+    }
+
+    return data;
+  }
+
   private setup() {
     // create users table using the User model
     let query = `CREATE TABLE IF NOT EXISTS users (
@@ -135,118 +246,6 @@ class Database {
       // release connection
       await conn.release();
     }
-  }
-
-  public async insert(table: string, data: object): Promise<bigint> {
-    const { keys, values } = processData(data);
-    // create sql query - insert into table (keys) values (values)
-    // ? for values to be replaced by params
-    const sql = `INSERT INTO ${table} (${keys.join(',')}) 
-        VALUES (${values.map(() => '?').join(',')})`;
-    // execute query
-    const result = await this.query(sql, values);
-
-
-    // return insert id
-    let insertId = BigInt(-1);
-    if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      insertId = BigInt((result as ResultSetHeader)?.insertId);
-    }
-    return insertId;
-  }
-
-  public async update(table: string, id: bigint, data: object):
-    Promise<boolean> {
-    const { keys, values } = processData(data);
-
-    // create sql query - update table set key = ?, key = ? where id = ?
-    // ? for values to be replaced by params
-    const sqlKeys = keys.map(key => `${key} = ?`).join(',');
-    const sql = `UPDATE ${table} SET ${sqlKeys} WHERE id = ?`;
-    // execute query
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await this.query(sql, [...values, id]);
-
-    let affectedRows = -1;
-    if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
-    }
-
-    // return true if affected rows > 0 else false
-    return affectedRows > 0;
-  }
-
-  public async delete(table: string, id: bigint): Promise<boolean> {
-    const sql = `DELETE FROM ${table} WHERE id = ?`;
-    const result = await this.query(sql, [id]);
-
-    let affectedRows = -1;
-    if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
-    }
-
-    // return true if affected rows > 0 else false
-    return affectedRows > 0;
-  }
-
-  public async get<T>(table: string, id: bigint): Promise<T | null> {
-    // create sql query - select * from table where id = ?
-    const sql = `SELECT * FROM ${table} WHERE id = ?`;
-    // execute query
-    const result = await this.query(sql, [id]);
-
-    // check if T has any properties that are JSON
-    // if so parse them
-    if (result && Object.keys(result).length > 0) {
-      const keys = Object.keys((result as RowDataPacket[])[0]);
-      for (const element of keys) {
-        const key = element;
-        const value: unknown = (result as RowDataPacket[])[0][key];
-        if (typeof value === 'string' && value.startsWith('JSON-')) {
-          (result as RowDataPacket[])[0][key] =
-            JSON.parse(value.replace('JSON-', ''));
-        }
-      }
-    }
-
-    let data: T | null = null;
-    if (result) {
-      data = (result as T[])?.[0] || null;
-    }
-
-    return data;
-  }
-
-  public async getObjByKey<T>(table: string, key: string, value: string):
-    Promise<T | null> {
-    // create sql query - select * from table where id = ?
-    const sql = `SELECT * FROM ${table} WHERE ${key} = ?`;
-    // execute query
-    const result = await this.query(sql, [value]);
-
-    // check if T has any properties that are JSON
-    // if so parse them
-    if (result && Object.keys(result).length > 0) {
-      const keys = Object.keys((result as RowDataPacket[])[0]);
-      for (const element of keys) {
-        const key = element;
-        const value: unknown = (result as RowDataPacket[])[0][key];
-        if (typeof value === 'string' && value.startsWith('JSON-')) {
-          (result as RowDataPacket[])[0][key] =
-            JSON.parse(value.replace('JSON-', ''));
-        }
-      }
-    }
-
-    let data: T | null = null;
-    if (result) {
-      data = (result as T[])?.[0] || null;
-    }
-
-    return data;
   }
 }
 

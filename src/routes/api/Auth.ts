@@ -9,6 +9,7 @@ import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
 
 const AuthRouter = Router();
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getInfoFromRequest(req: any): { email: string, password: string } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

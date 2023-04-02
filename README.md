@@ -2,11 +2,12 @@
 
 ## About
 
-REST api for NavigoLearning. This project is built with Node.js, Express, and MariaDB.
+REST api for NavigoLearning. This project is built with Node.js, Express, and
+MariaDB.
 
 ## Documentation
-Documentation for the api can be found [here](docs/README.md).
 
+Documentation for the api can be found [here](docs/README.md).
 
 ## Available Scripts
 
@@ -42,7 +43,7 @@ Run the production build (Must be built first).
 
 Run production build with a different env file.
 
-
 ## Additional Notes
 
-- If `npm run dev` gives you issues with bcrypt on MacOS you may need to run: `npm rebuild bcrypt --build-from-source`. 
+- If `npm run dev` gives you issues with bcrypt on MacOS you may need to
+  run: `npm rebuild bcrypt --build-from-source`. 
