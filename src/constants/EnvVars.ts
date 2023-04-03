@@ -30,6 +30,11 @@ const EnvVars = {
     password: (process.env.MARIADB_PASSWORD ?? ''),
     database: (process.env.MARIADB_DATABASE ?? ''),
   },
+  Google: {
+    ClientID: (process.env.GOOGLE_CLIENT_ID ?? ''),
+    ClientSecret: (process.env.GOOGLE_CLIENT_SECRET ?? ''),
+    RedirectUri: (process.env.GOOGLE_REDIRECT_URI ?? ''),
+  },
   GitHub: {
     ClientID: (process.env.GITHUB_CLIENT_ID ?? ''),
     ClientSecret: (process.env.GITHUB_CLIENT_SECRET ?? ''),
