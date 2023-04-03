@@ -106,7 +106,7 @@ function handleExternalAuthError(error, res: Response):
   }
 }
 
-AuthRouter.get(Paths.Auth.Login,
+AuthRouter.post(Paths.Auth.Login,
   async (req, res) => {
     // check if data is valid
     const { email, password } = getInfoFromRequest(req);
