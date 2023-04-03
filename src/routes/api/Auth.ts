@@ -79,7 +79,7 @@ async function saveSession(res: Response, user: User): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     res.cookie('token', token, {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
-      httpOnly: true,
+      httpOnly: false,
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
     });
 
