@@ -130,7 +130,7 @@ AuthRouter.get(Paths.Auth.Login,
       });
     }
 
-    // check if password is correct
+    // check if the password is correct
     const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
     // if not, return error
     if (!isPasswordCorrect) {
@@ -162,6 +162,7 @@ AuthRouter.get(Paths.Auth.GoogleCallback,
     }
 
     try {
+      // get access token
       let response =
         await axios.post('https://oauth2.googleapis.com/token', {
           client_id: EnvVars.Google.ClientID,
@@ -170,27 +171,51 @@ AuthRouter.get(Paths.Auth.GoogleCallback,
           grant_type: 'authorization_code',
           code,
         });
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const accessToken = response?.data?.access_token as string;
 
-      if (!accessToken) throw new Error('No access token');
+      // if no token, return error
+      if (!accessToken) throw new AxiosError('No access token received');
 
+      // get user data
       response =
         await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+      const userData = response?.data as GoogleUserData;
 
-      if (!response.data) throw new Error('No user data');
+      // if no user data, return error
+      if (!userData) throw new Error('No user data received');
 
-      const userData = response.data as GoogleUserData;
+      // get database
+      const db = new DatabaseDriver();
 
-      res.status(HttpStatusCodes.OK).json({
-        message: 'Login successful',
-        data: userData,
-      });
+      // check if user exists
+      let user =
+        await db.getObjByKey<User>('users', 'email', userData.email);
+
+      // if a user doesn't exist, create a new user
+      if (!user) {
+        const userId = await db.insert('users', {
+          email: userData.email,
+          name: userData.name,
+          googleId: userData.id,
+        });
+
+        user = await db.get<User>('users', userId);
+
+        if (!user) throw new Error('User not found');
+      } else if (!user.googleId) {
+        // if a user exists but doesn't have a Google id, add it
+        await db.update('users', user.id, {
+          googleId: userData.id,
+        });
+      }
+
+      // save session
+      return await saveSession(res, user);
     } catch (e) {
       handleExternalAuthError(e, res);
     }
@@ -253,8 +278,6 @@ AuthRouter.get(Paths.Auth.GithubCallback,
         const userId = await db.insert('users', {
           name: data.name,
           email: data.email,
-          pwdHash: '',
-          role: 0,
           githubId: data.id,
         });
 

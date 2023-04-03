@@ -187,8 +187,8 @@ class Database {
       id BIGINT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL,
-      role INT NOT NULL,
-      pwdHash VARCHAR(255) NOT NULL,
+      role INT NOT NULL DEFAULT 0,
+      pwdHash VARCHAR(255) NOT NULL DEFAULT '',
       googleId VARCHAR(255),
       githubId VARCHAR(255),
       PRIMARY KEY (id)
