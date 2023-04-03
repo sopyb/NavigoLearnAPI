@@ -418,9 +418,8 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   }
 
   // TODO: send email with reset code
-
-  return res.status(HttpStatusCodes.OK).json({
-    message: 'Password reset email sent',
+  return res.status(HttpStatusCodes.NOT_IMPLEMENTED).json({
+    error: 'Not implemented',
   });
 });
 
