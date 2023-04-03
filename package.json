@@ -1,6 +1,10 @@
 {
   "name": "navigo-learn-api",
   "version": "0.0.0",
+  "description": "Navigo Learn API",
+  "repository": "https://github.com/NavigoLearn/API.git",
+  "author": "Navigo",
+  "license": "BSD 3-Clause",
   "scripts": {
     "build": "npx ts-node build.ts",
     "lint": "npx eslint --ext .ts src/",
