@@ -10,6 +10,7 @@ const Paths = {
     Base: '/auth',
     Login: '/login',
     GoogleLogin: '/google-login',
+    GoogleCallback: '/google-callback',
     GithubLogin: '/github-login',
     GithubCallback: '/github-callback',
     Register: '/register',

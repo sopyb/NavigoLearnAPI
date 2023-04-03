@@ -13,6 +13,13 @@ import { UserInfo } from '@src/models/UserInfo';
 
 const AuthRouter = Router();
 
+interface GoogleUserData {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+}
+
 interface GitHubUserData {
   login: string;
   id: number;
@@ -82,6 +89,23 @@ async function saveSession(res: Response, user: User): Promise<void> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+function handleExternalAuthError(error, res: Response):
+  void {
+  if (!(error instanceof Error)) return;
+  logger.err(error);
+  if (error instanceof AxiosError) {
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'Couldn\'t get access token from external service',
+    });
+  } else {
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: error.message || 'Internal server error',
+    });
+  }
+}
+
 AuthRouter.post(Paths.Auth.Login,
   async (req, res) => {
     // check if data is valid
@@ -106,7 +130,7 @@ AuthRouter.post(Paths.Auth.Login,
       });
     }
 
-    // check if password is correct
+    // check if the password is correct
     const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
     // if not, return error
     if (!isPasswordCorrect) {
@@ -118,14 +142,85 @@ AuthRouter.post(Paths.Auth.Login,
     // save session
     return await saveSession(res, user);
   });
-
-AuthRouter.post(Paths.Auth.GoogleLogin,
+AuthRouter.get(Paths.Auth.GoogleLogin,
   (req, res) => {
-    // handle Google login TODO
-    return res.status(HttpStatusCodes.OK)
-      .json({ message: 'Google login successful' });
+    res.redirect('https://accounts.google.com/o/oauth2/v2/auth?client_id='
+      + EnvVars.Google.ClientID
+      + '&redirect_uri='
+      + EnvVars.Google.RedirectUri
+      + '&response_type=code&scope=email%20profile');
   });
 
+AuthRouter.get(Paths.Auth.GoogleCallback,
+  async (req, res) => {
+    const code = req.query.code as string;
+
+    if (!code) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        error: 'Error while logging in with Google',
+      });
+    }
+
+    try {
+      // get access token
+      let response =
+        await axios.post('https://oauth2.googleapis.com/token', {
+          client_id: EnvVars.Google.ClientID,
+          client_secret: EnvVars.Google.ClientSecret,
+          redirect_uri: EnvVars.Google.RedirectUri,
+          grant_type: 'authorization_code',
+          code,
+        });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const accessToken = response?.data?.access_token as string;
+
+      // if no token, return error
+      if (!accessToken) throw new AxiosError('No access token received');
+
+      // get user data
+      response =
+        await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+      const userData = response?.data as GoogleUserData;
+
+      // if no user data, return error
+      if (!userData) throw new Error('No user data received');
+
+      // get database
+      const db = new DatabaseDriver();
+
+      // check if user exists
+      let user =
+        await db.getObjByKey<User>('users', 'email', userData.email);
+
+      // if a user doesn't exist, create a new user
+      if (!user) {
+        const userId = await db.insert('users', {
+          email: userData.email,
+          name: userData.name,
+          googleId: userData.id,
+        });
+
+        user = await db.get<User>('users', userId);
+
+        if (!user) throw new Error('User not found');
+      } else if (!user.googleId) {
+        // if a user exists but doesn't have a Google id, add it
+        await db.update('users', user.id, {
+          googleId: userData.id,
+        });
+      }
+
+      // save session
+      return await saveSession(res, user);
+    } catch (e) {
+      handleExternalAuthError(e, res);
+    }
+  })
+;
 AuthRouter.get(Paths.Auth.GithubLogin,
   (req, res) => {
     res.redirect('https://github.com/login/oauth/authorize?client_id='
@@ -137,10 +232,9 @@ AuthRouter.get(Paths.Auth.GithubLogin,
 
 AuthRouter.get(Paths.Auth.GithubCallback,
   async (req, res) => {
-    const code = req.query.code as string,
-      error = req.query.error as string;
+    const code = req.query.code as string;
 
-    if (error || !code) {
+    if (!code) {
       return res.status(HttpStatusCodes.FORBIDDEN).json({
         error: 'Error while logging in with GitHub',
       });
@@ -184,8 +278,6 @@ AuthRouter.get(Paths.Auth.GithubCallback,
         const userId = await db.insert('users', {
           name: data.name,
           email: data.email,
-          pwdHash: '',
-          role: 0,
           githubId: data.id,
         });
 
@@ -193,12 +285,27 @@ AuthRouter.get(Paths.Auth.GithubCallback,
         if (userId < 0) throw new Error('Could not create user');
 
         // get user
-        user = await db.get<User>('users', userId);
-
-        // check if user was retrieved
-        if (!user) throw new Error('Could not get user');
+        user = new User(
+          data.name,
+          data.email,
+          0,
+          '',
+          userId,
+          null,
+          data.id.toString());
       }
 
+      // check if user has githubId if not,
+      // update user with githubId merging accounts
+      if (!user.githubId) {
+        // update user
+        const userId = await db.update('users', user.id, {
+          githubId: data.id,
+        });
+
+        // check if user was updated
+        if (!userId) throw new Error('Could not update user');
+      }
 
       //check if user has userInfo
       const userInfo =
@@ -226,20 +333,7 @@ AuthRouter.get(Paths.Auth.GithubCallback,
       // save session
       return await saveSession(res, user);
     } catch (error) {
-      logger.err(error);
-      if (error instanceof AxiosError) {
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-          error: 'Couldn\'t get access token from GitHub',
-        });
-      } else if (error instanceof Error) {
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-          error: error.message,
-        });
-      } else {
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-          error: 'Internal server error',
-        });
-      }
+      handleExternalAuthError(error, res);
     }
   });
 
@@ -324,9 +418,8 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   }
 
   // TODO: send email with reset code
-
-  return res.status(HttpStatusCodes.OK).json({
-    message: 'Password reset email sent',
+  return res.status(HttpStatusCodes.NOT_IMPLEMENTED).json({
+    error: 'Not implemented',
   });
 });
 
