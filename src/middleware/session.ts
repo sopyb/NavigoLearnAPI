@@ -9,7 +9,7 @@ const COOKIE_NAME = 'token';
 /** interfaces **/
 export interface ISession {
   id: bigint;
-  usedId: bigint;
+  userId: bigint;
   token: string;
   expires: Date;
 }
@@ -25,7 +25,9 @@ async function extendSession(
   res: Response,
 ): Promise<void> {
   const { session } = req;
-  if (!session) { return; }
+  if (!session) {
+    return;
+  }
   // update token expiration
   session.expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
   await db.update('sessions', session.id, session);

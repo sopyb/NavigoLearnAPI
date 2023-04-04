@@ -47,7 +47,6 @@
             - Delete: /:commentId
 - [Users](users/README.md)
     - Base URL: /api/users
-    - Me: /me
-    - Get: /:userId
+    - Get: /:userId?
     - Update: /:userId?
     - Delete: /:userId?

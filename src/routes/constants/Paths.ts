@@ -62,8 +62,7 @@ const Paths = {
   },
   Users: {
     Base: '/users',
-    Me: '/me',
-    Get: '/:userId',
+    Get: '/:userId?',
     Update: '/:userId?',
     Delete: '/:userId?',
   },

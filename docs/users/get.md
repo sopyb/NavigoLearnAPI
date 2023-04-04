@@ -5,7 +5,7 @@
     ! Subject to change - Just a rough draft.
 ```
 
-## GET - /api/get/:userId
+## GET - /api/users/:userId?
 
 Returns information about user with :userId.
 
@@ -20,16 +20,22 @@ Returns information about user with :userId.
 | Code | Description                                  |
 |------|----------------------------------------------|
 | 200  | Returns information about user with :userId. |
-| 401  | Unauthorized. (Profile is private)           |
+| 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 
-### Response (TBD)
+### Response
 
 ```json
 {
-  "id": "bigint",
-  "username": "string",
-  "email": "string",
-    ...
+  "name": "Sopy",
+  "profilePictureUrl": "https://avatars.githubusercontent.com/u/32602702?v=4",
+  "userId": "4",
+  "bio": "Tech nerd running through my veins",
+  "quote": "",
+  "blogUrl": "https://sopy.one",
+  "websiteUrl": "",
+  "githubUrl": "https://github.com/sopyb",
+  "githubLink": true,
+  "googleLink": true
 }
 ```
