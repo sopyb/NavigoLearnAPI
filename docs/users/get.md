@@ -24,7 +24,7 @@ Returns information about user with :userId.
 {
   "name": "Sopy",
   "profilePictureUrl": "https://avatars.githubusercontent.com/u/32602702?v=4",
-  "userId": "4",
+  "userId": "4: bigint",
   "bio": "Tech nerd running through my veins",
   "quote": "",
   "blogUrl": "https://sopy.one",
