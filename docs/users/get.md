@@ -1,9 +1,4 @@
-# /api/users/get/:userId
-
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
+# /api/users/get/:userId?
 
 ## GET - /api/users/:userId?
 
