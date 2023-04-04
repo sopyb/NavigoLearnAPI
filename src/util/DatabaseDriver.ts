@@ -121,7 +121,7 @@ class Database {
     return affectedRows > 0;
   }
 
-  public async get<T>(table: string, id: bigint): Promise<T | null> {
+  public async get<T>(table: string, id: bigint): Promise<T | undefined> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT * FROM ${table} WHERE id = ?`;
     // execute query
@@ -141,9 +141,9 @@ class Database {
       }
     }
 
-    let data: T | null = null;
+    let data: T | undefined = undefined;
     if (result) {
-      data = (result as T[])?.[0] || null;
+      data = (result as T[])?.[0] || undefined;
     }
 
     return data;
@@ -153,7 +153,7 @@ class Database {
     table: string,
     key: string,
     value: string | bigint,
-  ): Promise<T | null> {
+  ): Promise<T | undefined> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT * FROM ${table} WHERE ${key} = ?`;
     // execute query
@@ -173,9 +173,9 @@ class Database {
       }
     }
 
-    let data: T | null = null;
+    let data: T | undefined = undefined;
     if (result) {
-      data = (result as T[])?.[0] || null;
+      data = (result as T[])?.[0] || undefined;
     }
 
     return data;
