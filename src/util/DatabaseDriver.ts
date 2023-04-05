@@ -1,6 +1,7 @@
 import EnvVars from '@src/constants/EnvVars';
 import mariadb, { Pool } from 'mariadb';
 import fs from 'fs';
+import path from 'path';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -192,7 +193,8 @@ class Database {
 
   private setup() {
     // get setup.sql file
-    const setupSql = fs.readFileSync('./setup.sql', 'utf8');
+    const setupSql =
+      fs.readFileSync(path.join('..', 'sql', 'setup.sql'), 'utf8');
 
     // split sql queries
     const queries = setupSql.split(';');
