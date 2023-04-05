@@ -59,12 +59,14 @@ function processData(data: Object): Data {
 
 class Database {
   private static pool: Pool;
+  private static isSetup = false;
 
   public constructor(config: DatabaseConfig = DBCred as DatabaseConfig) {
     this.initialize(config);
   }
 
   public initialize(config: DatabaseConfig = DBCred as DatabaseConfig) {
+    if (Database.isSetup) return;
     Database.pool = mariadb.createPool(config);
     this.setup();
   }
