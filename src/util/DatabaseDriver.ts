@@ -57,16 +57,38 @@ function processData(data: Object): Data {
   return { keys, values };
 }
 
+function parseResult<T>(result: RowDataPacket[] | ResultSetHeader)
+  : T | undefined {
+
+  if (result && Object.keys(result).length > 0) {
+    const keys = Object.keys((result as RowDataPacket[])[0]);
+    for (const element of keys) {
+      const key = element;
+      const value: unknown = (result as RowDataPacket[])[0][key];
+      if (typeof value === 'string' && value.startsWith('JSON-')) {
+        (result as RowDataPacket[])[0][key] =
+          JSON.parse(value.replace('JSON-', ''));
+      }
+    }
+  }
+
+  let data: T | undefined = undefined;
+  if (result) {
+    data = (result as T[])?.[0] || undefined;
+  }
+
+  return data;
+}
+
 class Database {
   private static pool: Pool;
   private static isSetup = false;
 
   public constructor(config: DatabaseConfig = DBCred as DatabaseConfig) {
-    this.initialize(config);
+    if (!Database.pool) this.initialize(config);
   }
 
   public initialize(config: DatabaseConfig = DBCred as DatabaseConfig) {
-    if (Database.isSetup) return;
     Database.pool = mariadb.createPool(config);
     this.setup();
   }
@@ -139,24 +161,7 @@ class Database {
 
     // check if T has any properties that are JSON
     // if so parse them
-    if (result && Object.keys(result).length > 0) {
-      const keys = Object.keys((result as RowDataPacket[])[0]);
-      for (const element of keys) {
-        const key = element;
-        const value: unknown = (result as RowDataPacket[])[0][key];
-        if (typeof value === 'string' && value.startsWith('JSON-')) {
-          (result as RowDataPacket[])[0][key] =
-            JSON.parse(value.replace('JSON-', ''));
-        }
-      }
-    }
-
-    let data: T | undefined = undefined;
-    if (result) {
-      data = (result as T[])?.[0] || undefined;
-    }
-
-    return data;
+    return parseResult<T>(result);
   }
 
   public async getObjByKey<T>(
@@ -173,38 +178,29 @@ class Database {
 
     // check if T has any properties that are JSON
     // if so parse them
-    if (result && Object.keys(result).length > 0) {
-      const keys = Object.keys((result as RowDataPacket[])[0]);
-      for (const element of keys) {
-        const key = element;
-        const value: unknown = (result as RowDataPacket[])[0][key];
-        if (typeof value === 'string' && value.startsWith('JSON-')) {
-          (result as RowDataPacket[])[0][key] =
-            JSON.parse(value.replace('JSON-', ''));
-        }
-      }
-    }
-
-    let data: T | undefined = undefined;
-    if (result) {
-      data = (result as T[])?.[0] || undefined;
-    }
-
-    return data;
+    return parseResult<T>(result);
   }
 
-  private setup() {
+  private async setup() {
     // get setup.sql file
-    const setupSql =
-      fs.readFileSync(path.join('..', 'sql', 'setup.sql'), 'utf8');
+    let setupSql =
+      fs.readFileSync(path.join(__dirname, '..', 'sql', 'setup.sql'), 'utf8');
+
+    // remove comments
+    setupSql = setupSql.replace(/--.*/g, '');
+
+    // remove empty lines
+    setupSql = setupSql.replace(/^\s*[\r, \n]/gm, '');
 
     // split sql queries
     const queries = setupSql.split(';');
 
     // execute each query
     for (const query of queries) {
-      this.query(query);
+      await this.query(query);
     }
+
+    Database.isSetup = true;
   }
 
   private async query(sql: string, params?: unknown[]):
