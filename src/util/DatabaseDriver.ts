@@ -90,7 +90,7 @@ class Database {
 
   public initialize(config: DatabaseConfig = DBCred as DatabaseConfig) {
     Database.pool = mariadb.createPool(config);
-    this.setup();
+    this._setup();
   }
 
   public async insert(table: string, data: object): Promise<bigint> {
@@ -100,7 +100,7 @@ class Database {
     const sql = `INSERT INTO ${table} (${keys.join(',')})
                  VALUES (${values.map(() => '?').join(',')})`;
     // execute query
-    const result = await this.query(sql, values);
+    const result = await this._query(sql, values);
 
     // return insert id
     let insertId = BigInt(-1);
@@ -123,7 +123,7 @@ class Database {
                  WHERE id = ?`;
     // execute query
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await this.query(sql, [ ...values, id ]);
+    const result = await this._query(sql, [ ...values, id ]);
 
     let affectedRows = -1;
     if (result) {
@@ -139,7 +139,7 @@ class Database {
     const sql = `DELETE
                  FROM ${table}
                  WHERE id = ?`;
-    const result = await this.query(sql, [ id ]);
+    const result = await this._query(sql, [ id ]);
 
     let affectedRows = -1;
     if (result) {
@@ -157,7 +157,7 @@ class Database {
                  FROM ${table}
                  WHERE id = ?`;
     // execute query
-    const result = await this.query(sql, [ id ]);
+    const result = await this._query(sql, [ id ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -174,14 +174,14 @@ class Database {
                  FROM ${table}
                  WHERE ${key} = ?`;
     // execute query
-    const result = await this.query(sql, [ value ]);
+    const result = await this._query(sql, [ value ]);
 
     // check if T has any properties that are JSON
     // if so parse them
     return parseResult<T>(result);
   }
 
-  private async setup() {
+  private async _setup() {
     // get setup.sql file
     let setupSql =
       fs.readFileSync(path.join(__dirname, '..', 'sql', 'setup.sql'), 'utf8');
@@ -197,14 +197,15 @@ class Database {
 
     // execute each query
     for (const query of queries) {
-      await this.query(query);
+      if (query) await this._query(query);
     }
 
     Database.isSetup = true;
   }
 
-  private async query(sql: string, params?: unknown[]):
+  private async _query(sql: string, params?: unknown[]):
     Promise<ResultSetHeader | RowDataPacket[]> {
+    if (!sql) return Promise.reject(new Error('No SQL query'));
     // get connection from pool
     const conn = await Database.pool.getConnection();
     try {

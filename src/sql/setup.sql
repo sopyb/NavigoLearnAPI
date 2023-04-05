@@ -1,4 +1,16 @@
-create or replace table roadmaps
+create table if not exists users
+(
+    id       bigint auto_increment
+        primary key,
+    name     varchar(255)            not null,
+    email    varchar(255)            not null,
+    role     int          default 0  not null,
+    pwdHash  varchar(255) default '' not null,
+    googleId varchar(255)            null,
+    githubId varchar(255)            null
+);
+
+create table if not exists roadmaps
 (
     id          bigint auto_increment
         primary key,
@@ -11,34 +23,38 @@ create or replace table roadmaps
     deleted     datetime     null,
     isDeleted   tinyint(1)   not null,
     isPublic    tinyint(1)   not null,
-    data        text         not null
+    data        text         not null,
+    constraint roadmaps_users_id_fk
+        foreign key (ownerId) references users (id)
 );
 
-create or replace index roadmaps_description_index
+create index if not exists roadmaps_description_index
     on roadmaps (description);
 
-create or replace index roadmaps_name_index
+create index if not exists roadmaps_name_index
     on roadmaps (name);
 
-create or replace index roadmaps_owner_index
+create index if not exists roadmaps_owner_index
     on roadmaps (ownerId);
 
-create or replace index roadmaps_tags_index
+create index if not exists roadmaps_tags_index
     on roadmaps (tags(768));
 
-create or replace table sessions
+create table if not exists sessions
 (
     id      bigint auto_increment
         primary key,
     userId  bigint       not null,
     token   varchar(255) not null,
-    expires datetime     not null
+    expires datetime     not null,
+    constraint sessions_users_id_fk
+        foreign key (userId) references users (id)
 );
 
-create or replace index sessions_index
+create index if not exists sessions_index
     on sessions (userId, token);
 
-create or replace table userInfo
+create table if not exists userInfo
 (
     id                bigint auto_increment
         primary key,
@@ -48,35 +64,13 @@ create or replace table userInfo
     quote             varchar(255) null,
     blogUrl           varchar(255) null,
     websiteUrl        varchar(255) null,
-    githubUrl         varchar(255) null
+    githubUrl         varchar(255) null,
+    constraint userInfo_users_id_fk
+        foreign key (userId) references users (id)
 );
 
-create or replace index userInfo_index
+create index if not exists userInfo_index
     on userInfo (userId);
 
-create or replace table users
-(
-    id       bigint auto_increment
-        primary key,
-    name     varchar(255)            not null,
-    email    varchar(255)            not null,
-    role     int          default 0  not null,
-    pwdHash  varchar(255) default '' not null,
-    googleId varchar(255)            null,
-    githubId varchar(255)            null
-);
-
-alter table roadmaps
-    add constraint roadmaps_users_id_fk
-        foreign key (ownerId) references users (id);
-
-alter table sessions
-    add constraint sessions_users_id_fk
-        foreign key (userId) references users (id);
-
-alter table userInfo
-    add constraint userInfo_users_id_fk
-        foreign key (userId) references users (id);
-
-create or replace index users_index
+create index if not exists users_index
     on users (email, name);
