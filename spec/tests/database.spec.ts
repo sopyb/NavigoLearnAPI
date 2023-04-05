@@ -71,7 +71,7 @@ describe('Database Middleware', () => {
     const deletedUserFromDb = await db.get<User>('users', user.id);
 
     // check user
-    expect(deletedUserFromDb).toBeNull();
+    expect(deletedUserFromDb).toBeUndefined();
   });
 
   it('should be able to save and retrieve roadmaps in the DB', async () => {
@@ -158,8 +158,8 @@ describe('Database Middleware', () => {
     const deletedUserFromDb = await db.get<User>('users', user.id);
 
     // check roadmap and user
-    expect(deletedRoadmapFromDb).toBeNull();
-    expect(deletedUserFromDb).toBeNull();
+    expect(deletedRoadmapFromDb).toBeUndefined();
+    expect(deletedUserFromDb).toBeUndefined();
   });
 });
 
