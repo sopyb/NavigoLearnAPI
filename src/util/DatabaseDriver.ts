@@ -195,9 +195,18 @@ class Database {
     // split sql queries
     const queries = setupSql.split(';');
 
-    // execute each query
-    for (const query of queries) {
-      if (query) await this._query(query);
+    // get connection from pool
+    const conn = await Database.pool.getConnection();
+    try {
+      // execute each query
+      for (const query of queries) {
+        if (query) await conn.query(query);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // release connection
+      await conn.release();
     }
 
     Database.isSetup = true;
@@ -205,6 +214,8 @@ class Database {
 
   private async _query(sql: string, params?: unknown[]):
     Promise<ResultSetHeader | RowDataPacket[]> {
+    while (!Database.isSetup)
+      await new Promise(r => setTimeout(r, 100));
     if (!sql) return Promise.reject(new Error('No SQL query'));
     // get connection from pool
     const conn = await Database.pool.getConnection();
