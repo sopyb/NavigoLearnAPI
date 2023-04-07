@@ -347,6 +347,14 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
     });
   }
 
+  // check if email is valid
+  // https://datatracker.ietf.org/doc/html/rfc5322#section-3.4.1
+  if (!email.match(RegExp('^[\\w!#$%&\'*+/=?^`{|}~.-]+' +
+    '@(?!-)[A-Za-z0-9-]+([-.][a-z0-9]+)*\\.[A-Za-z]{2,63}$')))
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Invalid Email',
+    });
+
   // get database
   const db = new DatabaseDriver();
 
@@ -375,7 +383,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const result = await db.insert('users', newUser);
 
   // check result
-  if (result >= 0) {
+  if (result >= BigInt(0)) {
     // save session
     return await saveSession(res, newUser);
   }

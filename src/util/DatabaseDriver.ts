@@ -2,6 +2,7 @@ import EnvVars from '@src/constants/EnvVars';
 import mariadb, { Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
+import logger from 'jet-logger';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -197,19 +198,20 @@ class Database {
 
     // get connection from pool
     const conn = await Database.pool.getConnection();
+
     try {
       // execute each query
       for (const query of queries) {
         if (query) await conn.query(query);
       }
     } catch (e) {
-      console.error(e);
+      logger.err(e);
     } finally {
       // release connection
       await conn.release();
-    }
 
-    Database.isSetup = true;
+      Database.isSetup = true;
+    }
   }
 
   private async _query(sql: string, params?: unknown[]):
@@ -217,6 +219,7 @@ class Database {
     while (!Database.isSetup)
       await new Promise(r => setTimeout(r, 100));
     if (!sql) return Promise.reject(new Error('No SQL query'));
+
     // get connection from pool
     const conn = await Database.pool.getConnection();
     try {

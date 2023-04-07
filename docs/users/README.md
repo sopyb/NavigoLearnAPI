@@ -2,7 +2,7 @@
 
 *Click on a route to see more information about it.*
 
-## [Get](get.md) [GET - /api/users/:userId?]
+## [Get](get/README.md) [GET - /api/users/:userId?]
 
 Returns information about user with :userId or logged-in user.
 

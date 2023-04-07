@@ -1,8 +1,8 @@
-# /api/users/get/:userId?
+# /api/users/:userId?
 
 ## GET - /api/users/:userId?
 
-Returns information about user with :userId.
+Returns information about user with :userId or logged-in user.
 
 ### Parameters
 
@@ -24,7 +24,8 @@ Returns information about user with :userId.
 {
   "name": "Sopy",
   "profilePictureUrl": "https://avatars.githubusercontent.com/u/32602702?v=4",
-  "userId": "4: bigint",
+  "userId": "4",
+  "_COMM": "typeof userId = bigint",
   "bio": "Tech nerd running through my veins",
   "quote": "",
   "blogUrl": "https://sopy.one",

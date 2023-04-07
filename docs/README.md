@@ -47,6 +47,17 @@
             - Delete: /:commentId
 - [Users](users/README.md)
     - Base URL: /api/users
-    - Get: /:userId?
+    - [Get](users/get/README.md): 
+      - Base URL: /api/users/:userId?
+      - Profile: /
+      - Mini profile: /mini
+      - User roadmaps: /roadmaps
+      - User discussions: /discussions
+      - User followers: /followers
+      - User followed: /following
+      - Roadmap count: /roadmapCount
+      - Discussion count: /discussionCount
+      - Followers count: /followerCount
+      - Following count: /followingCount
     - Update: /:userId?
     - Delete: /:userId?
