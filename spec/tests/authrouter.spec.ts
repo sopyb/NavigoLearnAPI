@@ -2,8 +2,6 @@ import app from '@src/server';
 import request from 'supertest';
 import Database from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
-import { ISession } from '@src/middleware/session';
-import { IUserInfo } from '@src/models/UserInfo';
 
 describe('Login Router', () => {
   it('Login, signup, login', async () => {
@@ -41,26 +39,6 @@ describe('Login Router', () => {
     if (!user) {
       return;
     }
-
-    // get a list of user sessions
-    const sessions =
-      await db.getAllWhere<ISession>('sessions', 'userId', user.id);
-
-    // delete sessions
-    if (sessions)
-      for (const session of sessions) {
-        await db.delete('sessions', session.id);
-      }
-
-    // get a list of userInfo entries
-    const userInfo =
-      await db.getAllWhere<IUserInfo>('userInfo', 'userId', user.id);
-
-    // delete userInfo
-    if (userInfo)
-      for (const info of userInfo) {
-        await db.delete('userInfo', info.id);
-      }
 
     // delete user
     const success = await db.delete('users', user.id);

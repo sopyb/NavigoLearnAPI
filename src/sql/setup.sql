@@ -1,18 +1,3 @@
-create table if not exists followers
-(
-    id         bigint auto_increment
-        primary key,
-    followerId bigint                                not null,
-    userId     bigint                                not null,
-    createdAt  timestamp default current_timestamp() not null
-);
-
-create index if not exists followers_followerId_index
-    on followers (followerId);
-
-create index if not exists followers_userId_index
-    on followers (userId);
-
 create table if not exists users
 (
     id       bigint auto_increment
@@ -24,6 +9,27 @@ create table if not exists users
     googleId varchar(255)            null,
     githubId varchar(255)            null
 );
+
+create table if not exists followers
+(
+    id         bigint auto_increment
+        primary key,
+    followerId bigint                                not null,
+    userId     bigint                                not null,
+    createdAt  timestamp default current_timestamp() not null,
+    constraint followers_users_id_fk
+        foreign key (followerId) references users (id)
+            on delete cascade,
+    constraint followers_users_id_fk2
+        foreign key (userId) references users (id)
+            on delete cascade
+);
+
+create index if not exists followers_followerId_index
+    on followers (followerId);
+
+create index if not exists followers_userId_index
+    on followers (userId);
 
 create table if not exists roadmaps
 (
@@ -38,6 +44,7 @@ create table if not exists roadmaps
     data        text         not null,
     constraint roadmaps_users_id_fk
         foreign key (ownerId) references users (id)
+            on delete cascade
 );
 
 create table if not exists issues
@@ -52,9 +59,11 @@ create table if not exists issues
     createdAt timestamp  default current_timestamp() null,
     editedAt  timestamp                              null,
     constraint issues_roadmaps_id_fk
-        foreign key (roadmapId) references roadmaps (id),
+        foreign key (roadmapId) references roadmaps (id)
+            on delete cascade,
     constraint issues_users_id_fk
         foreign key (userId) references users (id)
+            on delete cascade
 );
 
 create table if not exists issueComments
@@ -67,9 +76,11 @@ create table if not exists issueComments
     createdAt timestamp default current_timestamp() not null,
     editedAt  timestamp                             null,
     constraint issueComments_issues_id_fk
-        foreign key (issueId) references issues (id),
+        foreign key (issueId) references issues (id)
+            on delete cascade,
     constraint issueComments_users_id_fk
         foreign key (userid) references users (id)
+            on delete cascade
 );
 
 create index if not exists issueComments_issueId_createdAt_index
@@ -95,6 +106,7 @@ create table if not exists roadmapTags
     tagName   varchar(255) not null,
     constraint roadmapTags_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
+            on delete cascade
 );
 
 create index if not exists roadmapTags_roadmapId_index
@@ -124,6 +136,7 @@ create table if not exists sessionTable
     expires datetime     not null,
     constraint sessions_users_id_fk
         foreign key (userId) references users (id)
+            on delete cascade
 );
 
 create index if not exists sessionTable_expires_index
@@ -145,6 +158,7 @@ create table if not exists userInfo
     githubUrl         varchar(255) null,
     constraint userInfo_users_id_fk
         foreign key (userId) references users (id)
+            on delete cascade
 );
 
 create index if not exists userInfo_index
