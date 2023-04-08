@@ -76,7 +76,17 @@ const Paths = {
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
     },
-    Update: '/:userId?',
+    Update: {
+      Base: '/:userId?',
+      ProfilePicture: '/profile-picture',
+      Bio: '/bio',
+      Quote: '/quote',
+      Name: '/name',
+      BlogUrl: '/blog-url',
+      WebsiteUrl: '/website-url',
+      GithubUrl: '/github-url',
+      Email: '/email',
+    },
     Delete: '/:userId?',
   },
 };

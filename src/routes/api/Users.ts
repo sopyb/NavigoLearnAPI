@@ -7,6 +7,7 @@ import {
 } from '@src/middleware/session';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
+import UpdateUser from '@src/routes/api/Users/Update';
 
 const UsersRouter = Router();
 
@@ -14,11 +15,11 @@ const UsersRouter = Router();
 UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 
 // Post routes
-// ...
-// TODO
+UsersRouter.use(Paths.Users.Update.Base, requireSessionMiddleware);
+UsersRouter.use(Paths.Users.Update.Base, UpdateUser);
 
 // Delete route - delete user - requires session
-UsersRouter.delete(Paths.Users.Get.Profile, requireSessionMiddleware);
+UsersRouter.delete(Paths.Users.Delete, requireSessionMiddleware);
 UsersRouter.delete(Paths.Users.Delete,
   async (req: RequestWithSession, res) => {
     // get database
