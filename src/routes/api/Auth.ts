@@ -139,6 +139,26 @@ AuthRouter.post(Paths.Auth.Login,
       });
     }
 
+    // check if user has userInfo
+    const userInfo = db.getObjByKey('userInfo', 'userId', user.id);
+
+    if (!userInfo) {
+      // create userInfo
+      const row = await db.insert('userInfo', {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        bio: '',
+        website: '',
+        profilePicture: '',
+      });
+
+      if (row < 0)
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: 'Internal server error',
+        });
+    }
+
     // save session
     return await saveSession(res, user);
   });
@@ -385,6 +405,27 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 
   // check result
   if (result >= 0) {
+
+    // create userInfo
+    const userInfo = new UserInfo(
+      newUser.id,
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    // save userInfo
+    const userInfoResult = await db.insert('userInfo', userInfo);
+
+    // check if userInfo was created
+    if (userInfoResult < 0)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Something went wrong',
+      });
+
     // save session
     return await saveSession(res, newUser);
   }

@@ -18,10 +18,6 @@ function comparePassword(password: string, hash: string): boolean {
   return hashToCompare === hashFromDb;
 }
 
-export default class LoginUtil {
-
-}
-
 export {
   saltPassword,
   comparePassword,
