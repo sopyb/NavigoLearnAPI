@@ -32,10 +32,8 @@ create table if not exists roadmaps
     name        varchar(255) not null,
     description varchar(255) not null,
     ownerId     bigint       not null,
-    created     datetime     not null,
-    updated     datetime     not null,
-    deleted     datetime     null,
-    isDeleted   tinyint(1)   not null,
+    createdAt   datetime     not null,
+    updatedAt   datetime     not null,
     isPublic    tinyint(1)   not null,
     data        text         not null,
     constraint roadmaps_users_id_fk
@@ -105,6 +103,9 @@ create index if not exists roadmapTags_roadmapId_index
 create index if not exists roadmapTags_tagName_index
     on roadmapTags (tagName);
 
+create index if not exists roadmaps_createdAt_index
+    on roadmaps (createdAt desc);
+
 create index if not exists roadmaps_description_index
     on roadmaps (description);
 
@@ -114,7 +115,7 @@ create index if not exists roadmaps_name_index
 create index if not exists roadmaps_owner_index
     on roadmaps (ownerId);
 
-create table if not exists sessions
+create table if not exists sessionTable
 (
     id      bigint auto_increment
         primary key,
@@ -125,8 +126,11 @@ create table if not exists sessions
         foreign key (userId) references users (id)
 );
 
+create index if not exists sessionTable_expires_index
+    on sessionTable (expires);
+
 create index if not exists sessions_index
-    on sessions (userId, token);
+    on sessionTable (userId, token);
 
 create table if not exists userInfo
 (
@@ -148,3 +152,11 @@ create index if not exists userInfo_index
 
 create index if not exists users_index
     on users (email, name);
+
+create view if not exists sessions as
+select `navigo`.`sessionTable`.`id`      AS `id`,
+       `navigo`.`sessionTable`.`userId`  AS `userId`,
+       `navigo`.`sessionTable`.`token`   AS `token`,
+       `navigo`.`sessionTable`.`expires` AS `expires`
+from `navigo`.`sessionTable`
+where `navigo`.`sessionTable`.`expires` >= current_timestamp();

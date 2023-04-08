@@ -7,11 +7,8 @@ export interface IRoadmap {
   ownerId: bigint;
   name: string;
   description: string;
-  tags: string[];
-  created: Date;
-  updated: Date;
-  deleted: Date | null;
-  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
   isPublic: boolean;
   data: string; // base64 encoded json
 }
@@ -22,11 +19,8 @@ export class Roadmap implements IRoadmap {
   public ownerId: bigint;
   public name: string;
   public description: string;
-  public tags: string[];
-  public created: Date;
-  public updated: Date;
-  public deleted: Date | null;
-  public isDeleted: boolean;
+  public createdAt: Date;
+  public updatedAt: Date;
   public isPublic: boolean;
   public data: string; // base64 encoded json
 
@@ -34,27 +28,21 @@ export class Roadmap implements IRoadmap {
    * Constructor()
    */
   public constructor(
-    ownerId: bigint | number,
+    ownerId: bigint,
     name: string,
     description: string,
-    tags: string[],
     data: string,
+    createdAt: Date = new Date(),
+    updatedAt: Date = new Date(),
+    isPublic = false,
     id: bigint | null = null,
-    created: Date = new Date(),
-    updated: Date = new Date(),
-    deleted: Date | null = null,
-    isDeleted = false,
-    isPublic = true,
   ) {
     this.id = (id ?? -1) as bigint;
-    this.ownerId = ownerId as bigint;
+    this.ownerId = ownerId;
     this.name = name;
     this.description = description;
-    this.tags = tags;
-    this.created = created;
-    this.updated = updated;
-    this.deleted = deleted;
-    this.isDeleted = isDeleted;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
     this.isPublic = isPublic;
     this.data = data;
   }
@@ -71,14 +59,11 @@ export class Roadmap implements IRoadmap {
       param.ownerId,
       param.name,
       param.description,
-      param.tags,
       param.data,
-      param.id,
-      param.created,
-      param.updated,
-      param.deleted,
-      param.isDeleted,
+      param.createdAt,
+      param.updatedAt,
       param.isPublic,
+      param.id,
     );
   }
 
@@ -89,11 +74,8 @@ export class Roadmap implements IRoadmap {
       'ownerId' in param &&
       'name' in param &&
       'description' in param &&
-      'tags' in param &&
-      'created' in param &&
-      'updated' in param &&
-      'deleted' in param &&
-      'isDeleted' in param &&
+      'createdAt' in param &&
+      'updatedAt' in param &&
       'isPublic' in param &&
       'data' in param
     );
