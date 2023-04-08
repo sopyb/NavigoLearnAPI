@@ -71,7 +71,7 @@ describe('Users Router', () => {
       .send({ email, password })
       .expect(HttpStatusCodes.OK);
 
-    await request(app).get('/api/auth/register')
+    await request(app).post('/api/auth/register')
       .send({ email: email2, password: password2 })
       .expect(HttpStatusCodes.OK);
 
