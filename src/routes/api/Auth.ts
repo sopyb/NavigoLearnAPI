@@ -48,7 +48,7 @@ async function createSession(user: User): Promise<string> {
   // check if token is already in use - statistically unlikely but possible
   const session = await db.getObjByKey('sessions', 'token', token);
   if (!!session) {
-    return '';
+    return createSession(user);
   }
 
   // save session
@@ -381,9 +381,10 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 
   // save user
   const result = await db.insert('users', newUser);
+  newUser.id = result;
 
   // check result
-  if (result >= BigInt(0)) {
+  if (result >= 0) {
     // save session
     return await saveSession(res, newUser);
   }

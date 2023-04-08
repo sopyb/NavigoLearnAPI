@@ -58,8 +58,8 @@ function processData(data: Object): Data {
   return { keys, values };
 }
 
-function parseResult<T>(result: RowDataPacket[] | ResultSetHeader)
-  : T | undefined {
+function parseResult(result: RowDataPacket[] | ResultSetHeader)
+  : RowDataPacket[] | undefined {
 
   if (result && Object.keys(result).length > 0) {
     const keys = Object.keys((result as RowDataPacket[])[0]);
@@ -73,12 +73,12 @@ function parseResult<T>(result: RowDataPacket[] | ResultSetHeader)
     }
   }
 
-  let data: T | undefined = undefined;
-  if (result) {
-    data = (result as T[])?.[0] || undefined;
-  }
+  return result as RowDataPacket[];
+}
 
-  return data;
+function getFirstResult<T>(result: RowDataPacket[] | ResultSetHeader):
+  T | undefined {
+  return parseResult(result)?.[0] as T;
 }
 
 class Database {
@@ -162,7 +162,7 @@ class Database {
 
     // check if T has any properties that are JSON
     // if so parse them
-    return parseResult<T>(result);
+    return getFirstResult<T>(result);
   }
 
   public async getObjByKey<T>(
@@ -179,7 +179,23 @@ class Database {
 
     // check if T has any properties that are JSON
     // if so parse them
-    return parseResult<T>(result);
+    return getFirstResult<T>(result);
+  }
+
+  public async getAllWhere<T>
+  (table: string, key: string, value: string | bigint):
+    Promise<T[] | undefined> {
+    // create sql query - select * from table where key = ?
+    const sql = `SELECT *
+                 FROM ${table}
+                 WHERE ${key} = ?`;
+
+    // execute query
+    const result = await this._query(sql, [ value ]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    return parseResult(result) as T[];
   }
 
   private async _setup() {

@@ -1,3 +1,18 @@
+create table if not exists followers
+(
+    id         bigint auto_increment
+        primary key,
+    followerId bigint                                not null,
+    userId     bigint                                not null,
+    createdAt  timestamp default current_timestamp() not null
+);
+
+create index if not exists followers_followerId_index
+    on followers (followerId);
+
+create index if not exists followers_userId_index
+    on followers (userId);
+
 create table if not exists users
 (
     id       bigint auto_increment
@@ -16,7 +31,6 @@ create table if not exists roadmaps
         primary key,
     name        varchar(255) not null,
     description varchar(255) not null,
-    tags        text         not null,
     ownerId     bigint       not null,
     created     datetime     not null,
     updated     datetime     not null,
@@ -28,6 +42,69 @@ create table if not exists roadmaps
         foreign key (ownerId) references users (id)
 );
 
+create table if not exists issues
+(
+    id        bigint auto_increment
+        primary key,
+    roadmapId bigint                                 not null,
+    userId    bigint                                 not null,
+    open      tinyint(1) default 1                   not null,
+    title     varchar(255)                           not null,
+    content   text                                   null,
+    createdAt timestamp  default current_timestamp() null,
+    editedAt  timestamp                              null,
+    constraint issues_roadmaps_id_fk
+        foreign key (roadmapId) references roadmaps (id),
+    constraint issues_users_id_fk
+        foreign key (userId) references users (id)
+);
+
+create table if not exists issueComments
+(
+    id        bigint auto_increment
+        primary key,
+    issueId   bigint                                not null,
+    userid    bigint                                not null,
+    content   text                                  not null,
+    createdAt timestamp default current_timestamp() not null,
+    editedAt  timestamp                             null,
+    constraint issueComments_issues_id_fk
+        foreign key (issueId) references issues (id),
+    constraint issueComments_users_id_fk
+        foreign key (userid) references users (id)
+);
+
+create index if not exists issueComments_issueId_createdAt_index
+    on issueComments (issueId, createdAt);
+
+create index if not exists issueComments_userid_index
+    on issueComments (userid);
+
+create index if not exists issues_roadmapId_createdAt_index
+    on issues (roadmapId asc, createdAt desc);
+
+create index if not exists issues_title_index
+    on issues (title);
+
+create index if not exists issues_userId_index
+    on issues (userId);
+
+create table if not exists roadmapTags
+(
+    id        bigint       not null
+        primary key,
+    roadmapId bigint       not null,
+    tagName   varchar(255) not null,
+    constraint roadmapTags_roadmaps_id_fk
+        foreign key (roadmapId) references roadmaps (id)
+);
+
+create index if not exists roadmapTags_roadmapId_index
+    on roadmapTags (roadmapId);
+
+create index if not exists roadmapTags_tagName_index
+    on roadmapTags (tagName);
+
 create index if not exists roadmaps_description_index
     on roadmaps (description);
 
@@ -36,9 +113,6 @@ create index if not exists roadmaps_name_index
 
 create index if not exists roadmaps_owner_index
     on roadmaps (ownerId);
-
-create index if not exists roadmaps_tags_index
-    on roadmaps (tags(768));
 
 create table if not exists sessions
 (
