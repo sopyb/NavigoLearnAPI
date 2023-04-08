@@ -1,0 +1,72 @@
+# Routes
+
+- Base URL: /api
+- [Auth](auth/README.md)
+    - Base URL: /api/auth
+    - Login: /login
+    - Register: /register
+    - ChangePassword: /change-password
+    - ForgotPassword: /forgot-password
+    - GoogleLogin: /google-login
+    - GithubLogin: /github-login
+    - Logout: /logout
+- [Explore](explore/README.md)
+    - Base URL: /api/explore
+    - New: /new
+    - Popular: /popular
+    - Trending: /trending
+    - [Search](explore/search/README.md):
+        - Base URL: /api/explore/search
+        - Users: /users
+        - Roadmaps: /roadmaps
+- [Roadmaps](roadmaps/README.md)
+    - Base URL: /api/roadmaps
+    - Create: /create
+    - Get: /:roadmapId
+    - Update: /:roadmapId
+    - Delete: /:roadmapId
+    - [Progress](roadmaps/progress/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/progress
+        - Get: /:userId?
+        - Update: /
+    - [Rating](roadmaps/rating/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/rating
+        - Get: /:own? # own = true if you want to get your own rating
+        - Update: /
+        - Delete: /
+    - [Issues](roadmaps/issues/README.md):
+        - Base URL: /api/roadmaps/:roadmapId/issues
+        - Create: /create
+        - Get: /:issueId?
+        - Update: /:issueId
+        - Close: /:issueId
+        - [Comments](roadmaps/issues/comments/README.md):
+            - Base URL: /api/roadmaps/:roadmapId/issues/:issueId/comments
+            - Create: /create
+            - Get: /:commentId?
+            - Update: /:commentId
+            - Delete: /:commentId
+- [Users](users/README.md)
+    - Base URL: /api/users
+    - [Get](users/get/README.md):
+        - Base URL: /api/users/:userId([0-9]+)?
+        - Profile: /
+        - Mini profile: /mini
+        - User roadmaps: /roadmaps
+        - User issues: /issues
+        - User followers: /followers
+        - User followed: /following
+        - Roadmap count: /roadmap-count
+        - Issue count: /discussion-count
+        - Followers count: /follower-count
+        - Following count: /following-count
+    - [Update](users/update/README.md):
+        - Base URL: /api/users/:userId([0-9]+)?
+        - ProfilePicture: /profile-picture
+        - Bio: /bio
+        - Username: /name
+        - Blog url: /blog-url
+        - Website url: /website-url
+        - Github url: /github-url
+        - Email: /email
+    - Delete: /:userId([0-9]+)?

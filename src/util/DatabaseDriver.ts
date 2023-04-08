@@ -127,9 +127,10 @@ class Database {
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE id = ?`;
+    const params = [ ...values, id ];
     // execute query
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await this._query(sql, [ ...values, id ]);
+    const result = await this._query(sql, params);
 
     let affectedRows = -1;
     if (result) {

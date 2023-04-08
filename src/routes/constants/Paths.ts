@@ -64,7 +64,7 @@ const Paths = {
   Users: {
     Base: '/users',
     Get: {
-      Base: '/:userId?',
+      Base: '/:userId([0-9]+)?',
       Profile: '/',
       MiniProfile: '/mini',
       UserRoadmaps: '/roadmaps',
@@ -75,9 +75,21 @@ const Paths = {
       IssueCount: '/issue-count',
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
+      Follow: '/follow',
+      Unfollow: '/unfollow',
     },
-    Update: '/:userId?',
-    Delete: '/:userId?',
+    Update: {
+      Base: '/:userId([0-9]+)?',
+      ProfilePicture: '/profile-picture',
+      Bio: '/bio',
+      Quote: '/quote',
+      Name: '/name',
+      BlogUrl: '/blog-url',
+      WebsiteUrl: '/website-url',
+      GithubUrl: '/github-url',
+      Email: '/email',
+    },
+    Delete: '/:userId([0-9]+)?',
   },
 };
 

@@ -10,6 +10,12 @@ Logs out a user.
 |------|------|-------------|
 | none | none | none        |
 
+### Body
+
+| Name | Type | Description |
+|------|------|-------------|
+| none | none | none        |
+
 ### Response Codes
 
 | Code | Description            |

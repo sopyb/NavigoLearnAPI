@@ -7,7 +7,7 @@ MariaDB.
 
 ## Documentation
 
-Documentation for the api can be found [here](docs/README.md).
+Documentation for the api can be found [here](docs/paths/README.md).
 
 ## Available Scripts
 
