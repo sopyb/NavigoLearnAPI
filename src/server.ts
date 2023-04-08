@@ -8,6 +8,7 @@ import path from 'path';
 import helmet from 'helmet';
 import express, { Request, Response } from 'express';
 import logger from 'jet-logger';
+import { sessionMiddleware } from '@src/middleware/session';
 
 import 'express-async-errors';
 
@@ -40,6 +41,9 @@ if (EnvVars.NodeEnv === NodeEnvs.Dev) {
 if (EnvVars.NodeEnv === NodeEnvs.Production) {
   app.use(helmet());
 }
+
+// add session middleware
+app.use('/api', sessionMiddleware);
 
 // Add base router
 app.use(Paths.Base, baseRouter);

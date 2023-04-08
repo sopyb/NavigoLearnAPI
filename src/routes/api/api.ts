@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import AuthRouter from '@src/routes/api/Auth';
+import UsersRouter from '@src/routes/api/Users';
 
 const baseRouter = Router();
 
@@ -17,6 +18,6 @@ baseRouter.use(Auth.Base, AuthRouter);
 // ...
 
 // Users routes
-// ...
+baseRouter.use(Users.Base, UsersRouter);
 
 export default baseRouter;
