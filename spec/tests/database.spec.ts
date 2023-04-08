@@ -79,7 +79,7 @@ describe('Database', () => {
 
     // get all users
     for (const user of users) {
-      const user2 = await db.getObjByKey<User>('users', 'email', user.email);
+      const user2 = await db.getWhere<User>('users', 'email', user.email);
 
       expect(user2).not.toBe(undefined);
       expect(user2?.id).toBe(user.id);
@@ -88,6 +88,39 @@ describe('Database', () => {
       expect(user2?.pwdHash).toBe(user.pwdHash);
       expect(user2?.role).toBe(user.role);
     }
+  });
+
+  // test for getting user by key (email) with value (user.email) like
+  it('should get users by key with value like', async () => {
+    // get database
+    const db = new Database();
+
+    // get all users
+    for (const user of users) {
+      // process email to get only the username
+      const email = user.email.split('@')[0] + '%';
+
+      const user2 = await db.getWhereLike<User>('users', 'email', email);
+
+      expect(user2).not.toBe(undefined);
+      expect(user2?.id).toBe(user.id);
+      expect(user2?.email).toBe(user.email);
+      expect(user2?.name).toBe(user.name);
+      expect(user2?.pwdHash).toBe(user.pwdHash);
+      expect(user2?.role).toBe(user.role);
+    }
+  });
+
+  // test for getting all users
+  it('should get all users', async () => {
+    // get database
+    const db = new Database();
+
+    // get all users
+    const users2 = await db.getAll<User>('users');
+
+    expect(users2).not.toBe(undefined);
+    expect(users2?.length).toBeGreaterThanOrEqual(users.length);
   });
 
   // test for getting all users where key (pwdHash) is value (password)
@@ -110,6 +143,61 @@ describe('Database', () => {
       expect(user2?.pwdHash).toBe(user.pwdHash);
       expect(user2?.role).toBe(user.role);
     }
+  });
+
+  // get all users where key (pwdHash) is value (password) like
+  it('should get all users where key is value like', async () => {
+    // get database
+    const db = new Database();
+
+    // get all users
+    const users2 = await db.getAllWhereLike<User>('users', 'pwdHash', 'pass%');
+
+    expect(users2).not.toBe(undefined);
+    expect(users2?.length).toBe(users.length);
+    for (const user of users) {
+      const user2 = users2?.find((u) => u.id === user.id);
+
+      expect(user2).not.toBe(undefined);
+      expect(user2?.id).toBe(user.id);
+      expect(user2?.email).toBe(user.email);
+      expect(user2?.name).toBe(user.name);
+      expect(user2?.pwdHash).toBe(user.pwdHash);
+      expect(user2?.role).toBe(user.role);
+    }
+  });
+
+  // test for counting users
+  it('should count users', async () => {
+    // get database
+    const db = new Database();
+
+    // get count
+    const count = await db.count('users');
+
+    expect(count).toBeGreaterThanOrEqual(users.length);
+  });
+
+  // test for counting users where key (pwdHash) is value (password)
+  it('should count users where key is value', async () => {
+    // get database
+    const db = new Database();
+
+    // get count
+    const count = await db.countWhere('users', 'pwdHash', 'password');
+
+    expect(count == users.length).toBe(true);
+  });
+
+  // test for counting users where key (pwdHash) is value (password) like
+  it('should count users where key is value like', async () => {
+    // get database
+    const db = new Database();
+
+    // get count
+    const count = await db.countWhereLike('users', 'pwdHash', 'pass%');
+
+    expect(count == users.length).toBe(true);
   });
 
   // test for deleting users

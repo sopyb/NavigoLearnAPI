@@ -46,7 +46,7 @@ async function createSession(user: User): Promise<string> {
   const db = new DatabaseDriver();
 
   // check if token is already in use - statistically unlikely but possible
-  const session = await db.getObjByKey('sessions', 'token', token);
+  const session = await db.getWhere('sessions', 'token', token);
   if (!!session) {
     return createSession(user);
   }
@@ -122,7 +122,7 @@ AuthRouter.post(Paths.Auth.Login,
 
     // check if user exists
     const user =
-      await db.getObjByKey<User>('users', 'email', email);
+      await db.getWhere<User>('users', 'email', email);
     // if not, return error
     if (!user) {
       return res.status(HttpStatusCodes.BAD_REQUEST).json({
@@ -140,7 +140,7 @@ AuthRouter.post(Paths.Auth.Login,
     }
 
     // check if user has userInfo
-    const userInfo = db.getObjByKey('userInfo', 'userId', user.id);
+    const userInfo = db.getWhere('userInfo', 'userId', user.id);
 
     if (!userInfo) {
       // create userInfo
@@ -214,7 +214,7 @@ AuthRouter.get(Paths.Auth.GoogleCallback,
 
       // check if user exists
       let user =
-        await db.getObjByKey<User>('users', 'email', userData.email);
+        await db.getWhere<User>('users', 'email', userData.email);
 
       // if a user doesn't exist, create a new user
       if (!user) {
@@ -291,7 +291,7 @@ AuthRouter.get(Paths.Auth.GithubCallback,
 
       // check if user exists
       let user =
-        await db.getObjByKey<User>('users', 'email', data.email);
+        await db.getWhere<User>('users', 'email', data.email);
 
       if (!user) {
         // create user
@@ -329,7 +329,7 @@ AuthRouter.get(Paths.Auth.GithubCallback,
 
       //check if user has userInfo
       const userInfo =
-        await db.getObjByKey<UserInfo>(
+        await db.getWhere<UserInfo>(
           'userInfo',
           'userId',
           user.id);
@@ -379,7 +379,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const db = new DatabaseDriver();
 
   // check if user exists
-  const user = await db.getObjByKey<User>('users', 'email', email);
+  const user = await db.getWhere<User>('users', 'email', email);
   // if yes, return error
   if (!!user) {
     return res.status(HttpStatusCodes.UNAUTHORIZED).json({
@@ -458,7 +458,7 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   const db = new DatabaseDriver();
 
   // check if user exists
-  const user = await db.getObjByKey<User>('users', 'email', email);
+  const user = await db.getWhere<User>('users', 'email', email);
 
   // if not, return error
   if (!user) {

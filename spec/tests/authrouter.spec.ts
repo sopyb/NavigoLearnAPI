@@ -36,7 +36,7 @@ describe('Login Router', () => {
     const db = new Database();
 
     // get user
-    const user = await db.getObjByKey<User>('users', 'email', email);
+    const user = await db.getWhere<User>('users', 'email', email);
 
     if (!user) {
       return;

@@ -26,6 +26,11 @@ interface RowDataPacket {
   [columnName: string]: unknown;
 }
 
+interface CountDataPacket extends RowDataPacket {
+  'COUNT(*)': number;
+
+}
+
 interface ResultSetHeader {
   fieldCount: number;
   affectedRows: number;
@@ -165,7 +170,7 @@ class Database {
     return getFirstResult<T>(result);
   }
 
-  public async getObjByKey<T>(
+  public async getWhere<T>(
     table: string,
     key: string,
     value: string | bigint,
@@ -182,9 +187,41 @@ class Database {
     return getFirstResult<T>(result);
   }
 
-  public async getAllWhere<T>
-  (table: string, key: string, value: string | bigint):
-    Promise<T[] | undefined> {
+  public async getWhereLike<T>(
+    table: string,
+    key: string,
+    value: string | bigint,
+  ): Promise<T | undefined> {
+    // create sql query - select * from table where id = ?
+    const sql = `SELECT *
+                 FROM ${table}
+                 WHERE ${key} LIKE ?`;
+    // execute query
+    const result = await this._query(sql, [ value ]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    return getFirstResult<T>(result);
+  }
+
+  public async getAll<T>(table: string): Promise<T[] | undefined> {
+    // create sql query - select * from table
+    const sql = `SELECT *
+                 FROM ${table}`;
+
+    // execute query
+    const result = await this._query(sql);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    return parseResult(result) as T[];
+  }
+
+  public async getAllWhere<T>(
+    table: string,
+    key: string,
+    value: string | bigint,
+  ): Promise<T[] | undefined> {
     // create sql query - select * from table where key = ?
     const sql = `SELECT *
                  FROM ${table}
@@ -196,6 +233,69 @@ class Database {
     // check if T has any properties that are JSON
     // if so parse them
     return parseResult(result) as T[];
+  }
+
+  public async getAllWhereLike<T>(table: string,
+    key: string,
+    value: string | bigint):
+    Promise<T[] | undefined> {
+    // create sql query - select * from table where key = ?
+    const sql = `SELECT *
+                 FROM ${table}
+                 WHERE ${key} LIKE ?`;
+
+    // execute query
+    const result = await this._query(sql, [ value ]);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    return parseResult(result) as T[];
+  }
+
+  public async count(table: string): Promise<number> {
+    // create sql query - select count(*) from table
+    const sql = `SELECT COUNT(*)
+                 FROM ${table}`;
+
+    // execute query
+    const result = await this._query(sql);
+
+    // return count
+    return (result as CountDataPacket[])[0]['COUNT(*)'];
+  }
+
+  public async countWhere(
+    table: string,
+    key: string,
+    value: string | bigint,
+  ): Promise<number> {
+    // create sql query - select count(*) from table where key = ?
+    const sql = `SELECT COUNT(*)
+                 FROM ${table}
+                 WHERE ${key} = ?`;
+
+    // execute query
+    const result = await this._query(sql, [ value ]);
+
+    // return count
+    return (result as CountDataPacket[])[0]['COUNT(*)'];
+  }
+
+  public async countWhereLike(
+    table: string,
+    key: string,
+    value: string | bigint,
+  ): Promise<number> {
+    // create sql query - select count(*) from table where key = ?
+    const sql = `SELECT COUNT(*)
+                 FROM ${table}
+                 WHERE ${key} LIKE ?`;
+
+    // execute query
+    const result = await this._query(sql, [ value ]);
+
+    // return count
+    return (result as CountDataPacket[])[0]['COUNT(*)'];
   }
 
   private async _setup() {

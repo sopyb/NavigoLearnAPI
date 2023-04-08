@@ -41,7 +41,7 @@ UsersGet.get(Paths.Users.Get.Profile,
     // get user from database
     const user = await db.get<User>('users', userId);
     const userInfo =
-      await db.getObjByKey<IUserInfo>('userInfo', 'userId', userId);
+      await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
 
     if (!user || !userInfo) {
       res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
@@ -80,7 +80,7 @@ UsersGet.get(Paths.Users.Get.MiniProfile,
 
     const user = await db.get<User>('users', userId);
     const userInfo =
-      await db.getObjByKey<IUserInfo>('userInfo', 'userId', userId);
+      await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
 
     if (!user || !userInfo) {
       res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
@@ -99,4 +99,5 @@ UsersGet.get(Paths.Users.Get.MiniProfile,
     });
   });
 
+// UsersGet.get(Paths.Users.Get.RoadmapCount,
 export default UsersGet;
