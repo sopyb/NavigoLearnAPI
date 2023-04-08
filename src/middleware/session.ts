@@ -83,7 +83,8 @@ export function requireSessionMiddleware(
 ): void {
   // if session isn't set, return forbidden
   if (!req.session) {
-    res.status(HttpStatusCodes.FORBIDDEN).send('Token not found, please login');
+    res.status(HttpStatusCodes.FORBIDDEN)
+      .json({ error: 'Token not found, please login' });
     return;
   }
 

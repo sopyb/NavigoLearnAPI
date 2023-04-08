@@ -11,7 +11,7 @@ import { Follower } from '@src/models/Follower';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
-const UsersGet = Router({ mergeParams: true });
+const UsersGet = Router({ mergeParams: true, strict: true });
 
 function getUserId(req: RequestWithSession): bigint | undefined {
 
@@ -35,8 +35,8 @@ UsersGet.get(Paths.Users.Get.Profile,
 
     if (userId === undefined)
       // send error json
-      return res.status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+      return res.status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'User not found' });
 
     // get database
     const db = new DatabaseDriver();
@@ -46,7 +46,7 @@ UsersGet.get(Paths.Users.Get.Profile,
     const userInfo =
       await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
     const roadmapsCount =
-      await db.countWhere('roadmaps', 'userId', userId);
+      await db.countWhere('roadmaps', 'ownerId', userId);
     const issueCount =
       await db.countWhere('issues', 'userId', userId);
     const followerCount =
@@ -59,6 +59,38 @@ UsersGet.get(Paths.Users.Get.Profile,
       return;
     }
 
+    UsersGet.get(Paths.Users.Get.MiniProfile,
+      async (req: RequestWithSession, res) => {
+        const userId = getUserId(req);
+
+        if (userId === undefined)
+          return res.status(HttpStatusCodes.NOT_FOUND)
+            .json({ error: 'User not found' });
+
+        const db = new DatabaseDriver();
+
+        const user = await db.get<User>('users', userId);
+        const userInfo =
+          await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
+
+        if (!user || !userInfo) {
+          res.status(HttpStatusCodes.NOT_FOUND)
+            .json({ error: 'User not found' });
+          return;
+        }
+
+        res.status(HttpStatusCodes.OK).json({
+          type: 'mini',
+          name: user.name,
+          profilePictureUrl: userInfo.profilePictureUrl,
+          userId: user.id.toString(),
+        });
+
+        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: 'Internal server error',
+        });
+      });
+
     res.status(HttpStatusCodes.OK).json({
       type: 'profile',
       name: user.name,
@@ -67,10 +99,10 @@ UsersGet.get(Paths.Users.Get.Profile,
       bio: userInfo.bio,
       quote: userInfo.quote,
       blogUrl: userInfo.blogUrl,
-      roadmapsCount: roadmapsCount,
-      issueCount: issueCount,
-      followerCount: followerCount,
-      followingCount: followingCount,
+      roadmapsCount: roadmapsCount.toString(),
+      issueCount: issueCount.toString(),
+      followerCount: followerCount.toString(),
+      followingCount: followingCount.toString(),
       websiteUrl: userInfo.websiteUrl,
       githubUrl: userInfo.githubUrl,
       githubLink: !!user.githubId,
@@ -78,37 +110,6 @@ UsersGet.get(Paths.Users.Get.Profile,
     });
 
     // internal server error if we get here
-    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: 'Internal server error',
-    });
-  });
-
-UsersGet.get(Paths.Users.Get.MiniProfile,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res.status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-
-    const db = new DatabaseDriver();
-
-    const user = await db.get<User>('users', userId);
-    const userInfo =
-      await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
-
-    if (!user || !userInfo) {
-      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-      return;
-    }
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'mini',
-      name: user.name,
-      profilePictureUrl: userInfo.profilePictureUrl,
-      userId: user.id.toString(),
-    });
-
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'Internal server error',
     });
@@ -125,7 +126,7 @@ UsersGet.get(Paths.Users.Get.UserRoadmaps,
     const db = new DatabaseDriver();
 
     const roadmaps =
-      await db.getAllWhere<Roadmap>('roadmaps', 'userId', userId);
+      await db.getAllWhere<Roadmap>('roadmaps', 'ownerId', userId);
 
     res.status(HttpStatusCodes.OK).json({
       type: 'roadmaps',
@@ -206,12 +207,12 @@ UsersGet.get(Paths.Users.Get.RoadmapCount,
     const db = new DatabaseDriver();
 
     // get roadmap count
-    const roadmapCount = await db.countWhere('roadmaps', 'userId', userId);
+    const roadmapCount = await db.countWhere('roadmaps', 'ownerId', userId);
 
     res.status(HttpStatusCodes.OK).json({
       type: 'roadmapCount',
       userId: userId.toString(),
-      roadmapCount: roadmapCount,
+      roadmapCount: roadmapCount.toString(),
     });
   });
 
@@ -232,7 +233,7 @@ UsersGet.get(Paths.Users.Get.IssueCount,
     res.status(HttpStatusCodes.OK).json({
       type: 'issueCount',
       userId: userId.toString(),
-      issueCount: issueCount,
+      issueCount: issueCount.toString(),
     });
   });
 
@@ -253,7 +254,7 @@ UsersGet.get(Paths.Users.Get.FollowerCount,
     res.status(HttpStatusCodes.OK).json({
       type: 'followerCount',
       userId: userId.toString(),
-      followerCount: followerCount,
+      followerCount: followerCount.toString(),
     });
   });
 
@@ -275,7 +276,7 @@ UsersGet.get(Paths.Users.Get.FollowingCount,
     res.status(HttpStatusCodes.OK).json({
       type: 'followingCount',
       userId: userId.toString(),
-      followingCount: followingCount,
+      followingCount: followingCount.toString(),
     });
   });
 export default UsersGet;

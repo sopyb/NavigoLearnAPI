@@ -1,22 +1,27 @@
 import Paths from '@src/routes/constants/Paths';
 import { Router } from 'express';
-import { RequestWithSession } from '@src/middleware/session';
+import {
+  RequestWithSession,
+  requireSessionMiddleware,
+} from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import axios from 'axios';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
-import { IUser } from '@src/models/User';
+import User from '@src/models/User';
+import { UserInfo } from '@src/models/UserInfo';
 
 const UpdateUser = Router({ mergeParams: true });
 
+UpdateUser.post('*', requireSessionMiddleware);
 UpdateUser.post(Paths.Users.Update.ProfilePicture,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      url: string = req.body?.AvatarURL;
+      url: string = req.body?.avatarURL;
 
     // send error json
     if (userId === undefined)
@@ -50,8 +55,18 @@ UpdateUser.post(Paths.Users.Update.ProfilePicture,
     // get database
     const db = new DatabaseDriver();
 
+    // get id of userInfo
+    const userInfo =
+      await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update profile picture' });
+
     // update user profile picture
-    const success = await db.update('users', userId, { profilePicture: url });
+    const success =
+      await db.update('userInfo', userInfo.id, { profilePictureUrl: url });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -67,7 +82,7 @@ UpdateUser.post(Paths.Users.Update.Bio,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      bio: string = req.body?.Bio;
+      bio: string = req.body?.bio;
 
     // send error json
     if (userId === undefined)
@@ -82,8 +97,17 @@ UpdateUser.post(Paths.Users.Update.Bio,
     // get database
     const db = new DatabaseDriver();
 
+    // get id of userInfo
+    const userInfo =
+      await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update bio' });
+
     // update user bio
-    const success = await db.update('users', userId, { bio });
+    const success = await db.update('userInfo', userInfo.id, { bio });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -99,7 +123,7 @@ UpdateUser.post(Paths.Users.Update.Quote,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      quote: string = req.body?.Quote;
+      quote: string = req.body?.quote;
 
     // send error json
     if (userId === undefined)
@@ -114,8 +138,16 @@ UpdateUser.post(Paths.Users.Update.Quote,
     // get database
     const db = new DatabaseDriver();
 
+    // get userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update quote' });
+
     //update user quote
-    const success = await db.update('users', userId, { quote });
+    const success = await db.update('userInfo', userInfo.id, { quote });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -131,7 +163,7 @@ UpdateUser.post(Paths.Users.Update.Name,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      name: string = req.body?.Name;
+      name: string = req.body?.name;
 
     // send error json
     if (userId === undefined)
@@ -163,7 +195,7 @@ UpdateUser.post(Paths.Users.Update.BlogUrl,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      blogUrl: string = req.body?.BlogUrl;
+      blogUrl: string = req.body?.blogUrl;
 
     // send error json
     if (userId === undefined)
@@ -178,8 +210,16 @@ UpdateUser.post(Paths.Users.Update.BlogUrl,
     // get database
     const db = new DatabaseDriver();
 
+    // get userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update blog URL' });
+
     //update user blog url
-    const success = await db.update('users', userId, { blogUrl });
+    const success = await db.update('userInfo', userInfo.id, { blogUrl });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -194,7 +234,7 @@ UpdateUser.post(Paths.Users.Update.WebsiteUrl,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      websiteUrl: string = req.body?.WebsiteUrl;
+      websiteUrl: string = req.body?.websiteUrl;
 
     // send error json
     if (userId === undefined)
@@ -209,8 +249,16 @@ UpdateUser.post(Paths.Users.Update.WebsiteUrl,
     // get database
     const db = new DatabaseDriver();
 
+    // get userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update website URL' });
+
     //update user website url
-    const success = await db.update('users', userId, { websiteUrl });
+    const success = await db.update('userInfo', userInfo.id, { websiteUrl });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -225,7 +273,7 @@ UpdateUser.post(Paths.Users.Update.GithubUrl,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      githubUrl: string = req.body?.GithubUrl;
+      githubUrl: string = req.body?.githubUrl;
 
     // send error json
     if (userId === undefined)
@@ -240,8 +288,16 @@ UpdateUser.post(Paths.Users.Update.GithubUrl,
     // get database
     const db = new DatabaseDriver();
 
+    // get userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+
+    // if userInfo does not exist
+    if (!userInfo)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Failed to update github URL' });
+
     //update user github url
-    const success = await db.update('users', userId, { githubUrl });
+    const success = await db.update('userInfo', userInfo.id, { githubUrl });
 
     // if update was not successful
     if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -256,10 +312,10 @@ UpdateUser.post(Paths.Users.Update.Email,
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      email: string = req.body?.Email,
+      email: string = req.body?.email,
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      password: string = req.body?.Password;
+      password: string = req.body?.password;
 
     // send error json
     if (userId === undefined)
@@ -280,22 +336,24 @@ UpdateUser.post(Paths.Users.Update.Email,
     const db = new DatabaseDriver();
 
     // get user
-    const user = await db.get<IUser>('users', userId);
+    const user = await db.get<User>('users', userId);
 
     // check if user exists
-    if (!user) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'User does not exist' });
+    if (!user || !user?.pwdHash)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'User does not exist' });
 
     // check if password is correct
-    if (!comparePassword(password, user.pwdHash as string))
+    if (!comparePassword(password, user.pwdHash))
       return res.status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Password is not correct' });
 
     // check if email is already taken
-    const emailTaken = await db.getWhere('users', 'email', email);
+    const emailTaken = await db.getWhere<User>('users', 'email', email);
 
     // check if email is already taken
-    if (!!emailTaken) return res.status(HttpStatusCodes.BAD_REQUEST);
+    if (!!emailTaken) return res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Email is already taken' });
 
     //update user email
     const success = await db.update('users', userId, { email });

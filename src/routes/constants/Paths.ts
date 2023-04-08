@@ -64,7 +64,7 @@ const Paths = {
   Users: {
     Base: '/users',
     Get: {
-      Base: '/:userId?',
+      Base: '/:userId([0-9]+)?',
       Profile: '/',
       MiniProfile: '/mini',
       UserRoadmaps: '/roadmaps',
@@ -77,7 +77,7 @@ const Paths = {
       FollowingCount: '/following-count',
     },
     Update: {
-      Base: '/:userId?',
+      Base: '/:userId([0-9]+)?',
       ProfilePicture: '/profile-picture',
       Bio: '/bio',
       Quote: '/quote',

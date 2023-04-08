@@ -15,7 +15,6 @@ const UsersRouter = Router();
 UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 
 // Post routes
-UsersRouter.use(Paths.Users.Update.Base, requireSessionMiddleware);
 UsersRouter.use(Paths.Users.Update.Base, UpdateUser);
 
 // Delete route - delete user - requires session
