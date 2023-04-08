@@ -38,7 +38,6 @@ const args = parse<IArgs>({
 const jasmine = new Jasmine();
 jasmine.exitOnCompletion = false;
 
-
 // Set location of test files
 jasmine.loadConfig({
   random: false,

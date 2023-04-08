@@ -1,8 +1,8 @@
 # /api/auth/forgot-password
 
 ```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
+- This route is not yet implemented.
+! Subject to change - Just a rough draft.
 ```
 
 ## POST - /api/auth/forgot-password

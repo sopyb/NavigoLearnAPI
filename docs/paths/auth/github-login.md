@@ -1,10 +1,16 @@
-# /api/auth/google-login
+# /api/auth/github-login
 
-## POST - /api/auth/google-login
+## GET - /api/auth/github-login
 
-Logs in a user using Google OAuth.
+Logs in a user using GitHub OAuth.
 
 ### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| none | none | none        |
+
+### Body
 
 | Name | Type | Description |
 |------|------|-------------|

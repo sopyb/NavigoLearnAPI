@@ -11,7 +11,7 @@ export class Follower implements IFollower {
   public id: bigint;
   public userId: bigint;
 
-  public  constructor(
+  public constructor(
     followerId: bigint,
     userId: bigint,
     id: bigint | null = null,

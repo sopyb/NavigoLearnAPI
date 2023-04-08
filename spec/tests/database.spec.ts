@@ -184,9 +184,10 @@ describe('Database', () => {
     const db = new Database();
 
     // get count
-    const count = await db.countWhere('users', 'pwdHash', 'password');
+    const count = BigInt(await db.countWhere('users', 'pwdHash', 'password'));
+    const size = BigInt(users.length);
 
-    expect(count == users.length).toBe(true);
+    expect(count).toBe(size);
   });
 
   // test for counting users where key (pwdHash) is value (password) like
@@ -195,9 +196,10 @@ describe('Database', () => {
     const db = new Database();
 
     // get count
-    const count = await db.countWhereLike('users', 'pwdHash', 'pass%');
+    const count = BigInt(await db.countWhereLike('users', 'pwdHash', 'pass%'));
+    const size = BigInt(users.length);
 
-    expect(count == users.length).toBe(true);
+    expect(count).toBe(size);
   });
 
   // test for deleting users

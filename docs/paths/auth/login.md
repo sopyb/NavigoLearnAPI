@@ -6,6 +6,12 @@ Logs in a user.
 
 ### Parameters
 
+| Name | Type | Description |
+|------|------|-------------|
+| none | none | none        |
+
+### Body
+
 | Name       | Type    | Description                          |
 |------------|---------|--------------------------------------|
 | Email      | string  | The email of the user.               |

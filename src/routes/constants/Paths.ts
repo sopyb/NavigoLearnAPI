@@ -89,7 +89,7 @@ const Paths = {
       GithubUrl: '/github-url',
       Email: '/email',
     },
-    Delete: '/:userId?',
+    Delete: '/:userId([0-9]+)?',
   },
 };
 
