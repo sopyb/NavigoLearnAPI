@@ -10,6 +10,10 @@ import { NodeEnvs } from '@src/constants/misc';
 import axios, { AxiosError } from 'axios';
 import logger from 'jet-logger';
 import { UserInfo } from '@src/models/UserInfo';
+import {
+  RequestWithSession,
+  requireSessionMiddleware,
+} from '@src/middleware/session';
 
 const AuthRouter = Router();
 
@@ -161,6 +165,175 @@ AuthRouter.post(Paths.Auth.Login,
     // save session
     return await saveSession(res, user);
   });
+
+AuthRouter.post(Paths.Auth.Register, async (req, res) => {
+  // check if data is valid
+  const { email, password } = getInfoFromRequest(req);
+  // if not, return error
+  if (!email || !password) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Email and password are required',
+    });
+  }
+
+  // check if email is valid
+  // https://datatracker.ietf.org/doc/html/rfc5322#section-3.4.1
+  if (!email.match(RegExp('^[\\w!#$%&\'*+/=?^`{|}~.-]+' +
+    '@(?!-)[A-Za-z0-9-]+([-.][a-z0-9]+)*\\.[A-Za-z]{2,63}$')))
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Invalid Email',
+    });
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // check if user exists
+  const user = await db.getWhere<User>('users', 'email', email);
+  // if yes, return error
+  if (!!user) {
+    return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+      error: 'User with this Email already exists',
+    });
+  }
+
+  // parse email for username
+  const username = email.split('@')[0];
+  const saltedPassword = saltPassword(password);
+
+  // create user
+  const newUser = new User(
+    username,
+    email,
+    UserRoles.Standard,
+    saltedPassword,
+  );
+
+  // save user
+  const result = await db.insert('users', newUser);
+  newUser.id = result;
+
+  // check result
+  if (result >= 0) {
+
+    // create userInfo
+    const userInfo = new UserInfo(
+      newUser.id,
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    );
+
+    // save userInfo
+    const userInfoResult = await db.insert('userInfo', userInfo);
+
+    // check if userInfo was created
+    if (userInfoResult < 0)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Something went wrong',
+      });
+
+    // save session
+    return await saveSession(res, newUser);
+  }
+
+  return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+    error: 'Something went wrong',
+  });
+});
+
+AuthRouter.use(Paths.Auth.ChangePassword, requireSessionMiddleware);
+AuthRouter.post(Paths.Auth.ChangePassword,
+  async (req: RequestWithSession, res) => {
+    // check if data is valid
+    const { password } = getInfoFromRequest(req);
+
+    // get new password from body
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { newPassword } = req?.body || {};
+
+    // if not, return error
+    if (!password || !newPassword || !req.session?.userId) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        error: 'A valid session, the old and the new password are required',
+      });
+    }
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if user exists
+    const user = await db.get<User>('users', req.session.userId);
+
+    // if not, return error
+    if (!user) {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Invalid user',
+      });
+    }
+
+    // check if the password is correct
+    const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
+
+    // if not, return error - if password is empty, allow change
+    if (!isPasswordCorrect && user.pwdHash !== '') {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        error: 'Incorrect password',
+      });
+    }
+
+    // change password
+    const saltedPassword = saltPassword(newPassword as string);
+
+    // update user
+    const result = await db.update('users', req.session.userId, {
+      pwdHash: saltedPassword,
+    });
+
+    // check result
+    if (result) {
+      return res.status(HttpStatusCodes.OK).json({
+        message: 'Password changed successfully',
+      });
+    } else {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Something went wrong',
+      });
+    }
+  });
+
+AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
+  // check if data is valid
+  const { email } = getInfoFromRequest(req);
+
+  // if not, return error
+  if (!email) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Email is required',
+    });
+  }
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // check if user exists
+  const user = await db.getWhere<User>('users', 'email', email);
+
+  // if not, return error
+  if (!user) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'User with this Email does not exist',
+    });
+  }
+
+  // TODO: send email with reset code
+  return res.status(HttpStatusCodes.NOT_IMPLEMENTED).json({
+    error: 'Not implemented',
+  });
+});
+
 AuthRouter.get(Paths.Auth.GoogleLogin,
   (req, res) => {
     res.redirect('https://accounts.google.com/o/oauth2/v2/auth?client_id='
@@ -356,119 +529,11 @@ AuthRouter.get(Paths.Auth.GithubCallback,
     }
   });
 
-AuthRouter.post(Paths.Auth.Register, async (req, res) => {
-  // check if data is valid
-  const { email, password } = getInfoFromRequest(req);
-  // if not, return error
-  if (!email || !password) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Email and password are required',
-    });
-  }
-
-  // check if email is valid
-  // https://datatracker.ietf.org/doc/html/rfc5322#section-3.4.1
-  if (!email.match(RegExp('^[\\w!#$%&\'*+/=?^`{|}~.-]+' +
-    '@(?!-)[A-Za-z0-9-]+([-.][a-z0-9]+)*\\.[A-Za-z]{2,63}$')))
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Invalid Email',
-    });
-
-  // get database
-  const db = new DatabaseDriver();
-
-  // check if user exists
-  const user = await db.getWhere<User>('users', 'email', email);
-  // if yes, return error
-  if (!!user) {
-    return res.status(HttpStatusCodes.UNAUTHORIZED).json({
-      error: 'User with this Email already exists',
-    });
-  }
-
-  // parse email for username
-  const username = email.split('@')[0];
-  const saltedPassword = saltPassword(password);
-
-  // create user
-  const newUser = new User(
-    username,
-    email,
-    UserRoles.Standard,
-    saltedPassword,
-  );
-
-  // save user
-  const result = await db.insert('users', newUser);
-  newUser.id = result;
-
-  // check result
-  if (result >= 0) {
-
-    // create userInfo
-    const userInfo = new UserInfo(
-      newUser.id,
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    );
-
-    // save userInfo
-    const userInfoResult = await db.insert('userInfo', userInfo);
-
-    // check if userInfo was created
-    if (userInfoResult < 0)
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Something went wrong',
-      });
-
-    // save session
-    return await saveSession(res, newUser);
-  }
-
-  return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-    error: 'Something went wrong',
-  });
-});
-
 AuthRouter.delete(Paths.Auth.Logout, (req, res) => {
   // remove cookie
   res.clearCookie('session');
   return res.status(HttpStatusCodes.OK).json({
     message: 'Logout successful',
-  });
-});
-
-AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
-  // check if data is valid
-  const { email } = getInfoFromRequest(req);
-
-  // if not, return error
-  if (!email) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Email is required',
-    });
-  }
-
-  // get database
-  const db = new DatabaseDriver();
-
-  // check if user exists
-  const user = await db.getWhere<User>('users', 'email', email);
-
-  // if not, return error
-  if (!user) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'User with this Email does not exist',
-    });
-  }
-
-  // TODO: send email with reset code
-  return res.status(HttpStatusCodes.NOT_IMPLEMENTED).json({
-    error: 'Not implemented',
   });
 });
 

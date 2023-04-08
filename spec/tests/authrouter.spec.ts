@@ -9,6 +9,7 @@ describe('Login Router', () => {
   const email = Math.random().toString(36).substring(2, 15) + '@test.com';
   // generate random password
   const password = Math.random().toString(36).substring(2, 15);
+  let loginCookie: string;
 
   it('Login with invalid credentials', async () => {
 
@@ -38,10 +39,18 @@ describe('Login Router', () => {
   it('Login with valid credentials', async () => {
     // login with new user and expect 200 response and a session cookie
     // to be sent back
-    await request(app).post('/api/auth/login')
+    const res = await request(app).post('/api/auth/login')
       .send({ email, password })
       .expect(HttpStatusCodes.OK)
       .expect('Set-Cookie', new RegExp('token=.*; Path=/;'));
+
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    res.headers['set-cookie'].forEach((cookie: string) => {
+      if (cookie.startsWith('token=')) {
+        loginCookie = cookie;
+      }
+    });
   });
 
   it('Logout', async () => {
@@ -50,6 +59,32 @@ describe('Login Router', () => {
       .expect(HttpStatusCodes.OK)
       .expect('Set-Cookie', new RegExp(
         'session=; Path=\\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'));
+  });
+
+  // try to change password without a session cookie
+  it('Change password without session cookie', async () => {
+    // change password and expect 401
+    await request(app).post('/api/auth/change-password')
+      .send({ password, newPassword: 'newPassword' })
+      .expect(HttpStatusCodes.FORBIDDEN);
+  });
+
+  // try to change password with a session cookie but invalid password
+  it('Change password with session cookie but invalid password', async () => {
+    // change password and expect 401
+    await request(app).post('/api/auth/change-password')
+      .set('Cookie', loginCookie)
+      .send({ password: 'invalidPassword', newPassword: 'newPassword' })
+      .expect(HttpStatusCodes.BAD_REQUEST);
+  });
+
+  // try to change password with a session cookie
+  it('Change password with session cookie', async () => {
+    // change password and expect 200
+    await request(app).post('/api/auth/change-password')
+      .set('Cookie', loginCookie)
+      .send({ password, newPassword: 'newPassword' })
+      .expect(HttpStatusCodes.OK);
   });
 
   // google login page test

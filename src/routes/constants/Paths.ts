@@ -9,13 +9,14 @@ const Paths = {
   Auth: {
     Base: '/auth',
     Login: '/login',
+    Register: '/register',
+    ChangePassword: '/change-password',
+    ForgotPassword: '/forgot-password',
     GoogleLogin: '/google-login',
     GoogleCallback: '/google-callback',
     GithubLogin: '/github-login',
     GithubCallback: '/github-callback',
-    Register: '/register',
     Logout: '/logout',
-    ForgotPassword: '/forgot-password',
   },
   Explore: {
     Base: '/explore',
