@@ -91,10 +91,9 @@ async function saveSession(res: Response, user: User): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-function handleExternalAuthError(error, res: Response):
-  void {
+function handleExternalAuthError(error, res: Response): void {
   if (!(error instanceof Error)) return;
-  logger.err(error);
+  if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'Couldn\'t get access token from external service',
