@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
-import { RequestWithSession } from '@src/middleware/session';
+import {
+  RequestWithSession,
+  requireSessionMiddleware,
+} from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
@@ -279,4 +282,121 @@ UsersGet.get(Paths.Users.Get.FollowingCount,
       followingCount: followingCount.toString(),
     });
   });
+
+UsersGet.get(Paths.Users.Get.Follow, requireSessionMiddleware);
+UsersGet.get(Paths.Users.Get.Follow,
+  async (req: RequestWithSession, res) => {
+    // get the target user id
+    const userId = BigInt(req.params.userId || -1);
+
+    // get the current user id
+    const followerId = req.session?.userId;
+
+    if (userId === followerId) return res.status(HttpStatusCodes.FORBIDDEN)
+      .json({ error: 'Cannot follow  yourself' });
+
+    // if either of the ids are undefined, return a bad request
+    if (!followerId || !userId || userId < 0)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'No user specified' });
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if the user is already following the target user
+    const following =
+      await db.getAllWhere<Follower>('followers', 'followerId', followerId);
+
+    if (!!following)
+      if (following.some(f => f.userId === userId))
+        return res.status(HttpStatusCodes.BAD_REQUEST)
+          .json({ error: 'Already following' });
+
+    // create a new follower
+    const follower = new Follower(
+      followerId,
+      userId,
+    );
+
+    // insert the follower into the database
+    const insert = await db.insert('followers', follower);
+
+    // if the insert was successful, return the follower
+    if (insert >= 0) {
+      return res.status(HttpStatusCodes.OK).json({
+        type: 'follow',
+        follower: {
+          id: insert.toString(),
+          followerId: follower.followerId.toString(),
+          userId: follower.userId.toString(),
+        },
+      });
+    }
+
+    // otherwise, return an error
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to follow' });
+  });
+
+UsersGet.get(Paths.Users.Get.Unfollow, requireSessionMiddleware);
+UsersGet.get(Paths.Users.Get.Unfollow,
+  async (req: RequestWithSession, res) => {
+    // get the target user id
+    const userId = BigInt(req.params.userId || -1);
+
+    // get the current user id
+    const followerId = req.session?.userId;
+
+    if (userId === followerId)
+      return res.status(HttpStatusCodes.FORBIDDEN)
+        .json({ error: 'Cannot unfollow yourself' });
+
+    // if either of the ids are undefined, return a bad request
+    if (!followerId || !userId)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'No user specified' });
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if the user is already following the target user
+    const following =
+      await db.getAllWhere<Follower>('followers', 'followerId', followerId);
+
+    if (!!following)
+      if (!following.some(f => f.userId === userId))
+        return res.status(HttpStatusCodes.BAD_REQUEST)
+          .json({ error: 'Not following' });
+
+    if (!following)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Not following' });
+
+    // get the follower object to delete
+    const follower =
+      following.find(f => f.userId === userId);
+
+    if (!follower)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Not following' });
+
+    // delete the follower from the database
+    const deleted = await db.delete('followers', follower.id);
+
+    // if the delete was successful, return the follower
+    if (deleted) {
+      return res.status(HttpStatusCodes.OK).json({
+        type: 'unfollow',
+        follower: {
+          followerId: followerId.toString(),
+          userId: userId.toString(),
+        },
+      });
+    }
+
+    // otherwise, return an error
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to unfollow' });
+  });
+
 export default UsersGet;

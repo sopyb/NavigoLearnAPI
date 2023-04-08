@@ -51,16 +51,28 @@ describe('Users Router', () => {
   let loginCookie: string;
   let userId: bigint;
 
+  // second user for testing
+  let email2: string;
+  let password2: string;
+  let userId2: bigint;
+
   // set up a user to run tests on
   beforeAll(async () => {
     // generate random email
     email = Math.random().toString(36).substring(2, 15) + '@test.com';
+    email2 = Math.random().toString(36).substring(2, 15) + '@test.com';
     // generate random password
     password = Math.random().toString(36).substring(2, 15);
+    password2 = Math.random().toString(36).substring(2, 15);
 
     // register a 200 response and a session cookie to be sent back
-    const reqData = await request(app).post('/api/auth/register')
+    const reqData = await request(app)
+      .post('/api/auth/register')
       .send({ email, password })
+      .expect(HttpStatusCodes.OK);
+
+    await request(app).get('/api/auth/register')
+      .send({ email: email2, password: password2 })
       .expect(HttpStatusCodes.OK);
 
     // eslint-disable-next-line max-len
@@ -76,11 +88,13 @@ describe('Users Router', () => {
 
     // get user from database
     const user = await db.getWhere<IUser>('users', 'email', email);
+    const user2 = await db.getWhere<IUser>('users', 'email', email2);
 
     // get user id
     userId = user?.id ?? BigInt(-1);
+    userId2 = user2?.id ?? BigInt(-1);
 
-    if (userId < 0) {
+    if (userId < 0 || userId2 < 0) {
       // can't run tests without a user
       throw new Error('Failed to create user');
     }
@@ -93,9 +107,11 @@ describe('Users Router', () => {
 
     // see if user exists
     const user = await db.getWhere<IUser>('users', 'email', email);
+    const user2 = await db.getWhere<IUser>('users', 'email', email2);
 
     // if user exists, delete them
     if (user) await db.delete('users', user.id);
+    if (user2) await db.delete('users', user2.id);
   });
 
   /**
@@ -573,6 +589,92 @@ describe('Users Router', () => {
   });
 
   /**
+   ! Test following a user
+   */
+
+  it('Follow self with no login cookie', async () => {
+    await request(app).get('/api/users/' + userId.toString() + '/follow')
+      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body.error).toBeDefined();
+      });
+  });
+
+  it('Follow self with login cookie', async () => {
+    await request(app).get('/api/users/' + userId.toString() + '/follow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  it('Follow user with login cookie', async () => {
+    await request(app).get('/api/users/' + userId2.toString() + '/follow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  it('Follow user with login cookie again', async () => {
+    await request(app).get('/api/users/' + userId2.toString() + '/follow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.BAD_REQUEST)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  /**
+   ! Test unfollowing a user
+   */
+
+  it('Unfollow self with no login cookie', async () => {
+    await request(app).get('/api/users/' + userId.toString() + '/unfollow')
+      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body.error).toBeDefined();
+      });
+  });
+
+  it('Unfollow self with login cookie', async () => {
+    await request(app).get('/api/users/' + userId.toString() + '/unfollow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  it('Unfollow user with login cookie', async () => {
+    await request(app).get('/api/users/' + userId2.toString() + '/unfollow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  it('Unfollow user with login cookie again', async () => {
+    await request(app).get('/api/users/' + userId2.toString() + '/unfollow')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.BAD_REQUEST)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+      });
+  });
+
+  /**
    ! Test Updating the User
    */
 
@@ -678,7 +780,6 @@ describe('Users Router', () => {
         expect(res.body).toBeDefined();
       });
   });
-
 
   it('Update user email with login cookie', async () => {
     email = `testuser${Math.floor(Math.random() * 1000000)}@test.com`;

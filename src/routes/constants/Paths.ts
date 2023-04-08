@@ -75,6 +75,8 @@ const Paths = {
       IssueCount: '/issue-count',
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
+      Follow: '/follow',
+      Unfollow: '/unfollow',
     },
     Update: {
       Base: '/:userId([0-9]+)?',
