@@ -3,7 +3,7 @@ export const INVALID_CONSTRUCTOR_PARAM = 'Invalid constructor parameter';
 
 // interface
 export interface IRoadmap {
-  id: bigint;
+  id?: bigint;
   ownerId: bigint;
   name: string;
   description: string;
@@ -28,21 +28,23 @@ export class Roadmap implements IRoadmap {
    * Constructor()
    */
   public constructor(
-    ownerId: bigint,
+    ownerId: bigint | string,
     name: string,
     description: string,
     data: string,
-    createdAt: Date = new Date(),
-    updatedAt: Date = new Date(),
-    isPublic = false,
-    id: bigint | null = null,
+    createdAt: Date | string = new Date(),
+    updatedAt: Date | string = new Date(),
+    isPublic = true,
+    id: bigint | string | null = null,
   ) {
-    this.id = (id ?? -1) as bigint;
-    this.ownerId = ownerId;
+    this.id = BigInt(id ?? -1);
+    this.ownerId = BigInt(ownerId);
     this.name = name;
     this.description = description;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+    this.createdAt = createdAt instanceof Date ?
+      createdAt : new Date(createdAt);
+    this.updatedAt = updatedAt instanceof Date ?
+      updatedAt : new Date(updatedAt);
     this.isPublic = isPublic;
     this.data = data;
   }
@@ -70,6 +72,7 @@ export class Roadmap implements IRoadmap {
   // Check if object is a roadmap.
   public static isRoadmap(param: object): param is IRoadmap {
     return (
+      !!param &&
       'id' in param &&
       'ownerId' in param &&
       'name' in param &&
@@ -79,6 +82,20 @@ export class Roadmap implements IRoadmap {
       'isPublic' in param &&
       'data' in param
     );
+  }
+
+  // toJSON()
+  public toJSON(): string {
+    return JSON.stringify({
+      id: this.id.toString(),
+      ownerId: this.ownerId.toString(),
+      name: this.name,
+      description: this.description,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      isPublic: this.isPublic,
+      data: this.data,
+    });
   }
 }
 

@@ -1,23 +1,24 @@
 import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import AuthRouter from '@src/routes/api/Auth';
+import RoadmapsRouter from '@src/routes/api/Roadmaps';
 import UsersRouter from '@src/routes/api/Users';
 
-const baseRouter = Router();
+const BaseRouter = Router();
 
 // Import all routes at base path
 const { Auth, Explore, Roadmaps, Users } = Paths;
 
 // Auth routes
-baseRouter.use(Auth.Base, AuthRouter);
+BaseRouter.use(Auth.Base, AuthRouter);
 
 // Explore routes
 // ...
 
 // Roadmaps routes
-// ...
+BaseRouter.use(Roadmaps.Base, RoadmapsRouter);
 
 // Users routes
-baseRouter.use(Users.Base, UsersRouter);
+BaseRouter.use(Users.Base, UsersRouter);
 
-export default baseRouter;
+export default BaseRouter;
