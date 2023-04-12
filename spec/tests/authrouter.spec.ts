@@ -66,7 +66,7 @@ describe('Login Router', () => {
     // change password and expect 401
     await request(app).post('/api/auth/change-password')
       .send({ password, newPassword: 'newPassword' })
-      .expect(HttpStatusCodes.FORBIDDEN);
+      .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
   // try to change password with a session cookie but invalid password

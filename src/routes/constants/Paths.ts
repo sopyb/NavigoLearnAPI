@@ -36,9 +36,9 @@ const Paths = {
       Base: '/:roadmapId([0-9]+)?',
       Roadmap: '/',
       MiniRoadmap: '/mini',
+      Tags: '/tags',
       Owner: '/owner',
       OwnerMini: '/owner/mini',
-      Tags: '/tags',
     },
     Update: {
       Base: '/:roadmapId([0-9]+)',

@@ -594,7 +594,7 @@ describe('Users Router', () => {
 
   it('Follow self with no login cookie', async () => {
     await request(app).get('/api/users/' + userId.toString() + '/follow')
-      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
         expect(res.body.error).toBeDefined();
@@ -637,7 +637,7 @@ describe('Users Router', () => {
 
   it('Unfollow self with no login cookie', async () => {
     await request(app).get('/api/users/' + userId.toString() + '/unfollow')
-      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
         expect(res.body.error).toBeDefined();
@@ -682,7 +682,7 @@ describe('Users Router', () => {
   it('Update user with no login cookie', async () => {
     await request(app).post('/api/users/')
       .send({})
-      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
         expect(res.body.error).toBeDefined();
@@ -800,7 +800,7 @@ describe('Users Router', () => {
   // will fail because no login cookie
   it('Delete user with no login cookie', async () => {
     await request(app).delete('/api/users/')
-      .expect(HttpStatusCodes.FORBIDDEN)
+      .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
         expect(res.body.error).toBeDefined();

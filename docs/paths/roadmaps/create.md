@@ -1,13 +1,14 @@
 # /api/roadmaps/create
 
 ## POST - /api/roadmaps/create
+
 Creates a new roadmap.
 
 ### Parameters
 
-| Name       | Type   | Description |
-|------------|--------|-------------|
-| none       | none   | none        |
+| Name | Type | Description |
+|------|------|-------------|
+| none | none | none        |
 
 ### Body
 

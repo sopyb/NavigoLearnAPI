@@ -133,7 +133,7 @@ create table if not exists sessionTable
         primary key,
     userId  bigint       not null,
     token   varchar(255) not null,
-    expires timestamp     not null,
+    expires timestamp    not null,
     constraint sessions_users_id_fk
         foreign key (userId) references users (id)
             on delete cascade

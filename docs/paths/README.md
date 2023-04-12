@@ -29,14 +29,14 @@
         - Owner: /owner - forwards to /users/:ownerId
         - MiniOwner: /owner/mini - forwards to /users/:ownerId/mini
         - Tags: /tags
-    - [Update](roadmaps/update/README.md): 
-      - Base URL: /api/roadmaps/:roadmapId([0-9]+)
-      - Title: /title
-      - Description: /description
-      - Tags: /tags
-      - Visibility: /visibility
-      - Owner: /owner
-      - Data: /data
+    - [Update](roadmaps/update/README.md):
+        - Base URL: /api/roadmaps/:roadmapId([0-9]+)
+        - Title: /title
+        - Description: /description
+        - Tags: /tags
+        - Visibility: /visibility
+        - Owner: /owner
+        - Data: /data
     - Delete: /:roadmapId([0-9]+)
     - [Progress](roadmaps/progress/README.md):
         - Base URL: /api/roadmaps/:roadmapId/progress

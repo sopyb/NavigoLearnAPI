@@ -27,7 +27,7 @@ interface RowDataPacket {
 }
 
 interface CountDataPacket extends RowDataPacket {
-  'COUNT(*)': number;
+  'COUNT(*)': bigint;
 
 }
 
@@ -253,7 +253,7 @@ class Database {
     return parseResult(result) as T[];
   }
 
-  public async count(table: string): Promise<number> {
+  public async count(table: string): Promise<bigint> {
     // create sql query - select count(*) from table
     const sql = `SELECT COUNT(*)
                  FROM ${table}`;
@@ -269,7 +269,7 @@ class Database {
     table: string,
     key: string,
     value: string | bigint,
-  ): Promise<number> {
+  ): Promise<bigint> {
     // create sql query - select count(*) from table where key = ?
     const sql = `SELECT COUNT(*)
                  FROM ${table}
@@ -286,7 +286,7 @@ class Database {
     table: string,
     key: string,
     value: string | bigint,
-  ): Promise<number> {
+  ): Promise<bigint> {
     // create sql query - select count(*) from table where key = ?
     const sql = `SELECT COUNT(*)
                  FROM ${table}
