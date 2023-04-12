@@ -62,38 +62,6 @@ UsersGet.get(Paths.Users.Get.Profile,
       return;
     }
 
-    UsersGet.get(Paths.Users.Get.MiniProfile,
-      async (req: RequestWithSession, res) => {
-        const userId = getUserId(req);
-
-        if (userId === undefined)
-          return res.status(HttpStatusCodes.NOT_FOUND)
-            .json({ error: 'User not found' });
-
-        const db = new DatabaseDriver();
-
-        const user = await db.get<User>('users', userId);
-        const userInfo =
-          await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
-
-        if (!user || !userInfo) {
-          res.status(HttpStatusCodes.NOT_FOUND)
-            .json({ error: 'User not found' });
-          return;
-        }
-
-        res.status(HttpStatusCodes.OK).json({
-          type: 'mini',
-          name: user.name,
-          profilePictureUrl: userInfo.profilePictureUrl,
-          userId: user.id.toString(),
-        });
-
-        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-          error: 'Internal server error',
-        });
-      });
-
     res.status(HttpStatusCodes.OK).json({
       type: 'profile',
       name: user.name,
@@ -113,6 +81,38 @@ UsersGet.get(Paths.Users.Get.Profile,
     });
 
     // internal server error if we get here
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'Internal server error',
+    });
+  });
+
+UsersGet.get(Paths.Users.Get.MiniProfile,
+  async (req: RequestWithSession, res) => {
+    const userId = getUserId(req);
+
+    if (userId === undefined)
+      return res.status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'User not found' });
+
+    const db = new DatabaseDriver();
+
+    const user = await db.get<User>('users', userId);
+    const userInfo =
+      await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
+
+    if (!user || !userInfo) {
+      res.status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'User not found' });
+      return;
+    }
+
+    res.status(HttpStatusCodes.OK).json({
+      type: 'mini',
+      name: user.name,
+      profilePictureUrl: userInfo.profilePictureUrl,
+      userId: user.id.toString(),
+    });
+
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'Internal server error',
     });
