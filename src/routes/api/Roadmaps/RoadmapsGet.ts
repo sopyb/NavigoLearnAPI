@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
@@ -11,24 +11,46 @@ import { Tag } from '@src/models/tags';
 
 const RoadmapsGet = Router({ mergeParams: true });
 
+async function checkIfRoadmapExists(req: RequestWithSession, res: Response):
+  Promise<{
+    id: bigint,
+    roadmap: Roadmap,
+    issueCount: bigint
+  } | undefined> {
+  const id = req.params.roadmapId;
+
+  if (!id) {
+    res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Roadmap id is missing.' });
+    return;
+  }
+
+  // get database connection
+  const db = new Database();
+
+  // get roadmap from database
+  const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
+  const issueCount = await db.countWhere('issues', 'roadmapId', id);
+
+  // check if roadmap is valid
+  if (!roadmap) {
+    res.status(HttpStatusCodes.NOT_FOUND)
+      .json({ error: 'Roadmap does not exist.' });
+
+    return;
+  }
+
+  return { id: BigInt(id), roadmap, issueCount };
+}
+
 RoadmapsGet.get(Paths.Roadmaps.Get.Roadmap,
   async (req: RequestWithSession, res) => {
     //get data from params
-    const id = req.params.roadmapId;
+    const data = await checkIfRoadmapExists(req, res);
 
-    if (!id) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap id is missing.' });
+    if (!data) return;
 
-    // get database connection
-    const db = new Database();
-
-    // get roadmap from database
-    const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-    const issueCount = await db.countWhere('issues', 'roadmapId', id);
-
-    // check if roadmap is valid
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap does not exist.' });
+    const {roadmap, issueCount } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -49,22 +71,11 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Roadmap,
 RoadmapsGet.get(Paths.Roadmaps.Get.MiniRoadmap,
   async (req: RequestWithSession, res) => {
     // get id from params
-    const id = req.params.roadmapId;
+    const data = await checkIfRoadmapExists(req, res);
 
-    if (!id) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap id is missing.' });
+    if (!data) return;
 
-    // get database connection
-    const db = new Database();
-
-    // get roadmap from database
-    const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-    const issueCount = await db.countWhere('issues', 'roadmapId', id);
-    // TODO add star count
-
-    // check if roadmap is valid
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap does not exist.' });
+    const {roadmap, issueCount } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -112,20 +123,11 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Tags,
 RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
   async (req: RequestWithSession, res) => {
     //get data from params
-    const id = req.params.roadmapId;
+    const data = await checkIfRoadmapExists(req, res);
 
-    if (!id) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap id is missing.' });
+    if (!data) return;
 
-    // get database connection
-    const db = new Database();
-
-    // get roadmap from database
-    const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-
-    // check if roadmap is valid
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap does not exist.' });
+    const {roadmap} = data;
 
     // fetch /api/users/:id
     axios.get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
@@ -141,20 +143,11 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
 RoadmapsGet.get(Paths.Roadmaps.Get.OwnerMini,
   async (req: RequestWithSession, res) => {
     //get data from params
-    const id = req.params.roadmapId;
+    const data = await checkIfRoadmapExists(req, res);
 
-    if (!id) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap id is missing.' });
+    if (!data) return;
 
-    // get database connection
-    const db = new Database();
-
-    // get roadmap from database
-    const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-
-    // check if roadmap is valid
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap does not exist.' });
+    const {roadmap} = data;
 
     // fetch /api/users/:id
     const user =
