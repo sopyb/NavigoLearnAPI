@@ -100,7 +100,7 @@ create index if not exists issues_userId_index
 
 create table if not exists roadmapTags
 (
-    id        bigint       not null
+    id        bigint auto_increment
         primary key,
     roadmapId bigint       not null,
     tagName   varchar(255) not null,

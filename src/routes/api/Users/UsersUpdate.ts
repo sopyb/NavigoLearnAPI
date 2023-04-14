@@ -12,10 +12,10 @@ import { comparePassword } from '@src/util/LoginUtil';
 import User from '@src/models/User';
 import { UserInfo } from '@src/models/UserInfo';
 
-const UpdateUser = Router({ mergeParams: true });
+const UsersUpdate = Router({ mergeParams: true });
 
-UpdateUser.post('*', requireSessionMiddleware);
-UpdateUser.post(Paths.Users.Update.ProfilePicture,
+UsersUpdate.post('*', requireSessionMiddleware);
+UsersUpdate.post(Paths.Users.Update.ProfilePicture,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
@@ -76,7 +76,7 @@ UpdateUser.post(Paths.Users.Update.ProfilePicture,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.Bio,
+UsersUpdate.post(Paths.Users.Update.Bio,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
@@ -117,7 +117,7 @@ UpdateUser.post(Paths.Users.Update.Bio,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.Quote,
+UsersUpdate.post(Paths.Users.Update.Quote,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
@@ -157,7 +157,7 @@ UpdateUser.post(Paths.Users.Update.Quote,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.Name,
+UsersUpdate.post(Paths.Users.Update.Name,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
@@ -189,7 +189,7 @@ UpdateUser.post(Paths.Users.Update.Name,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.BlogUrl,
+UsersUpdate.post(Paths.Users.Update.BlogUrl,
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId,
@@ -229,7 +229,7 @@ UpdateUser.post(Paths.Users.Update.BlogUrl,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.WebsiteUrl,
+UsersUpdate.post(Paths.Users.Update.WebsiteUrl,
   async (req: RequestWithSession, res) => {
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
@@ -268,7 +268,7 @@ UpdateUser.post(Paths.Users.Update.WebsiteUrl,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.GithubUrl,
+UsersUpdate.post(Paths.Users.Update.GithubUrl,
   async (req: RequestWithSession, res) => {
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
@@ -307,7 +307,7 @@ UpdateUser.post(Paths.Users.Update.GithubUrl,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-UpdateUser.post(Paths.Users.Update.Email,
+UsersUpdate.post(Paths.Users.Update.Email,
   async (req: RequestWithSession, res) => {
     const userId = req.session?.userId,
       // eslint-disable-next-line max-len
@@ -366,4 +366,4 @@ UpdateUser.post(Paths.Users.Update.Email,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-export default UpdateUser;
+export default UsersUpdate;

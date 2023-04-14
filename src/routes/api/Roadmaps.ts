@@ -7,8 +7,8 @@ import {
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { IRoadmap, Roadmap } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
-import GetRouter from '@src/routes/api/Roadmaps/Get';
-import Upate from '@src/routes/api/Roadmaps/Upate';
+import GetRouter from '@src/routes/api/Roadmaps/RoadmapsGet';
+import Upate from '@src/routes/api/Roadmaps/RoadmapsUpdate';
 import * as console from 'console';
 
 const RoadmapsRouter = Router();
@@ -38,12 +38,12 @@ RoadmapsRouter.post(Paths.Roadmaps.Create,
       roadmap = Roadmap.from(roadmapDataJson);
     } catch (e) {
       console.log(e);
-      return res.sendStatus(HttpStatusCodes.BAD_REQUEST)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Roadmap is not a valid roadmap object.' });
     }
 
     //check if session exists
-    if (!session) return res.sendStatus(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+    if (!session) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'Session is missing from user.' });
 
     // get database connection
@@ -53,7 +53,7 @@ RoadmapsRouter.post(Paths.Roadmaps.Create,
     const id = await db.insert('roadmaps', roadmap);
 
     // check if id is valid
-    if (id < 0) return res.sendStatus(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+    if (id < 0) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'Roadmap could not be saved to database.' });
 
     // return id
@@ -72,11 +72,11 @@ RoadmapsRouter.delete(Paths.Roadmaps.Delete,
     const id = BigInt(req.params.roadmapId || -1);
 
     // check if id is valid
-    if (id < 0) return res.sendStatus(HttpStatusCodes.BAD_REQUEST)
+    if (id < 0) return res.status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Roadmap id is missing.' });
 
     // check if session exists
-    if (!session) return res.sendStatus(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+    if (!session) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'Session is missing from user.' });
 
     // get database connection
@@ -84,19 +84,19 @@ RoadmapsRouter.delete(Paths.Roadmaps.Delete,
 
     // check if roadmap exists
     const roadmap = await db.get<Roadmap>('roadmaps', id);
-    if (!roadmap) return res.sendStatus(HttpStatusCodes.NOT_FOUND)
+    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Roadmap does not exist.' });
 
     // check if the user is owner
     if (roadmap.ownerId !== session?.userId)
-      return res.sendStatus(HttpStatusCodes.FORBIDDEN)
+      return res.status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'User is not the owner of the roadmap.' });
 
     // delete roadmap from database
     const success = await db.delete('roadmaps', id);
 
     // check if id is valid
-    if (!success) return res.sendStatus(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'Roadmap could not be deleted from database.' });
 
     // return id
