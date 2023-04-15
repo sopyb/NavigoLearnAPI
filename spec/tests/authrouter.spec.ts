@@ -53,14 +53,6 @@ describe('Login Router', () => {
     });
   });
 
-  it('Logout', async () => {
-    // logout with 200 response and a session cookie to be sent back
-    await request(app).delete('/api/auth/logout')
-      .expect(HttpStatusCodes.OK)
-      .expect('Set-Cookie', new RegExp(
-        'session=; Path=\\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'));
-  });
-
   // try to change password without a session cookie
   it('Change password without session cookie', async () => {
     // change password and expect 401
@@ -131,6 +123,28 @@ describe('Login Router', () => {
     // login and expect 500 internal server error
     await request(app).get('/api/auth/github-callback?code=invalid')
       .expect(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  });
+
+  it('Logout', async () => {
+    // logout with 200 response and a session cookie to be sent back
+    await request(app).delete('/api/auth/logout')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.OK)
+      .expect('Set-Cookie', new RegExp(
+        'session=; Path=\\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'));
+  });
+
+  it('Logout without session cookie', async () => {
+    // logout and expect 401
+    await request(app).delete('/api/auth/logout')
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
+
+  it('Logout with invalid session cookie', async () => {
+    // logout and expect 401
+    await request(app).delete('/api/auth/logout')
+      .set('Cookie', 'token=invalid')
+      .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
   // database cleanup
