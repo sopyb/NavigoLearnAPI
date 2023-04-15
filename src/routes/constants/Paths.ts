@@ -32,9 +32,24 @@ const Paths = {
   Roadmaps: {
     Base: '/roadmaps',
     Create: '/create',
-    Get: '/:roadmapId',
-    Update: '/:roadmapId',
-    Delete: '/:roadmapId',
+    Get: {
+      Base: '/:roadmapId([0-9]+)?',
+      Roadmap: '/',
+      MiniRoadmap: '/mini',
+      Tags: '/tags',
+      Owner: '/owner',
+      OwnerMini: '/owner/mini',
+    },
+    Update: {
+      Base: '/:roadmapId([0-9]+)',
+      Title: '/title',
+      Description: '/description',
+      Tags: '/tags',
+      Visibility: '/visibility',
+      Owner: '/owner',
+      Data: '/data',
+    },
+    Delete: '/:roadmapId([0-9]+)',
     Progress: {
       Base: '/:roadmapId/progress',
       Get: '/:userId?',
@@ -42,7 +57,7 @@ const Paths = {
     },
     Rating: {
       Base: '/:roadmapId/rating',
-      Get: '/:own?', // get rating of roadmap or own rating
+      Get: '/:own?', // get average rating of roadmap or own rating
       Update: '/',
       Delete: '/',
     },

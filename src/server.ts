@@ -12,7 +12,7 @@ import { sessionMiddleware } from '@src/middleware/session';
 
 import 'express-async-errors';
 
-import baseRouter from '@src/routes/api/api';
+import BaseRouter from '@src/routes/api/api';
 import Paths from '@src/routes/constants/Paths';
 
 import EnvVars from '@src/constants/EnvVars';
@@ -46,7 +46,7 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
 app.use('/api', sessionMiddleware);
 
 // Add base router
-app.use(Paths.Base, baseRouter);
+app.use(Paths.Base, BaseRouter);
 
 // if no response is sent, send 404
 app.use((_: Request, res: Response) => {
@@ -60,10 +60,8 @@ app.use(
     _: Request,
     res: Response,
   ) => {
-    if (EnvVars.NodeEnv !== NodeEnvs.Test) {
-      logger.err(err, true);
-    }
-    let status = HttpStatusCodes.BAD_REQUEST;
+    logger.err(err, true);
+    let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
     if (err instanceof RouteError) {
       status = err.status;
     }

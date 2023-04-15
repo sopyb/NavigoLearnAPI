@@ -38,8 +38,8 @@ create table if not exists roadmaps
     name        varchar(255) not null,
     description varchar(255) not null,
     ownerId     bigint       not null,
-    createdAt   datetime     not null,
-    updatedAt   datetime     not null,
+    createdAt   timestamp    not null,
+    updatedAt   timestamp    not null,
     isPublic    tinyint(1)   not null,
     data        text         not null,
     constraint roadmaps_users_id_fk
@@ -100,7 +100,7 @@ create index if not exists issues_userId_index
 
 create table if not exists roadmapTags
 (
-    id        bigint       not null
+    id        bigint auto_increment
         primary key,
     roadmapId bigint       not null,
     tagName   varchar(255) not null,
@@ -133,7 +133,7 @@ create table if not exists sessionTable
         primary key,
     userId  bigint       not null,
     token   varchar(255) not null,
-    expires datetime     not null,
+    expires timestamp    not null,
     constraint sessions_users_id_fk
         foreign key (userId) references users (id)
             on delete cascade

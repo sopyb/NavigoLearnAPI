@@ -1,10 +1,5 @@
 # /api/users/:userId([0-9]+)?
 
-```diff
-    - This route is not yet implemented.
-    ! Subject to change - Just a rough draft.
-```
-
 ## DELETE - /api/users/:userId([0-9]+)?
 
 Deletes user with :userId or logged-in user. This action is irreversible.

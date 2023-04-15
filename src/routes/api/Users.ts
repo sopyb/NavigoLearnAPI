@@ -1,21 +1,21 @@
 import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
-import UsersGet from '@src/routes/api/Users/Get';
+import UsersGet from '@src/routes/api/Users/UsersGet';
 import {
   RequestWithSession,
   requireSessionMiddleware,
 } from '@src/middleware/session';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import UpdateUser from '@src/routes/api/Users/Update';
+import UsersUpdate from '@src/routes/api/Users/UsersUpdate';
 
 const UsersRouter = Router();
 
 // Get routes
 UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 
-// Post routes
-UsersRouter.use(Paths.Users.Update.Base, UpdateUser);
+// Update routes
+UsersRouter.use(Paths.Users.Update.Base, UsersUpdate);
 
 // Delete route - delete user - requires session
 UsersRouter.delete(Paths.Users.Delete, requireSessionMiddleware);
