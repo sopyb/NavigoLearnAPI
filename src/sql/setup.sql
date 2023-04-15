@@ -57,7 +57,7 @@ create table if not exists issues
     title     varchar(255)                           not null,
     content   text                                   null,
     createdAt timestamp  default current_timestamp() null,
-    editedAt  timestamp                              null,
+    updatedAt timestamp                              null,
     constraint issues_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
             on delete cascade,

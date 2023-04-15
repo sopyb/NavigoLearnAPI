@@ -32,7 +32,7 @@ describe('Login Router', () => {
     // register a 200 response and a session cookie to be sent back
     await request(app).post('/api/auth/register')
       .send({ email, password })
-      .expect(HttpStatusCodes.OK)
+      .expect(HttpStatusCodes.CREATED)
       .expect('Set-Cookie', new RegExp('token=.*; Path=/;'));
   });
 

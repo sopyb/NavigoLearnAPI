@@ -26,7 +26,7 @@ describe('Roadmap Router', () => {
     // register user
     const res = await request(app).post('/api/auth/register')
       .send({ email, password })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     // get token
     // eslint-disable-next-line max-len
@@ -35,7 +35,7 @@ describe('Roadmap Router', () => {
 
     const res2 = await request(app).post('/api/auth/register')
       .send({ email: email2, password: password2 })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     // get token
     // eslint-disable-next-line max-len
@@ -90,7 +90,7 @@ describe('Roadmap Router', () => {
     const res = await request(app).post('/api/roadmaps/create')
       .set('Cookie', `token=${token}`)
       .send({ roadmap: roadmap.toJSON() })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     // if id is undefined
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

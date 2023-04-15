@@ -10,6 +10,7 @@ import Database from '@src/util/DatabaseDriver';
 import GetRouter from '@src/routes/api/Roadmaps/RoadmapsGet';
 import Upate from '@src/routes/api/Roadmaps/RoadmapsUpdate';
 import * as console from 'console';
+import RoadmapIssues from '@src/routes/api/Roadmaps/RoadmapIssues';
 
 const RoadmapsRouter = Router();
 
@@ -57,7 +58,7 @@ RoadmapsRouter.post(Paths.Roadmaps.Create,
       .json({ error: 'Roadmap could not be saved to database.' });
 
     // return id
-    return res.status(HttpStatusCodes.OK).json({ id: id.toString() });
+    return res.status(HttpStatusCodes.CREATED).json({ id: id.toString() });
   });
 
 RoadmapsRouter.use(Paths.Roadmaps.Get.Base, GetRouter);
@@ -102,5 +103,7 @@ RoadmapsRouter.delete(Paths.Roadmaps.Delete,
     // return id
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
+
+RoadmapsRouter.use(Paths.Roadmaps.Issues.Base, RoadmapIssues);
 
 export default RoadmapsRouter;

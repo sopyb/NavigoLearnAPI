@@ -68,4 +68,17 @@ export class Issue implements IIssue {
       'createdAt' in param &&
       'updatedAt' in param;
   }
+
+  public toJSON(): string {
+    return JSON.stringify({
+      id: this.id.toString(),
+      roadmapId: this.roadmapId.toString(),
+      userId: this.userId.toString(),
+      open: this.open,
+      title: this.title,
+      content: this.content,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    });
+  }
 }

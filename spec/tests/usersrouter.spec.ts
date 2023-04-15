@@ -69,11 +69,11 @@ describe('Users Router', () => {
     const reqData = await request(app)
       .post('/api/auth/register')
       .send({ email, password })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     await request(app).post('/api/auth/register')
       .send({ email: email2, password: password2 })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

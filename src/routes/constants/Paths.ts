@@ -62,11 +62,11 @@ const Paths = {
       Delete: '/',
     },
     Issues: {
-      Base: '/:id/issues',
+      Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
-      Get: '/:issueId?', // get all issues or one issue
+      Get: '/:issueId?', // get all issues (minified) or one issue (full)
       Update: '/:issueId',
-      Close: '/:issueId',
+      Delete: '/:issueId',
       Comments: {
         Base: '/:issueId/comments',
         Create: '/create',
