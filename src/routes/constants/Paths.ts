@@ -64,8 +64,14 @@ const Paths = {
     Issues: {
       Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
-      Get: '/:issueId?', // get all issues (minified) or one issue (full)
-      Update: '/:issueId',
+      Get: '/:issueId([0-9]+)?',
+      Update: {
+        Base: '/:issueId([0-9]+)',
+        Title: '/title',
+        Content: '/content',
+        Open: '/open',
+        Close: '/close',
+      },
       Delete: '/:issueId',
       Comments: {
         Base: '/:issueId/comments',

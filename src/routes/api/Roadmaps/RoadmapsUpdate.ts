@@ -192,7 +192,6 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Visibility,
     // get database connection
     const db = new Database();
 
-
     // update roadmap
     roadmap.isPublic = visibility;
     roadmap.updatedAt = new Date();
@@ -220,7 +219,6 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Owner,
 
     // get database connection
     const db = new Database();
-
 
     // check if the new owner exists
     const newOwner = await db.get<User>('users', BigInt(newOwnerId));

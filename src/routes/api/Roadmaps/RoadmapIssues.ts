@@ -8,6 +8,7 @@ import { IIssue, Issue } from '@src/models/Issue';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
+import IssuesUpdate from '@src/routes/api/Roadmaps/Issues/IssuesUpdate';
 
 const RoadmapIssues = Router({ mergeParams: true });
 
@@ -54,6 +55,75 @@ RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
     // return id
     return res.status(HttpStatusCodes.CREATED).json({ id: id.toString() });
   });
+
+RoadmapIssues.get(Paths.Roadmaps.Issues.Get,
+  async (req, res) => {
+    // get issue id  from params
+    const issueId = BigInt(req.params?.issueId || -1);
+    const roadmapId = BigInt(req.params?.roadmapId || -1);
+
+    // get database connection
+    const db = new Database();
+
+    if (roadmapId < 0) return res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Roadmap id is invalid.' });
+
+    // get roadmap from database
+    const roadmap = await db.get('roadmaps', roadmapId);
+
+    // check if roadmap exists
+    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
+      .json({ error: 'Roadmap not found.' });
+
+    // check if issue id is valid
+    if (issueId < 0) {
+      // get all issues from database from roadmap
+      let issues =
+        await db.getAllWhere<Issue>('issues', 'roadmapId', roadmapId);
+
+      if (!issues) issues = [];
+
+      const result = issues
+        .filter((issue) => issue.roadmapId === roadmapId)
+        .map((issue) => {
+          return {
+            id: issue.id.toString(),
+            title: issue.title,
+            content: issue.content,
+            roadmapId: issue.roadmapId.toString(),
+            userId: issue.userId.toString(),
+            createdAt: issue.createdAt,
+            updatedAt: issue.updatedAt,
+          };
+        });
+
+      // return issues
+      return res.status(HttpStatusCodes.OK).json({ issues: result });
+    } else {
+      // get issue from database
+      const issue = await db.get<Issue>('issues', issueId);
+
+      // check if issue exists
+      if (!issue) return res.status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Issue not found.' });
+
+      // return issue
+      return res.status(HttpStatusCodes.OK).json({
+        issue: {
+          id: issue.id.toString(),
+          title: issue.title,
+          content: issue.content,
+          roadmapId: issue.roadmapId.toString(),
+          userId: issue.userId.toString(),
+          createdAt: issue.createdAt,
+          updatedAt: issue.updatedAt,
+        },
+      });
+    }
+  });
+
+RoadmapIssues.post(Paths.Roadmaps.Issues.Update.Base, requireSessionMiddleware);
+RoadmapIssues.use(Paths.Roadmaps.Issues.Update.Base, IssuesUpdate);
 
 // Delete Issue
 RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete, requireSessionMiddleware);

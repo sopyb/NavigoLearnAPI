@@ -169,9 +169,201 @@ describe('Roadmap Issues', () => {
    ! Get Issue Tests
    */
 
+  it('should get an issue', async () => {
+    // get issue
+    await request(app)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}`)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.issue).toBeDefined();
+      });
+  });
+
+  it('should fail to get an issue that doesn\'t exist', async () => {
+    // get issue
+    await request(app)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}2`);
+  });
+
   /*
    ! Update Issue Tests
    */
+
+  it('should fail to update an issue if not logged in', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}`)
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
+
+  it('should be able to update title of issue', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/title`)
+      .set('Cookie', `token=${token}`)
+      .send({
+        title: 'New Test Title',
+      })
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should not be able to update title of issue if not owner', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/title`)
+      .set('Cookie', `token=${token}`)
+      .send({
+        title: 'New Test Title',
+      })
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
+
+  it('should not be able to update title of issue if not logged in',
+    async () => {
+    // update issue
+      await request(app)
+        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/title`)
+        .send({
+          title: 'New Test Title',
+        })
+        .expect(HttpStatusCodes.UNAUTHORIZED);
+    });
+
+  it('should be able to update content of issue', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/content`)
+      .set('Cookie', `token=${token}`)
+      .send({
+        content: 'New Test Content',
+      })
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should not be able to update content of issue if not owner', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/content`)
+      .set('Cookie', `token=${token}`)
+      .send({
+        content: 'New Test Content',
+      })
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
+
+  it('should not be able to update content of issue if not logged in',
+    async () => {
+    // update issue
+      await request(app)
+        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/content`)
+        .send({
+          content: 'New Test Content',
+        })
+        .expect(HttpStatusCodes.UNAUTHORIZED);
+    });
+
+  it('should be able to open issue', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+      .set('Cookie', `token=${token}`)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should be able to open issue if roadmap owner', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/open`)
+      .set('Cookie', `token=${token}`)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should not be able to open issue if not owner of issue or roadmap',
+    async () => {
+      // update issue
+      await request(app)
+        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+        .set('Cookie', `token=${token2}`)
+        .expect(HttpStatusCodes.FORBIDDEN);
+    });
+
+  it('should not be able to open issue if not logged in', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
+
+  it('should be able to close issue', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+      .set('Cookie', `token=${token}`)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should be able to close issue if roadmap owner', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/close`)
+      .set('Cookie', `token=${token}`)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(res?.body?.success).toBe(true);
+      });
+  });
+
+  it('should not be able to close issue if not owner of issue or roadmap',
+    async () => {
+      // update issue
+      await request(app)
+        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+        .set('Cookie', `token=${token2}`)
+        .expect(HttpStatusCodes.FORBIDDEN);
+    });
+
+  it('should not be able to close issue if not logged in', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
 
   /*
    ! Delete Issue Tests
