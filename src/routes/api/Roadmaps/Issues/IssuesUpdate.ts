@@ -2,7 +2,10 @@ import { Response, Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import { RequestWithSession } from '@src/middleware/session';
+import {
+  RequestWithSession,
+  requireSessionMiddleware,
+} from '@src/middleware/session';
 import { Issue } from '@src/models/Issue';
 import { Roadmap } from '@src/models/Roadmap';
 
@@ -223,9 +226,12 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
+IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, requireSessionMiddleware);
 IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status,
   (req, res) => statusChangeIssue(req, res, true));
 
+IssuesUpdate.delete(
+  Paths.Roadmaps.Issues.Update.Status, requireSessionMiddleware);
 IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status,
   (req, res) => statusChangeIssue(req, res, false));
 

@@ -280,7 +280,7 @@ describe('Roadmap Issues', () => {
   it('should be able to open issue', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
       .set('Cookie', `token=${token}`)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -294,7 +294,7 @@ describe('Roadmap Issues', () => {
   it('should be able to open issue if roadmap owner', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/open`)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/status`)
       .set('Cookie', `token=${token}`)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -309,7 +309,7 @@ describe('Roadmap Issues', () => {
     async () => {
       // update issue
       await request(app)
-        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+        .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
         .set('Cookie', `token=${token2}`)
         .expect(HttpStatusCodes.FORBIDDEN);
     });
@@ -317,14 +317,14 @@ describe('Roadmap Issues', () => {
   it('should not be able to open issue if not logged in', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/open`)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
   it('should be able to close issue', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+      .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
       .set('Cookie', `token=${token}`)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -338,7 +338,7 @@ describe('Roadmap Issues', () => {
   it('should be able to close issue if roadmap owner', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/close`)
+      .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/status`)
       .set('Cookie', `token=${token}`)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -353,7 +353,7 @@ describe('Roadmap Issues', () => {
     async () => {
       // update issue
       await request(app)
-        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+        .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
         .set('Cookie', `token=${token2}`)
         .expect(HttpStatusCodes.FORBIDDEN);
     });
@@ -361,7 +361,7 @@ describe('Roadmap Issues', () => {
   it('should not be able to close issue if not logged in', async () => {
     // update issue
     await request(app)
-      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid}/close`)
+      .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
