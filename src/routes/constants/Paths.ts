@@ -69,8 +69,7 @@ const Paths = {
         Base: '/:issueId([0-9]+)',
         Title: '/title',
         Content: '/content',
-        Open: '/open',
-        Close: '/close',
+        Status: '/status',
       },
       Delete: '/:issueId',
       Comments: {
@@ -97,7 +96,6 @@ const Paths = {
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
       Follow: '/follow',
-      Unfollow: '/unfollow',
     },
     Update: {
       Base: '/:userId([0-9]+)?',

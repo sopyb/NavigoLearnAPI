@@ -338,8 +338,8 @@ UsersGet.get(Paths.Users.Get.Follow,
       .json({ error: 'Failed to follow' });
   });
 
-UsersGet.get(Paths.Users.Get.Unfollow, requireSessionMiddleware);
-UsersGet.get(Paths.Users.Get.Unfollow,
+UsersGet.delete(Paths.Users.Get.Follow, requireSessionMiddleware);
+UsersGet.delete(Paths.Users.Get.Follow,
   async (req: RequestWithSession, res) => {
     // get the target user id
     const userId = BigInt(req.params.userId || -1);

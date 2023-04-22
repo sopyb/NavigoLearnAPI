@@ -223,10 +223,10 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
 
-IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Open,
+IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status,
   (req, res) => statusChangeIssue(req, res, true));
 
-IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Close,
+IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status,
   (req, res) => statusChangeIssue(req, res, false));
 
 export default IssuesUpdate;
