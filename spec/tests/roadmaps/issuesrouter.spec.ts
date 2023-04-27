@@ -229,7 +229,7 @@ describe('Roadmap Issues', () => {
 
   it('should not be able to update title of issue if not logged in',
     async () => {
-    // update issue
+      // update issue
       await request(app)
         .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/title`)
         .send({
@@ -268,7 +268,7 @@ describe('Roadmap Issues', () => {
 
   it('should not be able to update content of issue if not logged in',
     async () => {
-    // update issue
+      // update issue
       await request(app)
         .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/content`)
         .send({

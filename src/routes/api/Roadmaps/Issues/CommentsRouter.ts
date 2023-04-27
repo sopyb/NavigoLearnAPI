@@ -57,6 +57,13 @@ async function checkParams(req: Request, res: Response)
     return;
   }
 
+  // check if issue belongs to roadmap
+  if (issue.roadmapId !== roadmapId) {
+    res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Issue does not belong to roadmap.' });
+    return;
+  }
+
   return { issue, issueId, roadmap, roadmapId };
 }
 
@@ -93,8 +100,12 @@ CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Create,
     const args = await checkParams(req, res);
     const userArgs = await checkUser(req, res);
     if (!args || !userArgs) return;
-    const { issueId, roadmap} = args;
+    const { issueId, roadmap } = args;
     const { userId } = userArgs;
+
+    // if comment is empty
+    if (!content) return res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Comment can\'t be empty.' });
 
     // check if user is allowed to create a comment
     if (!roadmap.isPublic && roadmap.ownerId !== userId) {
@@ -114,14 +125,14 @@ CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Create,
       .json({ error: 'Failed to create comment.' });
 
     // send success json
-    return res.status(HttpStatusCodes.OK).json({ success: true });
+    return res.status(HttpStatusCodes.CREATED).json({ success: true });
   });
 
 CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get,
   async (req, res) => {
     const args = await checkParams(req, res);
     if (!args) return;
-    const { issueId} = args;
+    const { issueId } = args;
 
     // get database connection
     const db = new Database();
@@ -134,7 +145,15 @@ CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get,
       .json({ error: 'Failed to get comments, there might be none.' });
 
     // send success json
-    return res.status(HttpStatusCodes.OK).json({ success: true, comments });
+    return res.status(HttpStatusCodes.OK).json(JSON.stringify({
+      success: true,
+      comments,
+    }, (key, value) =>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      typeof value === 'bigint'
+        ? value.toString()
+        : value, // return everything else unchanged
+    ));
 
   });
 
@@ -146,6 +165,11 @@ CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Update,
     const { content } = req.body as { content: string };
     // get comment id from params
     const commentId = BigInt(req.params.commentId || -1);
+
+    // check if params are valid
+    const args = await checkParams(req, res);
+    if (!args) return;
+    const { issueId } = args;
 
     // get user info
     const userArgs = await checkUser(req, res);
@@ -159,6 +183,10 @@ CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Update,
       return;
     }
 
+    // if comment is empty
+    if (!content) return res.status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Comment can\'t be empty.' });
+
     // get database connection
     const db = new Database();
 
@@ -168,6 +196,13 @@ CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Update,
     if (!comment) {
       res.status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Comment does not exist.' });
+      return;
+    }
+
+    // check if comment belongs to issue
+    if (comment.issueId !== issueId) {
+      res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Comment does not belong to issue.' });
       return;
     }
 
@@ -195,6 +230,11 @@ CommentsRouter.delete(Paths.Roadmaps.Issues.Comments.Delete,
     // get comment id from params
     const commentId = BigInt(req.params.commentId || -1);
 
+    // check if ids are valid
+    const args = await checkParams(req, res);
+    if (!args) return;
+    const { issue } = args;
+
     // get user info
     const userArgs = await checkUser(req, res);
     if (!userArgs) return;
@@ -219,10 +259,15 @@ CommentsRouter.delete(Paths.Roadmaps.Issues.Comments.Delete,
       return;
     }
 
+    // check if issue is valid
+    if (comment.issueId !== issue.id)
+      return res.status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Comment does not belong to issue.' });
+
     // check if the user is allowed to delete comment
     if (comment.userId !== userId) {
       res.status(HttpStatusCodes.FORBIDDEN)
-        .json({ error: 'Only the owner can delete comments.' });
+        .json({ error: 'Only the comment owner can delete comments.' });
       return;
     }
 
