@@ -9,6 +9,7 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
 import IssuesUpdate from '@src/routes/api/Roadmaps/Issues/IssuesUpdate';
+import Comments from '@src/routes/api/Roadmaps/Issues/CommentsRouter';
 
 const RoadmapIssues = Router({ mergeParams: true });
 
@@ -164,5 +165,7 @@ RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete,
     // return success
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
+
+RoadmapIssues.use(Paths.Roadmaps.Issues.Comments.Base, Comments);
 
 export default RoadmapIssues;
