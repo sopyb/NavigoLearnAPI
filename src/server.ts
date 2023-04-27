@@ -50,7 +50,7 @@ app.use(Paths.Base, BaseRouter);
 
 // if no response is sent, send 404
 app.use((_: Request, res: Response) => {
-  res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'Not Found' });
+  res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'Route not Found' });
 });
 
 // Add error handler

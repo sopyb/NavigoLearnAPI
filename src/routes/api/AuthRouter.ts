@@ -71,7 +71,8 @@ async function createSession(user: User): Promise<string> {
   return token;
 }
 
-async function saveSession(res: Response, user: User): Promise<void> {
+async function saveSession(res: Response, user: User, register = false)
+  : Promise<void> {
   // get session token
   const token = await createSession(user);
 
@@ -88,9 +89,10 @@ async function saveSession(res: Response, user: User): Promise<void> {
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
     });
 
-    res.status(HttpStatusCodes.OK).json({
-      message: 'Login successful',
-    });
+    res.status(register ? HttpStatusCodes.CREATED : HttpStatusCodes.OK)
+      .json({
+        message: `${register ? 'Registe' : 'Login'} successful`,
+      });
   }
 }
 
@@ -191,7 +193,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const user = await db.getWhere<User>('users', 'email', email);
   // if yes, return error
   if (!!user) {
-    return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+    return res.status(HttpStatusCodes.CONFLICT).json({
       error: 'User with this Email already exists',
     });
   }
@@ -236,7 +238,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
       });
 
     // save session
-    return await saveSession(res, newUser);
+    return await saveSession(res, newUser, true);
   }
 
   return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({

@@ -8,8 +8,11 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { IRoadmap, Roadmap } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
 import GetRouter from '@src/routes/api/Roadmaps/RoadmapsGet';
-import Upate from '@src/routes/api/Roadmaps/RoadmapsUpdate';
+import UpdateRouter from '@src/routes/api/Roadmaps/RoadmapsUpdate';
 import * as console from 'console';
+import RoadmapIssues from '@src/routes/api/Roadmaps/RoadmapIssues';
+import envVars from '@src/constants/EnvVars';
+import { NodeEnvs } from '@src/constants/misc';
 
 const RoadmapsRouter = Router();
 
@@ -37,7 +40,7 @@ RoadmapsRouter.post(Paths.Roadmaps.Create,
 
       roadmap = Roadmap.from(roadmapDataJson);
     } catch (e) {
-      console.log(e);
+      if (envVars.NodeEnv !== NodeEnvs.Test) console.log(e);
       return res.status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Roadmap is not a valid roadmap object.' });
     }
@@ -57,12 +60,12 @@ RoadmapsRouter.post(Paths.Roadmaps.Create,
       .json({ error: 'Roadmap could not be saved to database.' });
 
     // return id
-    return res.status(HttpStatusCodes.OK).json({ id: id.toString() });
+    return res.status(HttpStatusCodes.CREATED).json({ id: id.toString() });
   });
 
 RoadmapsRouter.use(Paths.Roadmaps.Get.Base, GetRouter);
 
-RoadmapsRouter.use(Paths.Roadmaps.Update.Base, Upate);
+RoadmapsRouter.use(Paths.Roadmaps.Update.Base, UpdateRouter);
 
 RoadmapsRouter.delete(Paths.Roadmaps.Delete, requireSessionMiddleware);
 RoadmapsRouter.delete(Paths.Roadmaps.Delete,
@@ -102,5 +105,7 @@ RoadmapsRouter.delete(Paths.Roadmaps.Delete,
     // return id
     return res.status(HttpStatusCodes.OK).json({ success: true });
   });
+
+RoadmapsRouter.use(Paths.Roadmaps.Issues.Base, RoadmapIssues);
 
 export default RoadmapsRouter;

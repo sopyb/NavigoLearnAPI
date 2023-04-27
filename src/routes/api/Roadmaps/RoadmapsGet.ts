@@ -7,7 +7,7 @@ import { Roadmap } from '@src/models/Roadmap';
 import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
-import { Tag } from '@src/models/tags';
+import { Tag } from '@src/models/Tags';
 
 const RoadmapsGet = Router({ mergeParams: true });
 
@@ -50,7 +50,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Roadmap,
 
     if (!data) return;
 
-    const {roadmap, issueCount } = data;
+    const { roadmap, issueCount } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -75,7 +75,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.MiniRoadmap,
 
     if (!data) return;
 
-    const {roadmap, issueCount } = data;
+    const { roadmap, issueCount } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -127,7 +127,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
 
     if (!data) return;
 
-    const {roadmap} = data;
+    const { roadmap } = data;
 
     // fetch /api/users/:id
     axios.get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
@@ -147,7 +147,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.OwnerMini,
 
     if (!data) return;
 
-    const {roadmap} = data;
+    const { roadmap } = data;
 
     // fetch /api/users/:id
     const user =

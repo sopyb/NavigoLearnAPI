@@ -7,7 +7,7 @@ import {
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
-import { Tag } from '@src/models/tags';
+import { Tag } from '@src/models/Tags';
 import User from '@src/models/User';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
@@ -192,7 +192,6 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Visibility,
     // get database connection
     const db = new Database();
 
-
     // update roadmap
     roadmap.isPublic = visibility;
     roadmap.updatedAt = new Date();
@@ -220,7 +219,6 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Owner,
 
     // get database connection
     const db = new Database();
-
 
     // check if the new owner exists
     const newOwner = await db.get<User>('users', BigInt(newOwnerId));

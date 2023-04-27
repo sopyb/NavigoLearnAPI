@@ -57,7 +57,7 @@ create table if not exists issues
     title     varchar(255)                           not null,
     content   text                                   null,
     createdAt timestamp  default current_timestamp() null,
-    editedAt  timestamp                              null,
+    updatedAt timestamp                              null,
     constraint issues_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
             on delete cascade,
@@ -71,15 +71,15 @@ create table if not exists issueComments
     id        bigint auto_increment
         primary key,
     issueId   bigint                                not null,
-    userid    bigint                                not null,
+    userId    bigint                                not null,
     content   text                                  not null,
     createdAt timestamp default current_timestamp() not null,
-    editedAt  timestamp                             null,
+    updatedAt timestamp                             null,
     constraint issueComments_issues_id_fk
         foreign key (issueId) references issues (id)
             on delete cascade,
     constraint issueComments_users_id_fk
-        foreign key (userid) references users (id)
+        foreign key (userId) references users (id)
             on delete cascade
 );
 
@@ -87,7 +87,7 @@ create index if not exists issueComments_issueId_createdAt_index
     on issueComments (issueId, createdAt);
 
 create index if not exists issueComments_userid_index
-    on issueComments (userid);
+    on issueComments (userId);
 
 create index if not exists issues_roadmapId_createdAt_index
     on issues (roadmapId asc, createdAt desc);

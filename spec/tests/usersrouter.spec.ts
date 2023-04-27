@@ -69,11 +69,11 @@ describe('Users Router', () => {
     const reqData = await request(app)
       .post('/api/auth/register')
       .send({ email, password })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     await request(app).post('/api/auth/register')
       .send({ email: email2, password: password2 })
-      .expect(HttpStatusCodes.OK);
+      .expect(HttpStatusCodes.CREATED);
 
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -636,7 +636,7 @@ describe('Users Router', () => {
    */
 
   it('Unfollow self with no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/unfollow')
+    await request(app).delete('/api/users/' + userId.toString() + '/follow')
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -645,7 +645,7 @@ describe('Users Router', () => {
   });
 
   it('Unfollow self with login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/unfollow')
+    await request(app).delete('/api/users/' + userId.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.FORBIDDEN)
       .expect('Content-Type', /json/)
@@ -655,7 +655,7 @@ describe('Users Router', () => {
   });
 
   it('Unfollow user with login cookie', async () => {
-    await request(app).get('/api/users/' + userId2.toString() + '/unfollow')
+    await request(app).delete('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -665,7 +665,7 @@ describe('Users Router', () => {
   });
 
   it('Unfollow user with login cookie again', async () => {
-    await request(app).get('/api/users/' + userId2.toString() + '/unfollow')
+    await request(app).delete('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)

@@ -62,11 +62,16 @@ const Paths = {
       Delete: '/',
     },
     Issues: {
-      Base: '/:id/issues',
+      Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
-      Get: '/:issueId?', // get all issues or one issue
-      Update: '/:issueId',
-      Close: '/:issueId',
+      Get: '/:issueId([0-9]+)?',
+      Update: {
+        Base: '/:issueId([0-9]+)',
+        Title: '/title',
+        Content: '/content',
+        Status: '/status',
+      },
+      Delete: '/:issueId',
       Comments: {
         Base: '/:issueId/comments',
         Create: '/create',
@@ -91,7 +96,6 @@ const Paths = {
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
       Follow: '/follow',
-      Unfollow: '/unfollow',
     },
     Update: {
       Base: '/:userId([0-9]+)?',
