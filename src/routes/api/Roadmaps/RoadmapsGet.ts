@@ -129,7 +129,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
 
     const { roadmap } = data;
 
-    // fetch /api/users/:id
+    // fetch /api-wrapper/users/:id
     axios.get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
       .then(response => {
         res.status(response.status).json(response.data);
@@ -149,7 +149,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.OwnerMini,
 
     const { roadmap } = data;
 
-    // fetch /api/users/:id
+    // fetch /api-wrapper/users/:id
     const user =
       await axios.get(
         `http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}/mini`);

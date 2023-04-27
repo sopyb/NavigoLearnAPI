@@ -1,3 +1,6 @@
+# set charset to utf8-unicode-ci;
+ALTER DATABASE navigo CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
 create table if not exists users
 (
     id       bigint auto_increment
