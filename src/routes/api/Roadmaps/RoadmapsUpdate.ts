@@ -7,7 +7,7 @@ import {
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
-import { Tag } from '@src/models/tags';
+import { Tag } from '@src/models/Tags';
 import User from '@src/models/User';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
