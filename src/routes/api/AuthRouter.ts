@@ -531,7 +531,29 @@ AuthRouter.get(Paths.Auth.GithubCallback,
     }
   });
 
-AuthRouter.delete(Paths.Auth.Logout, (req, res) => {
+AuthRouter.delete(Paths.Auth.Logout, requireSessionMiddleware);
+AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
+  // get session
+  const token = req.session?.token;
+
+  // if no session, return error
+  if (!token) {
+    return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+      error: 'No session found',
+    });
+  }
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // delete session
+  const session = await db.getWhere<{ id: bigint }>('sessions', 'token', token);
+
+  if (!session) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+    .json({ error: 'Session not found' });
+
+  await db.delete('sessions', session.id);
+
   // remove cookie
   res.clearCookie('session');
   return res.status(HttpStatusCodes.OK).json({
