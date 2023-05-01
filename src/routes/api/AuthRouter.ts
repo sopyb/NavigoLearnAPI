@@ -465,6 +465,32 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       },
     });
 
+    // get user email
+    const response2 = await axios.get('https://api.github.com/user/emails', {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
+
+    // array of {email:string, primary:boolean, verified:boolean}
+    const emails = response2.data as {
+      email: string;
+      primary: boolean;
+      verified: boolean;
+    }[];
+
+    // get primary email
+    const primaryEmail = emails.find(
+      (email) => email.primary && email.verified,
+    );
+
+    // if no primary email, return error
+    if (!primaryEmail)
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        error: 'No primary email found',
+      });
+
     const data = response1.data as GitHubUserData;
 
     // get database
