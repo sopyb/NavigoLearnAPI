@@ -105,7 +105,7 @@ function handleExternalAuthError(error, res: Response): void {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: "Couldn't get access token from external service",
+      error: 'Couldn\'t get access token from external service',
     });
   } else {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -426,7 +426,8 @@ AuthRouter.get(Paths.Auth.GithubLogin, (req, res) => {
     'https://github.com/login/oauth/authorize?client_id=' +
       EnvVars.GitHub.ClientID +
       '&redirect_uri=' +
-      EnvVars.GitHub.RedirectUri,
+      EnvVars.GitHub.RedirectUri +
+      '&scope=user',
   );
 });
 
@@ -465,6 +466,34 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       },
     });
 
+    // get user email
+    const response2 = await axios.get('https://api.github.com/user/emails', {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: 'application/json',
+        "X-GitHub-Api-Version": "2022-11-28",
+        "X-OAuth-Scopes": "user:email",
+      },
+    });
+
+    // array of {email:string, primary:boolean, verified:boolean}
+    const emails = response2.data as {
+      email: string;
+      primary: boolean;
+      verified: boolean;
+    }[];
+
+    // get primary email
+    const primaryEmail = emails.find(
+      (email) => email.primary && email.verified,
+    );
+
+    // if no primary email, return error
+    if (!primaryEmail)
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        error: 'No primary email found',
+      });
+
     const data = response1.data as GitHubUserData;
 
     // get database
@@ -476,8 +505,8 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     if (!user) {
       // create user
       const userId = await db.insert('users', {
-        name: data.name,
-        email: data.email,
+        name: data.name || data.login,
+        email: data.email || primaryEmail.email,
         githubId: data.id,
       });
 

@@ -59,6 +59,10 @@ RoadmapsGet.get(
 
     if (!data) return;
 
+    // get likes where roadmapId = id
+    const likes = await new Database()
+      .countWhere('roadmapLikes', 'roadmapId', data.id.toString());
+
     const { roadmap, issueCount } = data;
 
     // return roadmap
@@ -68,8 +72,7 @@ RoadmapsGet.get(
       description: roadmap.description,
       ownerId: roadmap.ownerId.toString(),
       issueCount: issueCount.toString(),
-      // TODO: star count
-      // TODO: add progress info
+      likes: likes.toString(),
       createdAt: roadmap.createdAt,
       updatedAt: roadmap.updatedAt,
       isPublic: roadmap.isPublic,
@@ -86,6 +89,10 @@ RoadmapsGet.get(
 
     if (!data) return;
 
+    // get likes where roadmapId = id
+    const likes = await new Database()
+      .countWhere('roadmapLikes', 'roadmapId', data.id.toString());
+
     const { roadmap, issueCount } = data;
 
     // return roadmap
@@ -93,6 +100,7 @@ RoadmapsGet.get(
       id: roadmap.id.toString(),
       name: roadmap.name,
       description: roadmap.description,
+      likes: likes.toString(),
       issueCount: issueCount.toString(),
       ownerId: roadmap.ownerId.toString(),
     });
