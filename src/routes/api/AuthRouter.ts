@@ -559,7 +559,6 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     // save session
     return await saveSession(res, user);
   } catch (error) {
-    console.log(error);
     handleExternalAuthError(error, res);
   }
 });

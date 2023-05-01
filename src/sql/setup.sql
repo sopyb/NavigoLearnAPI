@@ -106,9 +106,11 @@ create table if not exists roadmapLikes
     userId    bigint                                not null,
     createdAt timestamp default current_timestamp() null,
     constraint roadmaplikes_roadmaps_id_fk
-        foreign key (roadmapId) references roadmaps (id),
+        foreign key (roadmapId) references roadmaps (id)
+            on delete cascade,
     constraint roadmaplikes_users_id_fk
         foreign key (userId) references users (id)
+            on delete cascade
 );
 
 create index if not exists roadmapLikes_roadmapId_index
