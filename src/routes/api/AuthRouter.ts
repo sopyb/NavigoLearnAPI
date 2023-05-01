@@ -36,7 +36,7 @@ interface GitHubUserData {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getInfoFromRequest(req: any): { email: string, password: string } {
+function getInfoFromRequest(req: any): { email: string; password: string } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const email = req?.body?.email as string;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -71,8 +71,11 @@ async function createSession(user: User): Promise<string> {
   return token;
 }
 
-async function saveSession(res: Response, user: User, register = false)
-  : Promise<void> {
+async function saveSession(
+  res: Response,
+  user: User,
+  register = false,
+): Promise<void> {
   // get session token
   const token = await createSession(user);
 
@@ -89,10 +92,9 @@ async function saveSession(res: Response, user: User, register = false)
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
     });
 
-    res.status(register ? HttpStatusCodes.CREATED : HttpStatusCodes.OK)
-      .json({
-        message: `${register ? 'Registe' : 'Login'} successful`,
-      });
+    res.status(register ? HttpStatusCodes.CREATED : HttpStatusCodes.OK).json({
+      message: `${register ? 'Registe' : 'Login'} successful`,
+    });
   }
 }
 
@@ -112,62 +114,60 @@ function handleExternalAuthError(error, res: Response): void {
   }
 }
 
-AuthRouter.post(Paths.Auth.Login,
-  async (req, res) => {
-    // check if data is valid
-    const { email, password } = getInfoFromRequest(req);
-    // if not, return error
-    if (!email || !password) {
-      return res.status(HttpStatusCodes.BAD_REQUEST).json({
-        error: 'Email and password are required',
+AuthRouter.post(Paths.Auth.Login, async (req, res) => {
+  // check if data is valid
+  const { email, password } = getInfoFromRequest(req);
+  // if not, return error
+  if (!email || !password) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Email and password are required',
+    });
+  }
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // check if user exists
+  const user = await db.getWhere<User>('users', 'email', email);
+  // if not, return error
+  if (!user) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Invalid email or password',
+    });
+  }
+
+  // check if the password is correct
+  const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
+  // if not, return error
+  if (!isPasswordCorrect) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: 'Invalid email or password',
+    });
+  }
+
+  // check if user has userInfo
+  const userInfo = db.getWhere('userInfo', 'userId', user.id);
+
+  if (!userInfo) {
+    // create userInfo
+    const row = await db.insert('userInfo', {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      bio: '',
+      website: '',
+      profilePicture: '',
+    });
+
+    if (row < 0)
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'Internal server error',
       });
-    }
+  }
 
-    // get database
-    const db = new DatabaseDriver();
-
-    // check if user exists
-    const user =
-      await db.getWhere<User>('users', 'email', email);
-    // if not, return error
-    if (!user) {
-      return res.status(HttpStatusCodes.BAD_REQUEST).json({
-        error: 'Invalid email or password',
-      });
-    }
-
-    // check if the password is correct
-    const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
-    // if not, return error
-    if (!isPasswordCorrect) {
-      return res.status(HttpStatusCodes.BAD_REQUEST).json({
-        error: 'Invalid email or password',
-      });
-    }
-
-    // check if user has userInfo
-    const userInfo = db.getWhere('userInfo', 'userId', user.id);
-
-    if (!userInfo) {
-      // create userInfo
-      const row = await db.insert('userInfo', {
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-        bio: '',
-        website: '',
-        profilePicture: '',
-      });
-
-      if (row < 0)
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-          error: 'Internal server error',
-        });
-    }
-
-    // save session
-    return await saveSession(res, user);
-  });
+  // save session
+  return await saveSession(res, user);
+});
 
 AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   // check if data is valid
@@ -203,12 +203,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const saltedPassword = saltPassword(password);
 
   // create user
-  const newUser = new User(
-    username,
-    email,
-    UserRoles.Standard,
-    saltedPassword,
-  );
+  const newUser = new User(username, email, UserRoles.Standard, saltedPassword);
 
   // save user
   const result = await db.insert('users', newUser);
@@ -216,17 +211,8 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 
   // check result
   if (result >= 0) {
-
     // create userInfo
-    const userInfo = new UserInfo(
-      newUser.id,
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    );
+    const userInfo = new UserInfo(newUser.id, '', '', '', '', '', '');
 
     // save userInfo
     const userInfoResult = await db.insert('userInfo', userInfo);
@@ -247,7 +233,8 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
 });
 
 AuthRouter.use(Paths.Auth.ChangePassword, requireSessionMiddleware);
-AuthRouter.post(Paths.Auth.ChangePassword,
+AuthRouter.post(
+  Paths.Auth.ChangePassword,
   async (req: RequestWithSession, res) => {
     // check if data is valid
     const { password } = getInfoFromRequest(req);
@@ -304,7 +291,8 @@ AuthRouter.post(Paths.Auth.ChangePassword,
         error: 'Something went wrong',
       });
     }
-  });
+  },
+);
 
 AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   // check if data is valid
@@ -336,200 +324,245 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   });
 });
 
-AuthRouter.get(Paths.Auth.GoogleLogin,
-  (req, res) => {
-    res.redirect('https://accounts.google.com/o/oauth2/v2/auth?client_id='
-      + EnvVars.Google.ClientID
-      + '&redirect_uri='
-      + EnvVars.Google.RedirectUri
-      + '&response_type=code&scope=email%20profile');
-  });
+AuthRouter.get(Paths.Auth.GoogleLogin, (req, res) => {
+  res.redirect(
+    'https://accounts.google.com/o/oauth2/v2/auth?client_id=' +
+      EnvVars.Google.ClientID +
+      '&redirect_uri=' +
+      EnvVars.Google.RedirectUri +
+      '&response_type=code&scope=email%20profile',
+  );
+});
 
-AuthRouter.get(Paths.Auth.GoogleCallback,
-  async (req, res) => {
-    const code = req.query.code as string;
+AuthRouter.get(Paths.Auth.GoogleCallback, async (req, res) => {
+  const code = req.query.code as string;
 
-    if (!code) {
-      return res.status(HttpStatusCodes.FORBIDDEN).json({
-        error: 'Error while logging in with Google',
+  if (!code) {
+    return res.status(HttpStatusCodes.FORBIDDEN).json({
+      error: 'Error while logging in with Google',
+    });
+  }
+
+  try {
+    // get access token
+    let response = await axios.post('https://oauth2.googleapis.com/token', {
+      client_id: EnvVars.Google.ClientID,
+      client_secret: EnvVars.Google.ClientSecret,
+      redirect_uri: EnvVars.Google.RedirectUri,
+      grant_type: 'authorization_code',
+      code,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const accessToken = response?.data?.access_token as string;
+
+    // if no token, return error
+    if (!accessToken) throw new AxiosError('No access token received');
+
+    // get user data
+    response = await axios.get(
+      'https://www.googleapis.com/oauth2/v2/userinfo',
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    const userData = response?.data as GoogleUserData;
+
+    // if no user data, return error
+    if (!userData) throw new Error('No user data received');
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if user exists
+    let user = await db.getWhere<User>('users', 'email', userData.email);
+
+    // if a user doesn't exist, create a new user
+    if (!user) {
+      const userId = await db.insert('users', {
+        email: userData.email,
+        name: userData.name,
+        googleId: userData.id,
+      });
+
+      user = await db.get<User>('users', userId);
+
+      if (!user) throw new Error('User not found');
+    } else if (!user.googleId) {
+      // if a user exists but doesn't have a Google id, add it
+      await db.update('users', user.id, {
+        googleId: userData.id,
       });
     }
 
-    try {
-      // get access token
-      let response =
-        await axios.post('https://oauth2.googleapis.com/token', {
-          client_id: EnvVars.Google.ClientID,
-          client_secret: EnvVars.Google.ClientSecret,
-          redirect_uri: EnvVars.Google.RedirectUri,
-          grant_type: 'authorization_code',
-          code,
-        });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const accessToken = response?.data?.access_token as string;
+    //check if user has userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', user.id);
 
-      // if no token, return error
-      if (!accessToken) throw new AxiosError('No access token received');
-
-      // get user data
-      response =
-        await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-      const userData = response?.data as GoogleUserData;
-
-      // if no user data, return error
-      if (!userData) throw new Error('No user data received');
-
-      // get database
-      const db = new DatabaseDriver();
-
-      // check if user exists
-      let user =
-        await db.getWhere<User>('users', 'email', userData.email);
-
-      // if a user doesn't exist, create a new user
-      if (!user) {
-        const userId = await db.insert('users', {
-          email: userData.email,
-          name: userData.name,
-          googleId: userData.id,
-        });
-
-        user = await db.get<User>('users', userId);
-
-        if (!user) throw new Error('User not found');
-      } else if (!user.googleId) {
-        // if a user exists but doesn't have a Google id, add it
-        await db.update('users', user.id, {
-          googleId: userData.id,
-        });
-      }
-
-      // save session
-      return await saveSession(res, user);
-    } catch (e) {
-      handleExternalAuthError(e, res);
-    }
-  })
-;
-AuthRouter.get(Paths.Auth.GithubLogin,
-  (req, res) => {
-    res.redirect('https://github.com/login/oauth/authorize?client_id='
-      + EnvVars.GitHub.ClientID
-      + '&redirect_uri='
-      + EnvVars.GitHub.RedirectUri);
-
-  });
-
-AuthRouter.get(Paths.Auth.GithubCallback,
-  async (req, res) => {
-    const code = req.query.code as string;
-
-    if (!code) {
-      return res.status(HttpStatusCodes.FORBIDDEN).json({
-        error: 'Error while logging in with GitHub',
+    // if not, create userInfo
+    if (!userInfo) {
+      const userInfoId = await db.insert('userInfo', {
+        userId: user.id,
+        profilePictureUrl: '',
+        bio: '',
+        quote: '',
+        blogUrl: '',
+        websiteUrl: '',
+        githubUrl: '',
       });
+
+      // check if userInfo was created
+      if (userInfoId < 0) throw new Error('Could not create userInfo');
     }
 
-    try {
-      const response =
-        await axios.post('https://github.com/login/oauth/access_token', {
-          client_id: EnvVars.GitHub.ClientID,
-          client_secret: EnvVars.GitHub.ClientSecret,
-          code: code,
-          redirect_uri: EnvVars.GitHub.RedirectUri,
-        }, {
-          headers: {
-            Accept: 'application/json',
-          },
-        });
+    // save session
+    return await saveSession(res, user);
+  } catch (e) {
+    handleExternalAuthError(e, res);
+  }
+});
+AuthRouter.get(Paths.Auth.GithubLogin, (req, res) => {
+  res.redirect(
+    'https://github.com/login/oauth/authorize?client_id=' +
+      EnvVars.GitHub.ClientID +
+      '&redirect_uri=' +
+      EnvVars.GitHub.RedirectUri +
+      '&scope=user',
+  );
+});
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const accessToken = (response?.data?.access_token as string);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const response1 =
-        await axios.get('https://api.github.com/user', {
-          headers: {
-            Authorization: `token ${accessToken}`,
-            Accept: 'application/json',
-          },
-        });
+AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
+  const code = req.query.code as string;
 
-      const data = response1.data as GitHubUserData;
+  if (!code) {
+    return res.status(HttpStatusCodes.FORBIDDEN).json({
+      error: 'Error while logging in with GitHub',
+    });
+  }
 
-      // get database
-      const db = new DatabaseDriver();
+  try {
+    const response = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: EnvVars.GitHub.ClientID,
+        client_secret: EnvVars.GitHub.ClientSecret,
+        code: code,
+        redirect_uri: EnvVars.GitHub.RedirectUri,
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+    );
 
-      // check if user exists
-      let user =
-        await db.getWhere<User>('users', 'email', data.email);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const accessToken = response?.data?.access_token as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const response1 = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
 
-      if (!user) {
-        // create user
-        const userId = await db.insert('users', {
-          name: data.name,
-          email: data.email,
-          githubId: data.id,
-        });
+    // get user email
+    const response2 = await axios.get('https://api.github.com/user/emails', {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: 'application/json',
+        "X-GitHub-Api-Version": "2022-11-28",
+        "X-OAuth-Scopes": "user:email",
+      },
+    });
 
-        // check if user was created
-        if (userId < 0) throw new Error('Could not create user');
+    // array of {email:string, primary:boolean, verified:boolean}
+    const emails = response2.data as {
+      email: string;
+      primary: boolean;
+      verified: boolean;
+    }[];
 
-        // get user
-        user = new User(
-          data.name,
-          data.email,
-          0,
-          '',
-          userId,
-          null,
-          data.id.toString());
-      }
+    // get primary email
+    const primaryEmail = emails.find(
+      (email) => email.primary && email.verified,
+    );
 
-      // check if user has githubId if not,
-      // update user with githubId merging accounts
-      if (!user.githubId) {
-        // update user
-        const userId = await db.update('users', user.id, {
-          githubId: data.id,
-        });
+    // if no primary email, return error
+    if (!primaryEmail)
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        error: 'No primary email found',
+      });
 
-        // check if user was updated
-        if (!userId) throw new Error('Could not update user');
-      }
+    const data = response1.data as GitHubUserData;
 
-      //check if user has userInfo
-      const userInfo =
-        await db.getWhere<UserInfo>(
-          'userInfo',
-          'userId',
-          user.id);
+    // get database
+    const db = new DatabaseDriver();
 
-      // if not, create userInfo
-      if (!userInfo) {
-        const userInfoId = await db.insert('userInfo', {
-          userId: user.id,
-          profilePictureUrl: data.avatar_url,
-          bio: data.bio,
-          quote: '',
-          blogUrl: data.blog,
-          websiteUrl: '',
-          githubUrl: `https://github.com/${data.login}`,
-        });
+    // check if user exists
+    let user = await db.getWhere<User>('users', 'email', data.email);
 
-        // check if userInfo was created
-        if (userInfoId < 0) throw new Error('Could not create userInfo');
-      }
+    if (!user) {
+      // create user
+      const userId = await db.insert('users', {
+        name: data.name || data.login,
+        email: data.email || primaryEmail.email,
+        githubId: data.id,
+      });
 
-      // save session
-      return await saveSession(res, user);
-    } catch (error) {
-      handleExternalAuthError(error, res);
+      // check if user was created
+      if (userId < 0) throw new Error('Could not create user');
+
+      // get user
+      user = new User(
+        data.name,
+        data.email,
+        0,
+        '',
+        userId,
+        null,
+        data.id.toString(),
+      );
     }
-  });
+
+    // check if user has githubId if not,
+    // update user with githubId merging accounts
+    if (!user.githubId) {
+      // update user
+      const userId = await db.update('users', user.id, {
+        githubId: data.id,
+      });
+
+      // check if user was updated
+      if (!userId) throw new Error('Could not update user');
+    }
+
+    //check if user has userInfo
+    const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', user.id);
+
+    // if not, create userInfo
+    if (!userInfo) {
+      const userInfoId = await db.insert('userInfo', {
+        userId: user.id,
+        profilePictureUrl: data.avatar_url,
+        bio: data.bio,
+        quote: '',
+        blogUrl: data.blog,
+        websiteUrl: '',
+        githubUrl: `https://github.com/${data.login}`,
+      });
+
+      // check if userInfo was created
+      if (userInfoId < 0) throw new Error('Could not create userInfo');
+    }
+
+    // save session
+    return await saveSession(res, user);
+  } catch (error) {
+    console.log(error);
+    handleExternalAuthError(error, res);
+  }
+});
 
 AuthRouter.delete(Paths.Auth.Logout, requireSessionMiddleware);
 AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
@@ -549,8 +582,10 @@ AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
   // delete session
   const session = await db.getWhere<{ id: bigint }>('sessions', 'token', token);
 
-  if (!session) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-    .json({ error: 'Session not found' });
+  if (!session)
+    return res
+      .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Session not found' });
 
   await db.delete('sessions', session.id);
 

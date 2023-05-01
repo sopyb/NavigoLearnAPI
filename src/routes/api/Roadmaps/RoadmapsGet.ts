@@ -129,7 +129,7 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
 
     const { roadmap } = data;
 
-    // fetch /api-wrapper/users/:id
+    // fetch /api/users/:id
     axios.get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
       .then(response => {
         res.status(response.status).json(response.data);

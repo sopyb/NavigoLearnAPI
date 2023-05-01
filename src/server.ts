@@ -43,7 +43,7 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
 }
 
 // add session middleware
-app.use('/api-wrapper', sessionMiddleware);
+app.use('/api', sessionMiddleware);
 
 // Add base router
 app.use(Paths.Base, BaseRouter);
