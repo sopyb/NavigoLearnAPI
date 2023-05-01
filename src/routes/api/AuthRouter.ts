@@ -426,7 +426,8 @@ AuthRouter.get(Paths.Auth.GithubLogin, (req, res) => {
     'https://github.com/login/oauth/authorize?client_id=' +
       EnvVars.GitHub.ClientID +
       '&redirect_uri=' +
-      EnvVars.GitHub.RedirectUri,
+      EnvVars.GitHub.RedirectUri +
+      '&scope=user',
   );
 });
 
@@ -470,6 +471,8 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       headers: {
         Authorization: `token ${accessToken}`,
         Accept: 'application/json',
+        "X-GitHub-Api-Version": "2022-11-28",
+        "X-OAuth-Scopes": "user:email",
       },
     });
 
@@ -503,7 +506,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       // create user
       const userId = await db.insert('users', {
         name: data.name || data.login,
-        email: data.email,
+        email: data.email || primaryEmail.email,
         githubId: data.id,
       });
 
@@ -556,6 +559,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     // save session
     return await saveSession(res, user);
   } catch (error) {
+    console.log(error);
     handleExternalAuthError(error, res);
   }
 });
