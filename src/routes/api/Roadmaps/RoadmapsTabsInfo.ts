@@ -93,4 +93,42 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
   }
 });
 
+RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, async (req, res) => {
+  const stringId = req.params?.tabInfoId;
+  // get database connection
+  const db = new Database();
+  if (stringId) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const sentTabData = req.body?.tabInfo as ITabInfo;
+    const newContent = sentTabData.content;
+    console.log('new content', newContent);
+    // gets previous data from the table
+    const tabData = await db.getWhere<ITabInfo>(
+      'tabsinfo',
+      'stringId',
+      stringId,
+    );
+
+    if (tabData?.content) {
+      tabData.content = newContent;
+    } else {
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Issue not found.' });
+    }
+    const success = await db.update('tabsinfo', tabData.id, tabData);
+
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be saved to database.' });
+    // return success
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  } else {
+    return res
+      .status(HttpStatusCodes.NOT_FOUND)
+      .json({ error: 'Issue not found.' });
+  }
+});
+
 export default RoadmapTabsInfo;
