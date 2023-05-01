@@ -28,7 +28,6 @@ interface RowDataPacket {
 
 interface CountDataPacket extends RowDataPacket {
   'COUNT(*)': bigint;
-
 }
 
 interface ResultSetHeader {
@@ -63,17 +62,18 @@ function processData(data: Object): Data {
   return { keys, values };
 }
 
-function parseResult(result: RowDataPacket[] | ResultSetHeader)
-  : RowDataPacket[] | undefined {
-
+function parseResult(
+  result: RowDataPacket[] | ResultSetHeader,
+): RowDataPacket[] | undefined {
   if (result && Object.keys(result).length > 0) {
     const keys = Object.keys((result as RowDataPacket[])[0]);
     for (const element of keys) {
       const key = element;
       const value: unknown = (result as RowDataPacket[])[0][key];
       if (typeof value === 'string' && value.startsWith('JSON-')) {
-        (result as RowDataPacket[])[0][key] =
-          JSON.parse(value.replace('JSON-', ''));
+        (result as RowDataPacket[])[0][key] = JSON.parse(
+          value.replace('JSON-', ''),
+        );
       }
     }
   }
@@ -81,8 +81,9 @@ function parseResult(result: RowDataPacket[] | ResultSetHeader)
   return result as RowDataPacket[];
 }
 
-function getFirstResult<T>(result: RowDataPacket[] | ResultSetHeader):
-  T | undefined {
+function getFirstResult<T>(
+  result: RowDataPacket[] | ResultSetHeader,
+): T | undefined {
   return parseResult(result)?.[0] as T;
 }
 
@@ -117,17 +118,20 @@ class Database {
     return insertId;
   }
 
-  public async update(table: string, id: bigint, data: object):
-    Promise<boolean> {
+  public async update(
+    table: string,
+    id: bigint,
+    data: object,
+  ): Promise<boolean> {
     const { keys, values } = processData(data);
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params
-    const sqlKeys = keys.map(key => `${key} = ?`).join(',');
+    const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE id = ?`;
-    const params = [ ...values, id ];
+    const params = [...values, id];
     // execute query
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await this._query(sql, params);
@@ -146,7 +150,7 @@ class Database {
     const sql = `DELETE
                  FROM ${table}
                  WHERE id = ?`;
-    const result = await this._query(sql, [ id ]);
+    const result = await this._query(sql, [id]);
 
     let affectedRows = -1;
     if (result) {
@@ -164,7 +168,7 @@ class Database {
                  FROM ${table}
                  WHERE id = ?`;
     // execute query
-    const result = await this._query(sql, [ id ]);
+    const result = await this._query(sql, [id]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -181,7 +185,7 @@ class Database {
                  FROM ${table}
                  WHERE ${key} = ?`;
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -198,7 +202,7 @@ class Database {
                  FROM ${table}
                  WHERE ${key} LIKE ?`;
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -229,24 +233,25 @@ class Database {
                  WHERE ${key} = ?`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // check if T has any properties that are JSON
     // if so parse them
     return parseResult(result) as T[];
   }
 
-  public async getAllWhereLike<T>(table: string,
+  public async getAllWhereLike<T>(
+    table: string,
     key: string,
-    value: string | bigint):
-    Promise<T[] | undefined> {
+    value: string | bigint,
+  ): Promise<T[] | undefined> {
     // create sql query - select * from table where key = ?
     const sql = `SELECT *
                  FROM ${table}
                  WHERE ${key} LIKE ?`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -276,7 +281,7 @@ class Database {
                  WHERE ${key} = ?`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
@@ -293,7 +298,7 @@ class Database {
                  WHERE ${key} LIKE ?`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, [value]);
 
     // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
@@ -301,8 +306,10 @@ class Database {
 
   private async _setup() {
     // get setup.sql file
-    let setupSql =
-      fs.readFileSync(path.join(__dirname, '..', 'sql', 'setup.sql'), 'utf8');
+    let setupSql = fs.readFileSync(
+      path.join(__dirname, '..', 'sql', 'setup.sql'),
+      'utf8',
+    );
 
     // remove comments
     setupSql = setupSql.replace(/--.*/g, '');
@@ -331,10 +338,11 @@ class Database {
     }
   }
 
-  private async _query(sql: string, params?: unknown[]):
-    Promise<ResultSetHeader | RowDataPacket[]> {
-    while (!Database.isSetup)
-      await new Promise(r => setTimeout(r, 100));
+  private async _query(
+    sql: string,
+    params?: unknown[],
+  ): Promise<ResultSetHeader | RowDataPacket[]> {
+    while (!Database.isSetup) await new Promise((r) => setTimeout(r, 100));
     if (!sql) return Promise.reject(new Error('No SQL query'));
 
     // get connection from pool
