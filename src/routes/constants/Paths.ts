@@ -79,8 +79,8 @@ const Paths = {
     TabsInfo: {
       Base: '/:roadmapId([0-9]+)/tabsInfo',
       Create: '/create',
-      Get: '/:tabInfoId([a-zA-Z0-9]+)?',
-      Update: '/:tabInfoId([a-zA-Z0-9]+)?',
+      Get: '/:tabInfoId?',
+      Update: '/:tabInfoId?',
       Delete: '/:tabInfoId',
     },
   },
