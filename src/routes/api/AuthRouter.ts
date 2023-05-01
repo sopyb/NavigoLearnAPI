@@ -105,7 +105,7 @@ function handleExternalAuthError(error, res: Response): void {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: "Couldn't get access token from external service",
+      error: 'Couldn\'t get access token from external service',
     });
   } else {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -476,7 +476,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     if (!user) {
       // create user
       const userId = await db.insert('users', {
-        name: data.name,
+        name: data.name || data.login,
         email: data.email,
         githubId: data.id,
       });
