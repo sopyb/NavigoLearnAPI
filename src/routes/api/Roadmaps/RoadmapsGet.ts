@@ -8,19 +8,26 @@ import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
 import { Tag } from '@src/models/Tags';
+import * as console from 'console';
 
 const RoadmapsGet = Router({ mergeParams: true });
 
-async function checkIfRoadmapExists(req: RequestWithSession, res: Response):
-  Promise<{
-    id: bigint,
-    roadmap: Roadmap,
-    issueCount: bigint
-  } | undefined> {
+async function checkIfRoadmapExists(
+  req: RequestWithSession,
+  res: Response,
+): Promise<
+  | {
+      id: bigint;
+      roadmap: Roadmap;
+      issueCount: bigint;
+    }
+  | undefined
+> {
   const id = req.params.roadmapId;
 
   if (!id) {
-    res.status(HttpStatusCodes.BAD_REQUEST)
+    res
+      .status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Roadmap id is missing.' });
     return;
   }
@@ -34,7 +41,8 @@ async function checkIfRoadmapExists(req: RequestWithSession, res: Response):
 
   // check if roadmap is valid
   if (!roadmap) {
-    res.status(HttpStatusCodes.NOT_FOUND)
+    res
+      .status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Roadmap does not exist.' });
 
     return;
@@ -43,7 +51,8 @@ async function checkIfRoadmapExists(req: RequestWithSession, res: Response):
   return { id: BigInt(id), roadmap, issueCount };
 }
 
-RoadmapsGet.get(Paths.Roadmaps.Get.Roadmap,
+RoadmapsGet.get(
+  Paths.Roadmaps.Get.Roadmap,
   async (req: RequestWithSession, res) => {
     //get data from params
     const data = await checkIfRoadmapExists(req, res);
@@ -69,9 +78,11 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Roadmap,
       isPublic: roadmap.isPublic,
       data: roadmap.data,
     });
-  });
+  },
+);
 
-RoadmapsGet.get(Paths.Roadmaps.Get.MiniRoadmap,
+RoadmapsGet.get(
+  Paths.Roadmaps.Get.MiniRoadmap,
   async (req: RequestWithSession, res) => {
     // get id from params
     const data = await checkIfRoadmapExists(req, res);
@@ -93,24 +104,29 @@ RoadmapsGet.get(Paths.Roadmaps.Get.MiniRoadmap,
       issueCount: issueCount.toString(),
       ownerId: roadmap.ownerId.toString(),
     });
-  });
+  },
+);
 
-RoadmapsGet.get(Paths.Roadmaps.Get.Tags,
+RoadmapsGet.get(
+  Paths.Roadmaps.Get.Tags,
   async (req: RequestWithSession, res) => {
     //get data from params
     const id = req.params.roadmapId;
 
-    if (!id) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap id is missing.' });
+    if (!id)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap id is missing.' });
 
     // get database connection
     const db = new Database();
 
     // check if roadmap exists
     const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND).json({
-      error: 'Roadmap does not exist.',
-    });
+    if (!roadmap)
+      return res.status(HttpStatusCodes.NOT_FOUND).json({
+        error: 'Roadmap does not exist.',
+      });
 
     // get tags from database
     const tags = await db.getAllWhere<Tag>('roadmapTags', 'roadmapId', id);
@@ -122,13 +138,15 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Tags,
     }
 
     // map tags name to array
-    const tagNames = tags.map(tag => tag.name);
+    const tagNames = tags.map((tag) => tag.name);
 
     // return tags
     return res.status(HttpStatusCodes.OK).json({ tags: tagNames });
-  });
+  },
+);
 
-RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
+RoadmapsGet.get(
+  Paths.Roadmaps.Get.Owner,
   async (req: RequestWithSession, res) => {
     //get data from params
     const data = await checkIfRoadmapExists(req, res);
@@ -138,17 +156,20 @@ RoadmapsGet.get(Paths.Roadmaps.Get.Owner,
     const { roadmap } = data;
 
     // fetch /api/users/:id
-    axios.get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
-      .then(response => {
+    axios
+      .get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
+      .then((response) => {
         res.status(response.status).json(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         logger.err(error);
         res.status(500).send('An error occurred');
       });
-  });
+  },
+);
 
-RoadmapsGet.get(Paths.Roadmaps.Get.OwnerMini,
+RoadmapsGet.get(
+  Paths.Roadmaps.Get.OwnerMini,
   async (req: RequestWithSession, res) => {
     //get data from params
     const data = await checkIfRoadmapExists(req, res);
@@ -158,14 +179,15 @@ RoadmapsGet.get(Paths.Roadmaps.Get.OwnerMini,
     const { roadmap } = data;
 
     // fetch /api-wrapper/users/:id
-    const user =
-      await axios.get(
-        `http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}/mini`);
+    const user = await axios.get(
+      `http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}/mini`,
+    );
 
     // ? might need to check if json needs to be parsed
 
     // return roadmap
     return res.status(user.status).json(user.data);
-  });
+  },
+);
 
 export default RoadmapsGet;

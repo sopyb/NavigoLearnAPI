@@ -75,6 +75,14 @@ const Paths = {
         Delete: '/:commentId',
       },
     },
+
+    TabsInfo: {
+      Base: '/:roadmapId([0-9]+)/tabsInfo',
+      Create: '/create',
+      Get: '/:tabInfoId([a-zA-Z0-9]+)?',
+      Update: '/:tabInfoId([a-zA-Z0-9]+)?',
+      Delete: '/:tabInfoId',
+    },
   },
   Users: {
     Base: '/users',
