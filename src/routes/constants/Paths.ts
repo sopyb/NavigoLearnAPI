@@ -50,16 +50,11 @@ const Paths = {
       Data: '/data',
     },
     Delete: '/:roadmapId([0-9]+)',
+    Like: '/:roadmapId([0-9]+)/like',
     Progress: {
       Base: '/:roadmapId/progress',
       Get: '/:userId?',
       Update: '/',
-    },
-    Rating: {
-      Base: '/:roadmapId/rating',
-      Get: '/:own?', // get average rating of roadmap or own rating
-      Update: '/',
-      Delete: '/',
     },
     Issues: {
       Base: '/:roadmapId([0-9]+)/issues',
