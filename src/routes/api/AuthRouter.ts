@@ -495,6 +495,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       });
 
     const data = response1.data as GitHubUserData;
+    data.email = primaryEmail.email;
 
     // get database
     const db = new DatabaseDriver();
@@ -506,7 +507,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       // create user
       const userId = await db.insert('users', {
         name: data.name || data.login,
-        email: data.email || primaryEmail.email,
+        email: data.email,
         githubId: data.id,
       });
 
