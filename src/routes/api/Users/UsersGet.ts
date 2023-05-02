@@ -11,7 +11,6 @@ import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
-import * as console from 'console';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -74,11 +73,6 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
     githubLink: !!user.githubId,
     googleLink: !!user.googleId,
   });
-
-  // internal server error if we get here
-  res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-    error: 'Internal server error',
-  });
 });
 
 UsersGet.get(
@@ -106,10 +100,6 @@ UsersGet.get(
       name: user.name,
       profilePictureUrl: userInfo.profilePictureUrl,
       userId: user.id.toString(),
-    });
-
-    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: 'Internal server error',
     });
   },
 );

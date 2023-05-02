@@ -90,6 +90,7 @@ async function saveSession(
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
       httpOnly: false,
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
+      sameSite: 'strict',
     });
 
     res.status(register ? HttpStatusCodes.CREATED : HttpStatusCodes.OK).json({
@@ -589,9 +590,13 @@ AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
 
   await db.delete('sessions', session.id);
 
-  // remove cookie
-  res.clearCookie('session');
-  return res.status(HttpStatusCodes.OK).json({
+  // set cookie
+  return res.cookie('token', '', {
+    httpOnly: false,
+    secure: EnvVars.NodeEnv === NodeEnvs.Production,
+    maxAge: 0,
+    sameSite: 'strict',
+  }).status(HttpStatusCodes.OK).json({
     message: 'Logout successful',
   });
 });

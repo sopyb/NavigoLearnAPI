@@ -25,9 +25,11 @@ async function extendSession(
   res: Response,
 ): Promise<void> {
   const { session } = req;
+
   if (!session) {
     return;
   }
+
   // update token expiration
   session.expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
   await db.update('sessions', session.id, session);
@@ -65,11 +67,36 @@ export async function sessionMiddleware(
   const session = await db.getWhere<ISession>('sessions', 'token', token);
 
   // if session exists, extend it
-  if (session) {
+  if (!!session) {
     req.session = session;
-    await extendSession(db, req, res);
+    // if session is expired, delete it
+    if (session.expires < new Date()) {
+      await db.delete('sessions', session.id);
+      req.session = undefined;
+      res.cookie('token', '', {
+        httpOnly: false,
+        secure: EnvVars.NodeEnv === NodeEnvs.Production,
+        maxAge: 0,
+        sameSite: 'strict',
+      });
+
+      res.status(HttpStatusCodes.UNAUTHORIZED).json({
+        error: 'Token expired, please login',
+      });
+
+      return;
+    } else {
+      await extendSession(db, req, res);
+    }
   } else {
     req.session = undefined;
+  }
+
+  // if session still doesn't exist, delete cookie
+  if (!req.session) {
+    res.status(HttpStatusCodes.UNAUTHORIZED).json({
+      error: 'Token not found, please login',
+    });
   }
 
   // if the token is valid, call next()
@@ -83,7 +110,8 @@ export function requireSessionMiddleware(
 ): void {
   // if session isn't set, return forbidden
   if (!req.session) {
-    res.status(HttpStatusCodes.UNAUTHORIZED)
+    res
+      .status(HttpStatusCodes.UNAUTHORIZED)
       .json({ error: 'Token not found, please login' });
     return;
   }
