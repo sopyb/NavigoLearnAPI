@@ -131,7 +131,7 @@ describe('Login Router', () => {
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Set-Cookie', new RegExp(
-        'session=; Path=\\/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'));
+        '^token=; Max-Age=0; Path=\\/;'));
   });
 
   it('Logout without session cookie', async () => {

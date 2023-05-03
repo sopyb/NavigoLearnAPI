@@ -590,6 +590,9 @@ AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
 
   await db.delete('sessions', session.id);
 
+  // clear previous cookie header
+  res.header('Set-Cookie', '')
+
   // set cookie
   return res.cookie('token', '', {
     httpOnly: false,
