@@ -21,7 +21,7 @@ describe('Roadmap Router', () => {
     const password = Math.random().toString(36).substring(2, 15);
     const password2 = Math.random().toString(36).substring(2, 15);
 
-    // register user
+    // register userDisplay
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email, password })
@@ -45,16 +45,16 @@ describe('Roadmap Router', () => {
     // get database
     const db = new Database();
 
-    // get user
+    // get userDisplay
     const dbuser = await db.getWhere<User>('users', 'email', email);
     const dbuser2 = await db.getWhere<User>('users', 'email', email2);
 
-    // if user is undefined cancel tests
+    // if userDisplay is undefined cancel tests
     if (!dbuser || !dbuser2) {
       throw new Error('User is undefined');
     }
 
-    // set user
+    // set userDisplay
     user = dbuser;
     user2 = dbuser2;
 
@@ -76,7 +76,7 @@ describe('Roadmap Router', () => {
     // get database
     const db = new Database();
 
-    // delete user - will cascade delete roadmap
+    // delete userDisplay - will cascade delete roadmap
     await db.delete('users', user.id);
     await db.delete('users', user2.id);
   });
@@ -120,7 +120,7 @@ describe('Roadmap Router', () => {
     expect(roadmap.ownerId).toEqual(dbroadmap.ownerId);
   });
 
-  it('should not create a roadmap if user is not logged in', async () => {
+  it('should not create a roadmap if userDisplay is not logged in', async () => {
     // create roadmap
     await request(app)
       .post('/api/roadmaps/create')

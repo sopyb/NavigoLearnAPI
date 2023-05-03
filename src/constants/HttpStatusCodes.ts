@@ -9,7 +9,6 @@
  * @see {@link https://en.wikipedia.org/wiki/List_of_HTTP_status_codes}
  */
 enum HttpStatusCodes {
-
   /**
    * The server has received the request headers and the client should proceed to send the request body
    * (in the case of a request for which a body needs to be sent; for example, a POST request).
@@ -166,7 +165,7 @@ enum HttpStatusCodes {
    * Similar to 403 Forbidden, but specifically for use when authentication is required and has failed or has not yet
    * been provided. The response must include a WWW-Authenticate header field containing a challenge applicable to the
    * requested resource. See Basic access authentication and Digest access authentication. 401 semantically means
-   * "unauthenticated",i.e. the user does not have the necessary credentials.
+   * "unauthenticated",i.e. the userDisplay does not have the necessary credentials.
    */
   UNAUTHORIZED = 401,
 
@@ -179,7 +178,7 @@ enum HttpStatusCodes {
 
   /**
    * The request was valid, but the server is refusing action.
-   * The user might not have the necessary permissions for a resource.
+   * The userDisplay might not have the necessary permissions for a resource.
    */
   FORBIDDEN = 403,
 
@@ -308,7 +307,7 @@ enum HttpStatusCodes {
   PRECONDITION_REQUIRED = 428,
 
   /**
-   * The user has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.
+   * The userDisplay has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.
    */
   TOO_MANY_REQUESTS = 429,
 
@@ -381,7 +380,7 @@ enum HttpStatusCodes {
    * Intended for use by intercepting proxies used to control access to the network (e.g., "captive portals" used
    * to require agreement to Terms of Service before granting full Internet access via a Wi-Fi hotspot).
    */
-  NETWORK_AUTHENTICATION_REQUIRED = 511
+  NETWORK_AUTHENTICATION_REQUIRED = 511,
 }
 
 export default HttpStatusCodes;

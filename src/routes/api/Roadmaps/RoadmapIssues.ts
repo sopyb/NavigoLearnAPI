@@ -14,7 +14,8 @@ import Comments from '@src/routes/api/Roadmaps/Issues/CommentsRouter';
 const RoadmapIssues = Router({ mergeParams: true });
 
 RoadmapIssues.post(Paths.Roadmaps.Issues.Create, requireSessionMiddleware);
-RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
+RoadmapIssues.post(
+  Paths.Roadmaps.Issues.Create,
   async (req: RequestWithSession, res) => {
     //get data from body and session
     let issue;
@@ -23,7 +24,7 @@ RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
     try {
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      const issueData = JSON.parse(req.body?.issue) as IIssue;
+      const issueData = req.body?.issue as IIssue;
 
       if (!issueData) {
         throw new Error('Issue is missing.');
@@ -32,6 +33,7 @@ RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
       // set userId
       issueData.userId = session?.userId || BigInt(-1);
       issueData.id = BigInt(-1);
+      issueData.roadmapId = BigInt(issueData.roadmapId);
 
       // update createdAt and updatedAt
       issueData.createdAt = new Date(issueData.createdAt);
@@ -39,7 +41,8 @@ RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
 
       issue = Issue.from(issueData);
     } catch (e) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Issue data is invalid.' });
     }
 
@@ -50,67 +53,91 @@ RoadmapIssues.post(Paths.Roadmaps.Issues.Create,
     const id = await db.insert('issues', issue);
 
     // check if id is valid
-    if (id < 0) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Issue could not be saved to database.' });
+    if (id < 0)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be saved to database.' });
 
     // return id
     return res.status(HttpStatusCodes.CREATED).json({ id: id.toString() });
-  });
+  },
+);
 
-RoadmapIssues.get(Paths.Roadmaps.Issues.Get,
-  async (req, res) => {
-    // get issue id  from params
-    const issueId = BigInt(req.params?.issueId || -1);
-    const roadmapId = BigInt(req.params?.roadmapId || -1);
+RoadmapIssues.get(Paths.Roadmaps.Issues.GetAll, async (req, res) => {
+  // get issue id  from params
+  const roadmapId = BigInt(req.params?.roadmapId || -1);
 
-    // get database connection
-    const db = new Database();
+  const db = new Database();
 
-    if (roadmapId < 0) return res.status(HttpStatusCodes.BAD_REQUEST)
+  if (roadmapId < 0)
+    return res
+      .status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Roadmap id is invalid.' });
 
-    // get roadmap from database
-    const roadmap = await db.get('roadmaps', roadmapId);
+  // get roadmap from database
+  const roadmap = await db.get('roadmaps', roadmapId);
 
-    // check if roadmap exists
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
+  // check if roadmap exists
+  if (!roadmap)
+    return res
+      .status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Roadmap not found.' });
 
-    // check if issue id is valid
-    if (issueId < 0) {
-      // get all issues from database from roadmap
-      let issues =
-        await db.getAllWhere<Issue>('issues', 'roadmapId', roadmapId);
+  // check if issue id is valid
+  let issues = await db.getAllWhere<Issue>('issues', 'roadmapId', roadmapId);
 
-      if (!issues) issues = [];
+  if (!issues) issues = [];
 
-      const result = issues
-        .filter((issue) => issue.roadmapId === roadmapId)
-        .map((issue) => {
-          return {
-            id: issue.id.toString(),
-            title: issue.title,
-            content: issue.content,
-            roadmapId: issue.roadmapId.toString(),
-            userId: issue.userId.toString(),
-            createdAt: issue.createdAt,
-            updatedAt: issue.updatedAt,
-          };
-        });
+  const result = issues
+    .filter((issue) => issue.roadmapId === roadmapId)
+    .map((issue) => {
+      return {
+        id: issue.id.toString(),
+        title: issue.title,
+        content: issue.content,
+        roadmapId: issue.roadmapId.toString(),
+        userId: issue.userId.toString(),
+        createdAt: issue.createdAt,
+        updatedAt: issue.updatedAt,
+      };
+    });
 
-      // return issues
-      return res.status(HttpStatusCodes.OK).json({ issues: result });
-    } else {
-      // get issue from database
-      const issue = await db.get<Issue>('issues', issueId);
+  // return issues
+  return res.status(HttpStatusCodes.OK).json({ issues: result });
+});
+RoadmapIssues.get(Paths.Roadmaps.Issues.Get, async (req, res) => {
+  // get issue id  from params
+  const issueId = BigInt(req.params?.issueId || -1);
+  const roadmapId = BigInt(req.params?.roadmapId || -1);
 
-      // check if issue exists
-      if (!issue) return res.status(HttpStatusCodes.NOT_FOUND)
-        .json({ error: 'Issue not found.' });
+  // get database connection
+  const db = new Database();
 
-      // return issue
-      return res.status(HttpStatusCodes.OK).json({
-        issue: {
+  if (roadmapId < 0)
+    return res
+      .status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Roadmap id is invalid.' });
+
+  // get roadmap from database
+  const roadmap = await db.get('roadmaps', roadmapId);
+
+  // check if roadmap exists
+  if (!roadmap)
+    return res
+      .status(HttpStatusCodes.NOT_FOUND)
+      .json({ error: 'Roadmap not found.' });
+
+  // check if issue id is valid
+  if (issueId < 0) {
+    // get all issues from database from roadmap
+    let issues = await db.getAllWhere<Issue>('issues', 'roadmapId', roadmapId);
+
+    if (!issues) issues = [];
+
+    const result = issues
+      .filter((issue) => issue.roadmapId === roadmapId)
+      .map((issue) => {
+        return {
           id: issue.id.toString(),
           title: issue.title,
           content: issue.content,
@@ -118,17 +145,43 @@ RoadmapIssues.get(Paths.Roadmaps.Issues.Get,
           userId: issue.userId.toString(),
           createdAt: issue.createdAt,
           updatedAt: issue.updatedAt,
-        },
+        };
       });
-    }
-  });
+
+    // return issues
+    return res.status(HttpStatusCodes.OK).json({ issues: result });
+  } else {
+    // get issue from database
+    const issue = await db.get<Issue>('issues', issueId);
+
+    // check if issue exists
+    if (!issue)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Issue not found.' });
+
+    // return issue
+    return res.status(HttpStatusCodes.OK).json({
+      issue: {
+        id: issue.id.toString(),
+        title: issue.title,
+        content: issue.content,
+        roadmapId: issue.roadmapId.toString(),
+        userId: issue.userId.toString(),
+        createdAt: issue.createdAt,
+        updatedAt: issue.updatedAt,
+      },
+    });
+  }
+});
 
 RoadmapIssues.post(Paths.Roadmaps.Issues.Update.Base, requireSessionMiddleware);
 RoadmapIssues.use(Paths.Roadmaps.Issues.Update.Base, IssuesUpdate);
 
 // Delete Issue
 RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete, requireSessionMiddleware);
-RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete,
+RoadmapIssues.delete(
+  Paths.Roadmaps.Issues.Delete,
   async (req: RequestWithSession, res) => {
     // get data from body and session
     const session = req.session;
@@ -141,30 +194,38 @@ RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete,
     const issue = await db.get<Issue>('issues', id);
 
     // check if issue exists
-    if (!issue) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Issue not found.' });
+    if (!issue)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Issue not found.' });
 
     const roadmap = await db.get<Roadmap>('roadmaps', issue.roadmapId);
 
     // check if roadmap exists
-    if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap not found.' });
+    if (!roadmap)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Roadmap not found.' });
 
-    // check if user is owner
+    // check if userDisplay is owner
     if (issue.userId !== session?.userId && roadmap.ownerId !== session?.userId)
-      return res.status(HttpStatusCodes.FORBIDDEN)
+      return res
+        .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'User is not owner of issue or roadmap.' });
 
     // delete issue from database
     const success = await db.delete('issues', id);
 
     // check if issue was deleted
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Issue could not be deleted.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be deleted.' });
 
     // return success
     return res.status(HttpStatusCodes.OK).json({ success: true });
-  });
+  },
+);
 
 RoadmapIssues.use(Paths.Roadmaps.Issues.Comments.Base, Comments);
 

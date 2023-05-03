@@ -2,7 +2,7 @@
 
 ## Mini profile [GET - /api/users/:userId([0-9]+)?/mini]
 
-Returns esential information such as Name and profile picture about user with :
+Returns esential information such as Name and profile picture about userDisplay with :
 userId.
 
 ### Parameters
@@ -21,7 +21,7 @@ userId.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

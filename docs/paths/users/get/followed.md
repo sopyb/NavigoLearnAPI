@@ -2,7 +2,7 @@
 
 ## User following [GET - /api/users/:userId([0-9]+)?/following-count]
 
-Returns all users followed by user with :userId or logged-in user.
+Returns all users followed by userDisplay with :userId or logged-in userDisplay.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Returns all users followed by user with :userId or logged-in user.
 
 | Code | Description                                      |
 |------|--------------------------------------------------|
-| 200  | Returns all users followed by user with :userId. |
+| 200  | Returns all users followed by userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist               |
 | 500  | Internal Server Error.                           |
 

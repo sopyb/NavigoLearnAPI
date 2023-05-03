@@ -20,7 +20,7 @@ describe('Roadmap Issues', () => {
     const password = Math.random().toString(36).substring(2, 15);
     const password2 = Math.random().toString(36).substring(2, 15);
 
-    // register user
+    // register userDisplay
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email, password })
@@ -30,7 +30,7 @@ describe('Roadmap Issues', () => {
       .send({ email: email2, password: password2 })
       .expect(HttpStatusCodes.CREATED);
 
-    // get user token
+    // get userDisplay token
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     token = res.header['set-cookie'][0].split(';')[0].split('=')[1] as string;
@@ -42,29 +42,30 @@ describe('Roadmap Issues', () => {
     // get database
     const db = new Database();
 
-    // get user
+    // get userDisplay
     const dbuser = await db.getWhere<User>('users', 'email', email);
 
     // get user2
     const dbuser2 = await db.getWhere<User>('users', 'email', email2);
 
-    // check if user exists
+    // check if userDisplay exists
     if (!dbuser || !dbuser2) throw new Error('User not found');
 
-    // set user
+    // set userDisplay
     user = dbuser;
     user2 = dbuser2;
 
     // create roadmap
     const res3 = await request(app)
       .post('/api/roadmaps/create')
-      .set('Cookie', [ `token=${token}` ])
+      .set('Cookie', [`token=${token}`])
       .send({
         roadmap: new Roadmap(
           user.id,
           'Test Roadmap',
           'Test Description',
-          'datra').toJSON(),
+          'datra',
+        ).toJSON(),
       })
       .expect(HttpStatusCodes.CREATED);
 
@@ -84,11 +85,11 @@ describe('Roadmap Issues', () => {
     // get database
     const db = new Database();
 
-    // delete user
+    // delete userDisplay
     const success = await db.delete('users', user.id);
     const success2 = await db.delete('users', user2.id);
 
-    // check if user was deleted
+    // check if userDisplay was deleted
     expect(success).toBe(true);
     expect(success2).toBe(true);
   });
@@ -97,7 +98,7 @@ describe('Roadmap Issues', () => {
    ! Create Issue Tests
    */
 
-  it('should create an issue if user is roadmap owner', async () => {
+  it('should create an issue if userDisplay is roadmap owner', async () => {
     // create issue
     const res = await request(app)
       .post(`/api/roadmaps/${roadmap.id}/issues/create`)
@@ -123,7 +124,7 @@ describe('Roadmap Issues', () => {
     issueid = res.body.id;
   });
 
-  it('should create an issue if user is not roadmap owner', async () => {
+  it('should create an issue if userDisplay is not roadmap owner', async () => {
     // create issue
     const res = await request(app)
       .post(`/api/roadmaps/${roadmap.id}/issues/create`)
@@ -182,10 +183,9 @@ describe('Roadmap Issues', () => {
       });
   });
 
-  it('should fail to get an issue that doesn\'t exist', async () => {
+  it("should fail to get an issue that doesn't exist", async () => {
     // get issue
-    await request(app)
-      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}2`);
+    await request(app).get(`/api/roadmaps/${roadmap.id}/issues/${issueid}2`);
   });
 
   /*
@@ -227,16 +227,15 @@ describe('Roadmap Issues', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it('should not be able to update title of issue if not logged in',
-    async () => {
-      // update issue
-      await request(app)
-        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/title`)
-        .send({
-          title: 'New Test Title',
-        })
-        .expect(HttpStatusCodes.UNAUTHORIZED);
-    });
+  it('should not be able to update title of issue if not logged in', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/title`)
+      .send({
+        title: 'New Test Title',
+      })
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
 
   it('should be able to update content of issue', async () => {
     // update issue
@@ -266,16 +265,15 @@ describe('Roadmap Issues', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it('should not be able to update content of issue if not logged in',
-    async () => {
-      // update issue
-      await request(app)
-        .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/content`)
-        .send({
-          content: 'New Test Content',
-        })
-        .expect(HttpStatusCodes.UNAUTHORIZED);
-    });
+  it('should not be able to update content of issue if not logged in', async () => {
+    // update issue
+    await request(app)
+      .post(`/api/roadmaps/${roadmap.id}/issues/${issueid2}/content`)
+      .send({
+        content: 'New Test Content',
+      })
+      .expect(HttpStatusCodes.UNAUTHORIZED);
+  });
 
   it('should be able to open issue', async () => {
     // update issue
@@ -305,14 +303,13 @@ describe('Roadmap Issues', () => {
       });
   });
 
-  it('should not be able to open issue if not owner of issue or roadmap',
-    async () => {
-      // update issue
-      await request(app)
-        .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
-        .set('Cookie', `token=${token2}`)
-        .expect(HttpStatusCodes.FORBIDDEN);
-    });
+  it('should not be able to open issue if not owner of issue or roadmap', async () => {
+    // update issue
+    await request(app)
+      .get(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
+      .set('Cookie', `token=${token2}`)
+      .expect(HttpStatusCodes.FORBIDDEN);
+  });
 
   it('should not be able to open issue if not logged in', async () => {
     // update issue
@@ -349,14 +346,13 @@ describe('Roadmap Issues', () => {
       });
   });
 
-  it('should not be able to close issue if not owner of issue or roadmap',
-    async () => {
-      // update issue
-      await request(app)
-        .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
-        .set('Cookie', `token=${token2}`)
-        .expect(HttpStatusCodes.FORBIDDEN);
-    });
+  it('should not be able to close issue if not owner of issue or roadmap', async () => {
+    // update issue
+    await request(app)
+      .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}/status`)
+      .set('Cookie', `token=${token2}`)
+      .expect(HttpStatusCodes.FORBIDDEN);
+  });
 
   it('should not be able to close issue if not logged in', async () => {
     // update issue
@@ -376,14 +372,13 @@ describe('Roadmap Issues', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it('should fail to delete an issue if not owner of issue/roadmap',
-    async () => {
-      // delete issue
-      await request(app)
-        .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}`)
-        .set('Cookie', `token=${token2}`)
-        .expect(HttpStatusCodes.FORBIDDEN);
-    });
+  it('should fail to delete an issue if not owner of issue/roadmap', async () => {
+    // delete issue
+    await request(app)
+      .delete(`/api/roadmaps/${roadmap.id}/issues/${issueid}`)
+      .set('Cookie', `token=${token2}`)
+      .expect(HttpStatusCodes.FORBIDDEN);
+  });
 
   it('should delete an issue', async () => {
     // delete issue

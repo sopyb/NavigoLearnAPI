@@ -15,14 +15,17 @@ async function checkArguments(
   req: RequestWithSession,
   res: Response,
   roadmapOwnerCanEdit = false,
-): Promise<{
-  session: RequestWithSession['session'],
-  issueId: bigint,
-  roadmapId: bigint,
-  issue: Issue,
-  roadmap: Roadmap,
-  db: Database,
-} | undefined> {
+): Promise<
+  | {
+      session: RequestWithSession['session'];
+      issueId: bigint;
+      roadmapId: bigint;
+      issue: Issue;
+      roadmap: Roadmap;
+      db: Database;
+    }
+  | undefined
+> {
   // get data from body and session
   const session = req.session;
   const issueId = BigInt(req.params.issueId || -1);
@@ -30,7 +33,8 @@ async function checkArguments(
 
   // check if session, issueId and roadmapId are valid
   if (!session || issueId < 0 || roadmapId < 0) {
-    res.status(HttpStatusCodes.BAD_REQUEST)
+    res
+      .status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Session, issueId or roadmapId is invalid.' });
     return;
   }
@@ -42,14 +46,16 @@ async function checkArguments(
   const issue = await db.get<Issue>('issues', issueId);
 
   if (!issue) {
-    res.status(HttpStatusCodes.NOT_FOUND)
+    res
+      .status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Issue does not exist.' });
     return;
   }
 
   // check if issue belongs to roadmap
   if (issue.roadmapId !== roadmapId) {
-    res.status(HttpStatusCodes.BAD_REQUEST)
+    res
+      .status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Issue does not belong to roadmap.' });
     return;
   }
@@ -58,14 +64,18 @@ async function checkArguments(
   const roadmap = await db.get<Roadmap>('roadmaps', roadmapId);
 
   if (!roadmap) {
-    res.status(HttpStatusCodes.NOT_FOUND)
+    res
+      .status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Roadmap does not exist.' });
     return;
   }
-  // check if user is allowed to update issue
-  if (issue.userId !== session.userId &&
-    (roadmapOwnerCanEdit ? roadmap?.ownerId !== session.userId : true)) {
-    res.status(HttpStatusCodes.FORBIDDEN)
+  // check if userDisplay is allowed to update issue
+  if (
+    issue.userId !== session.userId &&
+    (roadmapOwnerCanEdit ? roadmap?.ownerId !== session.userId : true)
+  ) {
+    res
+      .status(HttpStatusCodes.FORBIDDEN)
       .json({ error: 'User is not allowed to update issue.' });
     return;
   }
@@ -83,17 +93,14 @@ async function checkArguments(
 async function statusChangeIssue(
   req: RequestWithSession,
   res: Response,
-  open: boolean) {
+  open: boolean,
+) {
   // check if arguments are valid
   const args = await checkArguments(req, res, true);
 
   if (!args) return;
 
-  const {
-    issueId,
-    issue,
-    db,
-  } = args;
+  const { issueId, issue, db } = args;
 
   // update issue
   issue.open = open;
@@ -103,14 +110,17 @@ async function statusChangeIssue(
   const success = await db.update('issues', issueId, issue);
 
   // check if id is valid
-  if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-    .json({ error: 'Issue could not be saved to database.' });
+  if (!success)
+    return res
+      .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Issue could not be saved to database.' });
 
   // return success
   return res.status(HttpStatusCodes.OK).json({ success: true });
 }
 
-IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Title,
+IssuesUpdate.post(
+  Paths.Roadmaps.Issues.Update.Title,
   async (req: RequestWithSession, res) => {
     // get data from body and session
     const session = req.session;
@@ -121,12 +131,14 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Title,
 
     // check if title is valid
     if (!title) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Title is missing.' });
     }
     // check if session, issueId and roadmapId are valid
     if (!session || issueId < 0 || roadmapId < 0) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Session, issueId or roadmapId is invalid.' });
     }
 
@@ -137,19 +149,22 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Title,
     const issue = await db.get<Issue>('issues', issueId);
 
     if (!issue) {
-      return res.status(HttpStatusCodes.NOT_FOUND)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Issue does not exist.' });
     }
 
     // check if issue belongs to roadmap
     if (issue.roadmapId !== roadmapId) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Issue does not belong to roadmap.' });
     }
 
-    // check if user is allowed to update issue
+    // check if userDisplay is allowed to update issue
     if (issue.userId !== session.userId) {
-      return res.status(HttpStatusCodes.UNAUTHORIZED)
+      return res
+        .status(HttpStatusCodes.UNAUTHORIZED)
         .json({ error: 'User is not allowed to update issue.' });
     }
 
@@ -161,14 +176,18 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Title,
     const success = await db.update('issues', issueId, issue);
 
     // check if id is valid
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Issue could not be saved to database.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be saved to database.' });
 
     // return success
     return res.status(HttpStatusCodes.OK).json({ success: true });
-  });
+  },
+);
 
-IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
+IssuesUpdate.post(
+  Paths.Roadmaps.Issues.Update.Content,
   async (req: RequestWithSession, res) => {
     // get data from body and session
     const session = req.session;
@@ -179,12 +198,14 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
 
     // check if content is valid
     if (!content) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Content is missing.' });
     }
     // check if session, issueId and roadmapId are valid
     if (!session || issueId < 0 || roadmapId < 0) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Session, issueId or roadmapId is invalid.' });
     }
 
@@ -195,19 +216,22 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
     const issue = await db.get<Issue>('issues', issueId);
 
     if (!issue) {
-      return res.status(HttpStatusCodes.NOT_FOUND)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Issue does not exist.' });
     }
 
     // check if issue belongs to roadmap
     if (issue.roadmapId !== roadmapId) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Issue does not belong to roadmap.' });
     }
 
-    // check if user is allowed to update issue
+    // check if userDisplay is allowed to update issue
     if (issue.userId !== session.userId) {
-      return res.status(HttpStatusCodes.UNAUTHORIZED)
+      return res
+        .status(HttpStatusCodes.UNAUTHORIZED)
         .json({ error: 'User is not allowed to update issue.' });
     }
 
@@ -219,20 +243,27 @@ IssuesUpdate.post(Paths.Roadmaps.Issues.Update.Content,
     const success = await db.update('issues', issueId, issue);
 
     // check if id is valid
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Issue could not be saved to database.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be saved to database.' });
 
     // return success
     return res.status(HttpStatusCodes.OK).json({ success: true });
-  });
+  },
+);
 
 IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, requireSessionMiddleware);
-IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status,
-  (req, res) => statusChangeIssue(req, res, true));
+IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
+  statusChangeIssue(req, res, true),
+);
 
 IssuesUpdate.delete(
-  Paths.Roadmaps.Issues.Update.Status, requireSessionMiddleware);
-IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status,
-  (req, res) => statusChangeIssue(req, res, false));
+  Paths.Roadmaps.Issues.Update.Status,
+  requireSessionMiddleware,
+);
+IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
+  statusChangeIssue(req, res, false),
+);
 
 export default IssuesUpdate;

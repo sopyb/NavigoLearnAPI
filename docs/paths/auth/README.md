@@ -4,28 +4,28 @@
 
 ## [Login](login.md) [POST - /api/auth/login]
 
-Logs in a user.
+Logs in a userDisplay.
 
 ## [Register](register.md) [POST - /api/auth/register]
 
-Registers a new user.
+Registers a new userDisplay.
 
 ## [ChangePassword](change-password.md) [POST - /api/auth/change-password]
 
-Changes a user's password.
+Changes a userDisplay's password.
 
 ## [ForgotPassword](forgot-password.md) [POST - /api/auth/forgot-password]
 
-Sends a password reset email to the user.
+Sends a password reset email to the userDisplay.
 
 ## [GoogleLogin](google-login.md) [GET - /api/auth/google-login]
 
-Logs in a user using Google OAuth.
+Logs in a userDisplay using Google OAuth.
 
 ## [GithubLogin](github-login.md) [GET - /api/auth/github-login]
 
-Logs in a user using GitHub OAuth.
+Logs in a userDisplay using GitHub OAuth.
 
 ## [Logout](logout.md) [DELETE - /api/auth/logout]
 
-Logs out a user.
+Logs out a userDisplay.

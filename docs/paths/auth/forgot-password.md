@@ -7,13 +7,13 @@
 
 ## POST - /api/auth/forgot-password
 
-Sends a password reset email to the user.
+Sends a password reset email to the userDisplay.
 
 ### Parameters
 
 | Name  | Type   | Description            |
 |-------|--------|------------------------|
-| Email | string | The email of the user. |
+| Email | string | The email of the userDisplay. |
 
 ### Response Codes
 

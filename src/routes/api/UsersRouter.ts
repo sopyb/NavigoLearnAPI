@@ -17,33 +17,34 @@ UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 // Update routes
 UsersRouter.use(Paths.Users.Update.Base, UsersUpdate);
 
-// Delete route - delete user - requires session
+// Delete route - delete userDisplay - requires session
 UsersRouter.delete(Paths.Users.Delete, requireSessionMiddleware);
-UsersRouter.delete(Paths.Users.Delete,
-  async (req: RequestWithSession, res) => {
-    // get database
-    const db = new DatabaseDriver();
+UsersRouter.delete(Paths.Users.Delete, async (req: RequestWithSession, res) => {
+  // get database
+  const db = new DatabaseDriver();
 
-    // get userId from request
-    const userId = req.session?.userId;
+  // get userId from request
+  const userId = req.session?.userId;
 
-    if (userId === undefined) {
-      // send error json
-      return res.status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-    }
+  if (userId === undefined) {
+    // send error json
+    return res
+      .status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'No userDisplay specified' });
+  }
 
-    // delete user from database
-    const success = await db.delete('users', userId);
+  // delete userDisplay from database
+  const success = await db.delete('users', userId);
 
-    if (success) {
-      // send success json
-      return res.status(HttpStatusCodes.OK).json({ success: true });
-    } else {
-      // send error json
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Failed to delete user' });
-    }
-  });
+  if (success) {
+    // send success json
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  } else {
+    // send error json
+    return res
+      .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to delete userDisplay' });
+  }
+});
 
 export default UsersRouter;

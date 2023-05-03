@@ -2,7 +2,7 @@
 
 ## User followers [GET - /api/users/:userId([0-9]+)?/followers]
 
-Returns all followers of user with :userId or logged-in user.
+Returns all followers of userDisplay with :userId or logged-in userDisplay.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Returns all followers of user with :userId or logged-in user.
 
 | Code | Description                                 |
 |------|---------------------------------------------|
-| 200  | Returns all followers of user with :userId. |
+| 200  | Returns all followers of userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist          |
 | 500  | Internal Server Error.                      |
 

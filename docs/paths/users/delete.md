@@ -2,7 +2,7 @@
 
 ## DELETE - /api/users/:userId([0-9]+)?
 
-Deletes user with :userId or logged-in user. This action is irreversible.
+Deletes userDisplay with :userId or logged-in userDisplay. This action is irreversible.
 
 ## Parameters
 

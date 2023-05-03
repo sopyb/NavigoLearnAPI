@@ -11,6 +11,7 @@ import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
+import * as console from 'console';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -43,7 +44,7 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // get user from database
+  // get userDisplay from database
   const user = await db.get<User>('users', userId);
   const userInfo = await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
   const roadmapsCount = await db.countWhere('roadmaps', 'ownerId', userId);
@@ -112,7 +113,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     const db = new DatabaseDriver();
 
@@ -149,7 +150,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     const db = new DatabaseDriver();
 
@@ -171,7 +172,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     const db = new DatabaseDriver();
 
@@ -197,7 +198,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     const db = new DatabaseDriver();
 
@@ -223,7 +224,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     // get database
     const db = new DatabaseDriver();
@@ -247,7 +248,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     // get database
     const db = new DatabaseDriver();
@@ -271,7 +272,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     // get database
     const db = new DatabaseDriver();
@@ -295,7 +296,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     // get database
     const db = new DatabaseDriver();
@@ -315,12 +316,61 @@ UsersGet.get(
   },
 );
 
+UsersGet.get(Paths.Users.Get.IsFollowing, requireSessionMiddleware);
+UsersGet.get(
+  Paths.Users.Get.IsFollowing,
+  async (req: RequestWithSession, res) => {
+    // get the target userDisplay id
+    const userId = BigInt(req.params.userId || -1);
+
+    // get the current userDisplay id
+    const followerId = req.session?.userId;
+
+    if (userId === followerId)
+      return res
+        .status(HttpStatusCodes.FORBIDDEN)
+        .json({ error: 'Cannot follow  yourself' });
+
+    // if either of the ids are undefined, return a bad request
+    if (!followerId || !userId || userId < 0)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'No userDisplay specified' });
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if the userDisplay is already following the target userDisplay
+    const following = await db.getAllWhere<Follower>(
+      'followers',
+      'followerId',
+      followerId,
+    );
+    console.log(following);
+
+    if (!!following)
+      if (following.some((f) => f.userId === userId)) {
+        return res
+          .status(HttpStatusCodes.OK)
+          .json({ status: true, userId: userId.toString() });
+      } else {
+        return res
+          .status(HttpStatusCodes.OK)
+          .json({ status: false, userId: userId.toString() });
+      }
+    else
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'something went wrong' });
+  },
+);
+
 UsersGet.get(Paths.Users.Get.Follow, requireSessionMiddleware);
 UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
-  // get the target user id
+  // get the target userDisplay id
   const userId = BigInt(req.params.userId || -1);
 
-  // get the current user id
+  // get the current userDisplay id
   const followerId = req.session?.userId;
 
   if (userId === followerId)
@@ -332,12 +382,12 @@ UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
   if (!followerId || !userId || userId < 0)
     return res
       .status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'No user specified' });
+      .json({ error: 'No userDisplay specified' });
 
   // get database
   const db = new DatabaseDriver();
 
-  // check if the user is already following the target user
+  // check if the userDisplay is already following the target userDisplay
   const following = await db.getAllWhere<Follower>(
     'followers',
     'followerId',
@@ -378,10 +428,10 @@ UsersGet.delete(Paths.Users.Get.Follow, requireSessionMiddleware);
 UsersGet.delete(
   Paths.Users.Get.Follow,
   async (req: RequestWithSession, res) => {
-    // get the target user id
+    // get the target userDisplay id
     const userId = BigInt(req.params.userId || -1);
 
-    // get the current user id
+    // get the current userDisplay id
     const followerId = req.session?.userId;
 
     if (userId === followerId)
@@ -393,12 +443,12 @@ UsersGet.delete(
     if (!followerId || !userId)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
+        .json({ error: 'No userDisplay specified' });
 
     // get database
     const db = new DatabaseDriver();
 
-    // check if the user is already following the target user
+    // check if the userDisplay is already following the target userDisplay
     const following = await db.getAllWhere<Follower>(
       'followers',
       'followerId',

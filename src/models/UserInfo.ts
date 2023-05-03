@@ -1,5 +1,6 @@
-const INVALID_CONSTRUCTOR_PARAM = 'nameOrObj arg must a string or an object ' +
-  'with the appropriate user keys.';
+const INVALID_CONSTRUCTOR_PARAM =
+  'nameOrObj arg must a string or an object ' +
+  'with the appropriate userDisplay keys.';
 
 export interface IUserInfo {
   id: bigint;
@@ -43,14 +44,14 @@ export class UserInfo implements IUserInfo {
   }
 
   public static from(param: object): UserInfo {
-    // check if param is user
+    // check if param is userDisplay
     if (!UserInfo.isUserInfo(param)) {
       throw new Error(INVALID_CONSTRUCTOR_PARAM);
     }
 
     const info = param as IUserInfo;
 
-    // create user
+    // create userDisplay
     return new UserInfo(
       info.userId,
       info.profilePictureUrl,

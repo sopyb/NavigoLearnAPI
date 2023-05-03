@@ -106,7 +106,7 @@ function handleExternalAuthError(error, res: Response): void {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: 'Couldn\'t get access token from external service',
+      error: "Couldn't get access token from external service",
     });
   } else {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -128,7 +128,7 @@ AuthRouter.post(Paths.Auth.Login, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if user exists
+  // check if userDisplay exists
   const user = await db.getWhere<User>('users', 'email', email);
   // if not, return error
   if (!user) {
@@ -146,7 +146,7 @@ AuthRouter.post(Paths.Auth.Login, async (req, res) => {
     });
   }
 
-  // check if user has userInfo
+  // check if userDisplay has userInfo
   const userInfo = db.getWhere('userInfo', 'userId', user.id);
 
   if (!userInfo) {
@@ -190,7 +190,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if user exists
+  // check if userDisplay exists
   const user = await db.getWhere<User>('users', 'email', email);
   // if yes, return error
   if (!!user) {
@@ -203,10 +203,10 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const username = email.split('@')[0];
   const saltedPassword = saltPassword(password);
 
-  // create user
+  // create userDisplay
   const newUser = new User(username, email, UserRoles.Standard, saltedPassword);
 
-  // save user
+  // save userDisplay
   const result = await db.insert('users', newUser);
   newUser.id = result;
 
@@ -254,13 +254,13 @@ AuthRouter.post(
     // get database
     const db = new DatabaseDriver();
 
-    // check if user exists
+    // check if userDisplay exists
     const user = await db.get<User>('users', req.session.userId);
 
     // if not, return error
     if (!user) {
       return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Invalid user',
+        error: 'Invalid userDisplay',
       });
     }
 
@@ -277,7 +277,7 @@ AuthRouter.post(
     // change password
     const saltedPassword = saltPassword(newPassword as string);
 
-    // update user
+    // update userDisplay
     const result = await db.update('users', req.session.userId, {
       pwdHash: saltedPassword,
     });
@@ -309,7 +309,7 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if user exists
+  // check if userDisplay exists
   const user = await db.getWhere<User>('users', 'email', email);
 
   // if not, return error
@@ -359,7 +359,7 @@ AuthRouter.get(Paths.Auth.GoogleCallback, async (req, res) => {
     // if no token, return error
     if (!accessToken) throw new AxiosError('No access token received');
 
-    // get user data
+    // get userDisplay data
     response = await axios.get(
       'https://www.googleapis.com/oauth2/v2/userinfo',
       {
@@ -370,16 +370,16 @@ AuthRouter.get(Paths.Auth.GoogleCallback, async (req, res) => {
     );
     const userData = response?.data as GoogleUserData;
 
-    // if no user data, return error
-    if (!userData) throw new Error('No user data received');
+    // if no userDisplay data, return error
+    if (!userData) throw new Error('No userDisplay data received');
 
     // get database
     const db = new DatabaseDriver();
 
-    // check if user exists
+    // check if userDisplay exists
     let user = await db.getWhere<User>('users', 'email', userData.email);
 
-    // if a user doesn't exist, create a new user
+    // if a userDisplay doesn't exist, create a new userDisplay
     if (!user) {
       const userId = await db.insert('users', {
         email: userData.email,
@@ -391,13 +391,13 @@ AuthRouter.get(Paths.Auth.GoogleCallback, async (req, res) => {
 
       if (!user) throw new Error('User not found');
     } else if (!user.googleId) {
-      // if a user exists but doesn't have a Google id, add it
+      // if a userDisplay exists but doesn't have a Google id, add it
       await db.update('users', user.id, {
         googleId: userData.id,
       });
     }
 
-    //check if user has userInfo
+    //check if userDisplay has userInfo
     const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', user.id);
 
     // if not, create userInfo
@@ -467,13 +467,13 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       },
     });
 
-    // get user email
+    // get userDisplay email
     const response2 = await axios.get('https://api.github.com/user/emails', {
       headers: {
         Authorization: `token ${accessToken}`,
         Accept: 'application/json',
-        "X-GitHub-Api-Version": "2022-11-28",
-        "X-OAuth-Scopes": "user:email",
+        'X-GitHub-Api-Version': '2022-11-28',
+        'X-OAuth-Scopes': 'userDisplay:email',
       },
     });
 
@@ -501,21 +501,21 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     // get database
     const db = new DatabaseDriver();
 
-    // check if user exists
+    // check if userDisplay exists
     let user = await db.getWhere<User>('users', 'email', data.email);
 
     if (!user) {
-      // create user
+      // create userDisplay
       const userId = await db.insert('users', {
         name: data.name || data.login,
         email: data.email,
         githubId: data.id,
       });
 
-      // check if user was created
-      if (userId < 0) throw new Error('Could not create user');
+      // check if userDisplay was created
+      if (userId < 0) throw new Error('Could not create userDisplay');
 
-      // get user
+      // get userDisplay
       user = new User(
         data.name,
         data.email,
@@ -527,19 +527,19 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
       );
     }
 
-    // check if user has githubId if not,
-    // update user with githubId merging accounts
+    // check if userDisplay has githubId if not,
+    // update userDisplay with githubId merging accounts
     if (!user.githubId) {
-      // update user
+      // update userDisplay
       const userId = await db.update('users', user.id, {
         githubId: data.id,
       });
 
-      // check if user was updated
-      if (!userId) throw new Error('Could not update user');
+      // check if userDisplay was updated
+      if (!userId) throw new Error('Could not update userDisplay');
     }
 
-    //check if user has userInfo
+    //check if userDisplay has userInfo
     const userInfo = await db.getWhere<UserInfo>('userInfo', 'userId', user.id);
 
     // if not, create userInfo
@@ -591,17 +591,20 @@ AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
   await db.delete('sessions', session.id);
 
   // clear previous cookie header
-  res.header('Set-Cookie', '')
+  res.header('Set-Cookie', '');
 
   // set cookie
-  return res.cookie('token', '', {
-    httpOnly: false,
-    secure: EnvVars.NodeEnv === NodeEnvs.Production,
-    maxAge: 0,
-    sameSite: 'strict',
-  }).status(HttpStatusCodes.OK).json({
-    message: 'Logout successful',
-  });
+  return res
+    .cookie('token', '', {
+      httpOnly: false,
+      secure: EnvVars.NodeEnv === NodeEnvs.Production,
+      maxAge: 0,
+      sameSite: 'strict',
+    })
+    .status(HttpStatusCodes.OK)
+    .json({
+      message: 'Logout successful',
+    });
 });
 
 export default AuthRouter;

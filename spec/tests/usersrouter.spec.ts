@@ -9,12 +9,15 @@ async function checkProfile(
   mini?: boolean,
   loginCookie?: string,
 ): Promise<void> {
-  // get user and expect 200 response
-  await request(app).get(
-    '/api/users/' + (!!target ? target : '') + (mini ? '/mini' : ''))
+  // get userDisplay and expect 200 response
+  await request(app)
+    .get('/api/users/' + (!!target ? target : '') + (mini ? '/mini' : ''))
     .set('Cookie', loginCookie ?? '')
-    .expect((!!loginCookie || !!target) ?
-      HttpStatusCodes.OK : HttpStatusCodes.NOT_FOUND)
+    .expect(
+      !!loginCookie || !!target
+        ? HttpStatusCodes.OK
+        : HttpStatusCodes.NOT_FOUND,
+    )
     .expect('Content-Type', /json/)
     .expect((res) => {
       const receivedUser: object = res.body;
@@ -51,12 +54,12 @@ describe('Users Router', () => {
   let loginCookie: string;
   let userId: bigint;
 
-  // second user for testing
+  // second userDisplay for testing
   let email2: string;
   let password2: string;
   let userId2: bigint;
 
-  // set up a user to run tests on
+  // set up a userDisplay to run tests on
   beforeAll(async () => {
     // generate random email
     email = Math.random().toString(36).substring(2, 15) + '@test.com';
@@ -71,7 +74,8 @@ describe('Users Router', () => {
       .send({ email, password })
       .expect(HttpStatusCodes.CREATED);
 
-    await request(app).post('/api/auth/register')
+    await request(app)
+      .post('/api/auth/register')
       .send({ email: email2, password: password2 })
       .expect(HttpStatusCodes.CREATED);
 
@@ -86,36 +90,36 @@ describe('Users Router', () => {
     // get database
     const db = new Database();
 
-    // get user from database
+    // get userDisplay from database
     const user = await db.getWhere<IUser>('users', 'email', email);
     const user2 = await db.getWhere<IUser>('users', 'email', email2);
 
-    // get user id
+    // get userDisplay id
     userId = user?.id ?? BigInt(-1);
     userId2 = user2?.id ?? BigInt(-1);
 
     if (userId < 0 || userId2 < 0) {
-      // can't run tests without a user
-      throw new Error('Failed to create user');
+      // can't run tests without a userDisplay
+      throw new Error('Failed to create userDisplay');
     }
   });
 
-  // delete the user after tests
+  // delete the userDisplay after tests
   afterAll(async () => {
     // get database
     const db = new Database();
 
-    // see if user exists
+    // see if userDisplay exists
     const user = await db.getWhere<IUser>('users', 'email', email);
     const user2 = await db.getWhere<IUser>('users', 'email', email2);
 
-    // if user exists, delete them
+    // if userDisplay exists, delete them
     if (user) await db.delete('users', user.id);
     if (user2) await db.delete('users', user2.id);
   });
 
   /**
-   * Test getting a user's profile
+   * Test getting a userDisplay's profile
    */
   it('Get profile with no target or login cookie', async () => {
     await checkProfile(undefined, false, undefined);
@@ -150,10 +154,11 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's roadmaps
+   * Test getting userDisplay's roadmaps
    */
-  it('Get user roadmaps with no target or login cookie', async () => {
-    await request(app).get('/api/users/roadmaps')
+  it('Get userDisplay roadmaps with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/roadmaps')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -161,8 +166,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user roadmaps with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/roadmaps')
+  it('Get userDisplay roadmaps with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/roadmaps')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -174,22 +180,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user roadmaps with no target and login cookie', async () => {
-    await request(app).get('/api/users/roadmaps')
-      .set('Cookie', loginCookie)
-      .expect(HttpStatusCodes.OK)
-      .expect('Content-Type', /json/)
-      .expect((res) => {
-        expect(res.body).toBeDefined();
-        // expect it to be an array
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        expect(Array.isArray(res.body?.roadmaps)).toBe(true);
-      });
-  });
-
-  it('Get user roadmaps with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/roadmaps')
+  it('Get userDisplay roadmaps with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/roadmaps')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -202,11 +195,27 @@ describe('Users Router', () => {
       });
   });
 
+  it('Get userDisplay roadmaps with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/roadmaps')
+      .set('Cookie', loginCookie)
+      .expect(HttpStatusCodes.OK)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body).toBeDefined();
+        // expect it to be an array
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(Array.isArray(res.body?.roadmaps)).toBe(true);
+      });
+  });
+
   /**
-   * Test getting user's issues
+   * Test getting userDisplay's issues
    */
-  it('Get user issues with no target or login cookie', async () => {
-    await request(app).get('/api/users/issues')
+  it('Get userDisplay issues with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/issues')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -214,8 +223,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issues with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/issues')
+  it('Get userDisplay issues with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/issues')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -226,8 +236,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issues with no target and login cookie', async () => {
-    await request(app).get('/api/users/issues')
+  it('Get userDisplay issues with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/issues')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -240,8 +251,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issues with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/issues')
+  it('Get userDisplay issues with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/issues')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -255,10 +267,11 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's followers
+   * Test getting userDisplay's followers
    */
-  it('Get user followers with no target or login cookie', async () => {
-    await request(app).get('/api/users/followers')
+  it('Get userDisplay followers with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/followers')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -266,8 +279,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user followers with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/followers')
+  it('Get userDisplay followers with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/followers')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -278,8 +292,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user followers with no target and login cookie', async () => {
-    await request(app).get('/api/users/followers')
+  it('Get userDisplay followers with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/followers')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -292,8 +307,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user followers with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/followers')
+  it('Get userDisplay followers with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/followers')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -307,10 +323,11 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's following
+   * Test getting userDisplay's following
    */
-  it('Get user following with no target or login cookie', async () => {
-    await request(app).get('/api/users/following')
+  it('Get userDisplay following with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/following')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -318,8 +335,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/following')
+  it('Get userDisplay following with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/following')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -330,8 +348,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following with no target and login cookie', async () => {
-    await request(app).get('/api/users/following')
+  it('Get userDisplay following with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/following')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -344,8 +363,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/following')
+  it('Get userDisplay following with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/following')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -359,10 +379,11 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's Roadmap count
+   * Test getting userDisplay's Roadmap count
    */
-  it('Get user Roadmap count with no target or login cookie', async () => {
-    await request(app).get('/api/users/roadmap-count')
+  it('Get userDisplay Roadmap count with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/roadmap-count')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -370,8 +391,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user Roadmap count with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/roadmap-count')
+  it('Get userDisplay Roadmap count with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/roadmap-count')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -384,8 +406,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user Roadmap count with no target and login cookie', async () => {
-    await request(app).get('/api/users/roadmap-count')
+  it('Get userDisplay Roadmap count with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/roadmap-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -399,8 +422,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user Roadmap count with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/roadmap-count')
+  it('Get userDisplay Roadmap count with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/roadmap-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -415,11 +439,12 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's issue count
+   * Test getting userDisplay's issue count
    */
 
-  it('Get user issue count with no target or login cookie', async () => {
-    await request(app).get('/api/users/issue-count')
+  it('Get userDisplay issue count with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/issue-count')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -427,8 +452,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issue count with target and no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/issue-count')
+  it('Get userDisplay issue count with target and no login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/issue-count')
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -441,8 +467,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issue count with no target and login cookie', async () => {
-    await request(app).get('/api/users/issue-count')
+  it('Get userDisplay issue count with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/issue-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -456,8 +483,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user issue count with target and login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/issue-count')
+  it('Get userDisplay issue count with target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/issue-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -472,11 +500,12 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's follower count
+   * Test getting userDisplay's follower count
    */
 
-  it('Get user follower count with no target or login cookie', async () => {
-    await request(app).get('/api/users/follower-count')
+  it('Get userDisplay follower count with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/follower-count')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -484,7 +513,7 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user follower count with target and no login cookie', async () => {
+  it('Get userDisplay follower count with target and no login cookie', async () => {
     await request(app)
       .get('/api/users/' + userId.toString() + '/follower-count')
       .expect(HttpStatusCodes.OK)
@@ -499,8 +528,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user follower count with no target and login cookie', async () => {
-    await request(app).get('/api/users/follower-count')
+  it('Get userDisplay follower count with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/follower-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -514,7 +544,7 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user follower count with target and login cookie', async () => {
+  it('Get userDisplay follower count with target and login cookie', async () => {
     await request(app)
       .get('/api/users/' + userId.toString() + '/follower-count')
       .set('Cookie', loginCookie)
@@ -531,10 +561,11 @@ describe('Users Router', () => {
   });
 
   /**
-   * Test getting user's following count
+   * Test getting userDisplay's following count
    */
-  it('Get user following count with no target or login cookie', async () => {
-    await request(app).get('/api/users/following-count')
+  it('Get userDisplay following count with no target or login cookie', async () => {
+    await request(app)
+      .get('/api/users/following-count')
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -542,7 +573,7 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following count with target and no login cookie', async () => {
+  it('Get userDisplay following count with target and no login cookie', async () => {
     await request(app)
       .get('/api/users/' + userId.toString() + '/following-count')
       .expect(HttpStatusCodes.OK)
@@ -557,8 +588,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following count with no target and login cookie', async () => {
-    await request(app).get('/api/users/following-count')
+  it('Get userDisplay following count with no target and login cookie', async () => {
+    await request(app)
+      .get('/api/users/following-count')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -572,7 +604,7 @@ describe('Users Router', () => {
       });
   });
 
-  it('Get user following count with target and login cookie', async () => {
+  it('Get userDisplay following count with target and login cookie', async () => {
     await request(app)
       .get('/api/users/' + userId.toString() + '/following-count')
       .set('Cookie', loginCookie)
@@ -589,11 +621,12 @@ describe('Users Router', () => {
   });
 
   /**
-   ! Test following a user
+   ! Test following a userDisplay
    */
 
   it('Follow self with no login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/follow')
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/follow')
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -602,7 +635,8 @@ describe('Users Router', () => {
   });
 
   it('Follow self with login cookie', async () => {
-    await request(app).get('/api/users/' + userId.toString() + '/follow')
+    await request(app)
+      .get('/api/users/' + userId.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.FORBIDDEN)
       .expect('Content-Type', /json/)
@@ -611,8 +645,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Follow user with login cookie', async () => {
-    await request(app).get('/api/users/' + userId2.toString() + '/follow')
+  it('Follow userDisplay with login cookie', async () => {
+    await request(app)
+      .get('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -621,8 +656,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Follow user with login cookie again', async () => {
-    await request(app).get('/api/users/' + userId2.toString() + '/follow')
+  it('Follow userDisplay with login cookie again', async () => {
+    await request(app)
+      .get('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
@@ -632,11 +668,12 @@ describe('Users Router', () => {
   });
 
   /**
-   ! Test unfollowing a user
+   ! Test unfollowing a userDisplay
    */
 
   it('Unfollow self with no login cookie', async () => {
-    await request(app).delete('/api/users/' + userId.toString() + '/follow')
+    await request(app)
+      .delete('/api/users/' + userId.toString() + '/follow')
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -645,7 +682,8 @@ describe('Users Router', () => {
   });
 
   it('Unfollow self with login cookie', async () => {
-    await request(app).delete('/api/users/' + userId.toString() + '/follow')
+    await request(app)
+      .delete('/api/users/' + userId.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.FORBIDDEN)
       .expect('Content-Type', /json/)
@@ -654,8 +692,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Unfollow user with login cookie', async () => {
-    await request(app).delete('/api/users/' + userId2.toString() + '/follow')
+  it('Unfollow userDisplay with login cookie', async () => {
+    await request(app)
+      .delete('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
@@ -664,8 +703,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Unfollow user with login cookie again', async () => {
-    await request(app).delete('/api/users/' + userId2.toString() + '/follow')
+  it('Unfollow userDisplay with login cookie again', async () => {
+    await request(app)
+      .delete('/api/users/' + userId2.toString() + '/follow')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
@@ -679,8 +719,9 @@ describe('Users Router', () => {
    */
 
   // all will fail because no login cookie so only test one
-  it('Update user with no login cookie', async () => {
-    await request(app).post('/api/users/')
+  it('Update userDisplay with no login cookie', async () => {
+    await request(app)
+      .post('/api/users/')
       .send({})
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
@@ -689,8 +730,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user pfp with login cookie', async () => {
-    await request(app).post('/api/users/profile-picture')
+  it('Update userDisplay pfp with login cookie', async () => {
+    await request(app)
+      .post('/api/users/profile-picture')
       .set('Cookie', loginCookie)
       .send({
         avatarURL:
@@ -704,10 +746,11 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user Bio with login cookie', async () => {
-    await request(app).post('/api/users/bio')
+  it('Update userDisplay Bio with login cookie', async () => {
+    await request(app)
+      .post('/api/users/bio')
       .set('Cookie', loginCookie)
-      .send({ bio: 'I am a test user' })
+      .send({ bio: 'I am a test userDisplay' })
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -715,10 +758,11 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user quote with login cookie', async () => {
-    await request(app).post('/api/users/quote')
+  it('Update userDisplay quote with login cookie', async () => {
+    await request(app)
+      .post('/api/users/quote')
       .set('Cookie', loginCookie)
-      .send({ quote: 'I am a test user' })
+      .send({ quote: 'I am a test userDisplay' })
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -726,8 +770,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user name with login cookie', async () => {
-    await request(app).post('/api/users/name')
+  it('Update userDisplay name with login cookie', async () => {
+    await request(app)
+      .post('/api/users/name')
       .set('Cookie', loginCookie)
       .send({ name: 'Test User' })
       .expect(HttpStatusCodes.OK)
@@ -737,8 +782,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user blog url with login cookie', async () => {
-    await request(app).post('/api/users/blog-url')
+  it('Update userDisplay blog url with login cookie', async () => {
+    await request(app)
+      .post('/api/users/blog-url')
       .set('Cookie', loginCookie)
       .send({ blogUrl: 'https://www.google.com' })
       .expect(HttpStatusCodes.OK)
@@ -748,8 +794,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user website url with login cookie', async () => {
-    await request(app).post('/api/users/website-url')
+  it('Update userDisplay website url with login cookie', async () => {
+    await request(app)
+      .post('/api/users/website-url')
       .set('Cookie', loginCookie)
       .send({ websiteUrl: 'https://youtu.be/dQw4w9WgXcQ' })
       .expect(HttpStatusCodes.OK)
@@ -759,8 +806,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user github url with login cookie', async () => {
-    await request(app).post('/api/users/github-url')
+  it('Update userDisplay github url with login cookie', async () => {
+    await request(app)
+      .post('/api/users/github-url')
       .set('Cookie', loginCookie)
       .send({ githubUrl: 'https://github.com/NavigoLearn' })
       .expect(HttpStatusCodes.OK)
@@ -770,8 +818,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user email with the same email', async () => {
-    await request(app).post('/api/users/email')
+  it('Update userDisplay email with the same email', async () => {
+    await request(app)
+      .post('/api/users/email')
       .set('Cookie', loginCookie)
       .send({ email, password })
       .expect(HttpStatusCodes.BAD_REQUEST)
@@ -781,9 +830,10 @@ describe('Users Router', () => {
       });
   });
 
-  it('Update user email with login cookie', async () => {
+  it('Update userDisplay email with login cookie', async () => {
     email = `testuser${Math.floor(Math.random() * 1000000)}@test.com`;
-    await request(app).post('/api/users/email')
+    await request(app)
+      .post('/api/users/email')
       .set('Cookie', loginCookie)
       .send({ email, password })
       .expect(HttpStatusCodes.OK)
@@ -798,8 +848,9 @@ describe('Users Router', () => {
    */
 
   // will fail because no login cookie
-  it('Delete user with no login cookie', async () => {
-    await request(app).delete('/api/users/')
+  it('Delete userDisplay with no login cookie', async () => {
+    await request(app)
+      .delete('/api/users/')
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -807,8 +858,9 @@ describe('Users Router', () => {
       });
   });
 
-  it('Delete user with login cookie', async () => {
-    await request(app).delete('/api/users/')
+  it('Delete userDisplay with login cookie', async () => {
+    await request(app)
+      .delete('/api/users/')
       .set('Cookie', loginCookie)
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)

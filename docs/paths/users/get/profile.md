@@ -2,7 +2,7 @@
 
 ## Profile [GET - /api/users/:userId([0-9]+)?]
 
-Returns information about user with :userId or logged-in user.
+Returns information about userDisplay with :userId or logged-in userDisplay.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Returns information about user with :userId or logged-in user.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

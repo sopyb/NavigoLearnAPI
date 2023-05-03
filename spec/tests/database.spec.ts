@@ -24,13 +24,13 @@ describe('Database', () => {
         undefined,
       );
 
-      // add user to database
+      // add userDisplay to database
       const id = await db.insert('users', user);
 
-      // add id to user
+      // add id to userDisplay
       user.id = id;
 
-      // add user to users array
+      // add userDisplay to users array
       users.push(user);
 
       expect(id).toBeGreaterThan(0);
@@ -47,14 +47,14 @@ describe('Database', () => {
       // change username
       user.name = Math.random().toString(36).substring(2, 15);
 
-      // update user
+      // update userDisplay
       const success = await db.update('users', user.id, user);
 
       expect(success).toBe(true);
     }
   });
 
-  // test for getting user by id
+  // test for getting userDisplay by id
   it('should get users by id', async () => {
     // get database
     const db = new Database();
@@ -72,7 +72,7 @@ describe('Database', () => {
     }
   });
 
-  // test for getting user by key (email)
+  // test for getting userDisplay by key (email)
   it('should get users by key', async () => {
     // get database
     const db = new Database();
@@ -90,7 +90,7 @@ describe('Database', () => {
     }
   });
 
-  // test for getting user by key (email) with value (user.email) like
+  // test for getting userDisplay by key (email) with value (userDisplay.email) like
   it('should get users by key with value like', async () => {
     // get database
     const db = new Database();

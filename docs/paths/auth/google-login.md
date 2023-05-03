@@ -2,7 +2,7 @@
 
 ## POST - /api/auth/google-login
 
-Logs in a user using Google OAuth.
+Logs in a userDisplay using Google OAuth.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Logs in a user using Google OAuth.
 
 | Code | Description            |
 |------|------------------------|
-| 200  | Logs in a user.        |
+| 200  | Logs in a userDisplay.        |
 | 401  | Unauthorized.          |
 | 500  | Internal Server Error. |
 

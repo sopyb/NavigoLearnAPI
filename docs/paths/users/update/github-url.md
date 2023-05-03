@@ -2,7 +2,7 @@
 
 ## User github url [POST - /api/users/:userId([0-9]+)?/github-url]
 
-Updates user's github url.
+Updates userDisplay's github url.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Updates user's github url.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

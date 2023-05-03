@@ -2,7 +2,7 @@
 
 ## ProfilePicture [POST - /api/users/:userId([0-9]+)?/profile-picture]
 
-Updates user's profile picture url.
+Updates userDisplay's profile picture url.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Updates user's profile picture url.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

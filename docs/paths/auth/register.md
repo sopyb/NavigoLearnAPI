@@ -2,7 +2,7 @@
 
 ## POST - /api/auth/register
 
-Registers a new user.
+Registers a new userDisplay.
 
 ### Parameters
 
@@ -14,14 +14,14 @@ Registers a new user.
 
 | Name     | Type   | Description               |
 |----------|--------|---------------------------|
-| Email    | string | The email of the user.    |
-| Password | string | The password of the user. |
+| Email    | string | The email of the userDisplay.    |
+| Password | string | The password of the userDisplay. |
 
 ### Response Codes
 
 | Code | Description            |
 |------|------------------------|
-| 200  | Registers a new user.  |
+| 200  | Registers a new userDisplay.  |
 | 400  | Bad Request.           |
 | 401  | Unauthorized.          |
 | 500  | Internal Server Error. |
