@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Paths from '@src/routes/constants/Paths';
-import { requireSessionMiddleware } from '@src/middleware/session';
-import { RequestWithSession } from '@src/middleware/session';
+import { requireSessionMiddleware, RequestWithSession } from '@src/middleware/session';
 import { ITabInfo, TabInfo } from '@src/models/TabInfo';
 import Database from '@src/util/DatabaseDriver';
 import * as console from 'console';
@@ -47,7 +46,7 @@ RoadmapTabsInfo.post(
 
     // save issue to database
     console.log(tabInfo);
-    const id = await db.insert('tabsinfo', tabInfo);
+    const id = await db.insert('tabsInfo', tabInfo);
 
     // check if id is valid
     if (id < 0)
@@ -72,7 +71,7 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
   if (stringId) {
     // the stringId is supposed to be unique and created with uuidv4 by the frontend
     const tabData = await db.getWhere<ITabInfo>(
-      'tabsinfo',
+      'tabsInfo',
       'stringId',
       stringId,
     );
@@ -104,7 +103,7 @@ RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, async (req, res) => {
     console.log('new content', newContent);
     // gets previous data from the table
     const tabData = await db.getWhere<ITabInfo>(
-      'tabsinfo',
+      'tabsInfo',
       'stringId',
       stringId,
     );
@@ -116,7 +115,7 @@ RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, async (req, res) => {
         .status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Issue not found.' });
     }
-    const success = await db.update('tabsinfo', tabData.id, tabData);
+    const success = await db.update('tabsInfo', tabData.id, tabData);
 
     if (!success)
       return res

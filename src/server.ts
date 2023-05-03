@@ -42,8 +42,17 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
   app.use(helmet());
 }
 
+app.options('*', (req: Request, res: Response) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  // allow json
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  // allow all methods
+  res.header('Access-Control-Allow-Methods', '*');
+  res.send();
+});
+
 // add session middleware
-app.use('/api', sessionMiddleware);
+app.use(sessionMiddleware);
 
 // Add base router
 app.use(Paths.Base, BaseRouter);
