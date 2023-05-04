@@ -60,7 +60,7 @@ RoadmapsRouter.post(
     if (!session)
       return res
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Session is missing from userDisplay.' });
+        .json({ error: 'Session is missing from user.' });
 
     // get database connection
     const db = new Database();
@@ -101,7 +101,7 @@ RoadmapsRouter.delete(
     if (!session)
       return res
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Session is missing from userDisplay.' });
+        .json({ error: 'Session is missing from user.' });
 
     // get database connection
     const db = new Database();
@@ -113,7 +113,7 @@ RoadmapsRouter.delete(
         .status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Roadmap does not exist.' });
 
-    // check if the userDisplay is owner
+    // check if the user is owner
     if (roadmap.ownerId !== session?.userId)
       return res
         .status(HttpStatusCodes.FORBIDDEN)
@@ -158,7 +158,7 @@ RoadmapsRouter.get(
     if (!session)
       return res
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Session is missing from userDisplay.' });
+        .json({ error: 'Session is missing from user.' });
 
     // get database connection
     const db = new Database();
@@ -170,7 +170,7 @@ RoadmapsRouter.get(
         .status(HttpStatusCodes.NOT_FOUND)
         .json({ error: 'Roadmap does not exist.' });
 
-    // check if userDisplay has already liked the roadmap
+    // check if user has already liked the roadmap
     const liked = await db.getAllWhere<{ roadmapId: bigint; userId: bigint }>(
       'roadmapLikes',
       'userId',
@@ -219,7 +219,7 @@ RoadmapsRouter.delete(
     if (!session)
       return res
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Session is missing from userDisplay.' });
+        .json({ error: 'Session is missing from user.' });
 
     // get database connection
     const db = new Database();
@@ -228,7 +228,7 @@ RoadmapsRouter.delete(
     const roadmap = await db.get<Roadmap>('roadmaps', id);
     if (!roadmap) return res.status(HttpStatusCodes.NOT_FOUND);
 
-    // check if userDisplay has already liked the roadmap
+    // check if user has already liked the roadmap
     const liked = await db.getAllWhere<{
       id: bigint;
       roadmapId: bigint;
@@ -244,7 +244,7 @@ RoadmapsRouter.delete(
     // find id of roadmap liked
     const likedRoadmap = liked.find((like) => like.roadmapId === id);
 
-    // check if userDisplay has liked the roadmap
+    // check if user has liked the roadmap
     if (!likedRoadmap)
       return res
         .status(HttpStatusCodes.FORBIDDEN)

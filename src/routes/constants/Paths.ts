@@ -59,7 +59,7 @@ const Paths = {
     Issues: {
       Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
-      Get: '/:issueId([0-9]+)?',
+      Get: '/:issueId([0-9]+)',
       GetAll: '/',
       Update: {
         Base: '/:issueId([0-9]+)',

@@ -4,12 +4,12 @@
 
 ## [Get](get/README.md) [GET - /api/users/:userId([0-9]+)?]
 
-Returns information about userDisplay with :userId or logged-in userDisplay.
+Returns information about user with :userId or logged-in user.
 
 ## [Update](update/README.md) [POST - /api/users/:userId([0-9]+)?]
 
-Updates userDisplay with :userId.
+Updates user with :userId.
 
 ## [Delete](delete.md) [DELETE - /api/users/:userId([0-9]+)?]
 
-Delete userDisplay with :userId. This action is irreversible.
+Delete user with :userId. This action is irreversible.

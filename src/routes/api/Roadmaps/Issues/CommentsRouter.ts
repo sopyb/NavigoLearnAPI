@@ -87,19 +87,19 @@ async function checkUser(
     }
   | undefined
 > {
-  // get userDisplay id from session
+  // get user id from session
   const userId = BigInt(req.session?.userId || -1);
 
   // get database connection
   const db = new Database();
 
-  // get userDisplay
+  // get user
   const user = await db.get<User>('users', userId);
 
   if (!user) {
     res
       .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Token userDisplay can't be found." });
+      .json({ error: 'Token user can\'t be found.' });
     return;
   }
 
@@ -126,9 +126,9 @@ CommentsRouter.post(
     if (!content)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: "Comment can't be empty." });
+        .json({ error: 'Comment can\'t be empty.' });
 
-    // check if userDisplay is allowed to create a comment
+    // check if user is allowed to create a comment
     if (!roadmap.isPublic && roadmap.ownerId !== userId) {
       res
         .status(HttpStatusCodes.FORBIDDEN)
@@ -170,9 +170,6 @@ CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get, async (req, res) => {
     issueId,
   );
 
-  // if (!comments) return res.status(HttpStatusCodes.NOT_FOUND)
-  //   .json({ error: 'Failed to get comments, there might be none.' });
-
   const commentsData = comments?.map((comment) => ({
     id: comment.id.toString(),
     content: comment.content,
@@ -206,7 +203,7 @@ CommentsRouter.post(
     if (!args) return;
     const { issueId } = args;
 
-    // get userDisplay info
+    // get user info
     const userArgs = await checkUser(req, res);
     if (!userArgs) return;
     const { userId } = userArgs;
@@ -223,7 +220,7 @@ CommentsRouter.post(
     if (!content)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: "Comment can't be empty." });
+        .json({ error: 'Comment can\'t be empty.' });
 
     // get database connection
     const db = new Database();
@@ -246,7 +243,7 @@ CommentsRouter.post(
       return;
     }
 
-    // check if userDisplay is allowed to update comment
+    // check if user is allowed to update comment
     if (comment.userId !== userId) {
       res
         .status(HttpStatusCodes.FORBIDDEN)

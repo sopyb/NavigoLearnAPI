@@ -20,7 +20,7 @@ describe('Roadmap Issues', () => {
     const password = Math.random().toString(36).substring(2, 15);
     const password2 = Math.random().toString(36).substring(2, 15);
 
-    // register userDisplay
+    // register user
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email, password })
@@ -30,7 +30,7 @@ describe('Roadmap Issues', () => {
       .send({ email: email2, password: password2 })
       .expect(HttpStatusCodes.CREATED);
 
-    // get userDisplay token
+    // get user token
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     token = res.header['set-cookie'][0].split(';')[0].split('=')[1] as string;
@@ -42,16 +42,16 @@ describe('Roadmap Issues', () => {
     // get database
     const db = new Database();
 
-    // get userDisplay
+    // get user
     const dbuser = await db.getWhere<User>('users', 'email', email);
 
     // get user2
     const dbuser2 = await db.getWhere<User>('users', 'email', email2);
 
-    // check if userDisplay exists
+    // check if user exists
     if (!dbuser || !dbuser2) throw new Error('User not found');
 
-    // set userDisplay
+    // set user
     user = dbuser;
     user2 = dbuser2;
 
@@ -85,11 +85,11 @@ describe('Roadmap Issues', () => {
     // get database
     const db = new Database();
 
-    // delete userDisplay
+    // delete user
     const success = await db.delete('users', user.id);
     const success2 = await db.delete('users', user2.id);
 
-    // check if userDisplay was deleted
+    // check if user was deleted
     expect(success).toBe(true);
     expect(success2).toBe(true);
   });
@@ -98,19 +98,19 @@ describe('Roadmap Issues', () => {
    ! Create Issue Tests
    */
 
-  it('should create an issue if userDisplay is roadmap owner', async () => {
+  it('should create an issue if user is roadmap owner', async () => {
     // create issue
     const res = await request(app)
       .post(`/api/roadmaps/${roadmap.id}/issues/create`)
       .set('Cookie', `token=${token}`)
       .send({
-        issue: new Issue(
-          roadmap.id,
-          user.id,
-          true,
-          'datra',
-          'Test content',
-        ).toJSON(),
+        issue: {
+          roadmapId: roadmap.id,
+          userId: user.id,
+          open: true,
+          title: 'datra',
+          content: 'Test content',
+        },
       })
       .expect(HttpStatusCodes.CREATED)
       .expect((res) => {
@@ -124,7 +124,7 @@ describe('Roadmap Issues', () => {
     issueid = res.body.id;
   });
 
-  it('should create an issue if userDisplay is not roadmap owner', async () => {
+  it('should create an issue if user is not roadmap owner', async () => {
     // create issue
     const res = await request(app)
       .post(`/api/roadmaps/${roadmap.id}/issues/create`)
@@ -183,7 +183,7 @@ describe('Roadmap Issues', () => {
       });
   });
 
-  it("should fail to get an issue that doesn't exist", async () => {
+  it('should fail to get an issue that doesn\'t exist', async () => {
     // get issue
     await request(app).get(`/api/roadmaps/${roadmap.id}/issues/${issueid}2`);
   });

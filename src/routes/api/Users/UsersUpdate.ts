@@ -28,7 +28,7 @@ UsersUpdate.post(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     // if no url is specified
     if (url === undefined)
@@ -38,12 +38,12 @@ UsersUpdate.post(
 
     try {
       // get url and check if it is valid with axios
-      // if valid, update userDisplay profile picture
+      // if valid, update user profile picture
       const axiosReq = await axios.get(url);
 
       // if request is successful check data type
       if (axiosReq.status === 200) {
-        // if data is type picture update userDisplay profile picture
+        // if data is type picture update user profile picture
         // eslint-disable-next-line max-len
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         if (!axiosReq.headers['content-type']?.startsWith('image/'))
@@ -68,7 +68,7 @@ UsersUpdate.post(
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: 'Failed to update profile picture' });
 
-    // update userDisplay profile picture
+    // update user profile picture
     const success = await db.update('userInfo', userInfo.id, {
       profilePictureUrl: url,
     });
@@ -97,7 +97,7 @@ UsersUpdate.post(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     // if no bio is specified
     if (bio === undefined || bio.length > 255)
@@ -117,7 +117,7 @@ UsersUpdate.post(
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: 'Failed to update bio' });
 
-    // update userDisplay bio
+    // update user bio
     const success = await db.update('userInfo', userInfo.id, { bio });
 
     // if update was not successful
@@ -144,7 +144,7 @@ UsersUpdate.post(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay' });
+        .json({ error: 'No user' });
 
     // check if quote was given
     if (!quote || quote.length > 255)
@@ -164,7 +164,7 @@ UsersUpdate.post(
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: 'Failed to update quote' });
 
-    //update userDisplay quote
+    //update user quote
     const success = await db.update('userInfo', userInfo.id, { quote });
 
     // if update was not successful
@@ -191,7 +191,7 @@ UsersUpdate.post(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay' });
+        .json({ error: 'No user' });
 
     // check if quote was given
     if (!name || name.length > 32)
@@ -202,7 +202,7 @@ UsersUpdate.post(
     // get database
     const db = new DatabaseDriver();
 
-    //update userDisplay name
+    //update user name
     const success = await db.update('users', userId, { name });
 
     // if update was not successful
@@ -229,7 +229,7 @@ UsersUpdate.post(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay' });
+        .json({ error: 'No user' });
 
     // check if quote was given
     if (!blogUrl || blogUrl.length > 255)

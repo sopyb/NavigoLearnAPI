@@ -14,8 +14,8 @@ Changes a users password.
 
 | Name        | Type   | Description              |
 |-------------|--------|--------------------------|
-| password    | string | The new password of userDisplay |
-| newPassword | string | The new password of userDisplay |
+| password    | string | The new password of user |
+| newPassword | string | The new password of user |
 
 ### Response Codes
 
@@ -59,6 +59,6 @@ Changes a users password.
 
 ```json
 {
-  "error": "Invalid userDisplay"
+  "error": "Invalid user"
 }
 ```

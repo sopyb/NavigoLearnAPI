@@ -2,7 +2,7 @@
 
 ## User following [GET - /api/users/:userId([0-9]+)?/following-count]
 
-Returns all users followed by userDisplay with :userId or logged-in userDisplay.
+Returns all users followed by user with :userId or logged-in userDisplay.
 
 ### Parameters
 

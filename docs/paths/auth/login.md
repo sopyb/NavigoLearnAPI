@@ -2,7 +2,7 @@
 
 ## POST - /api/auth/login
 
-Logs in a userDisplay.
+Logs in a user.
 
 ### Parameters
 
@@ -14,15 +14,15 @@ Logs in a userDisplay.
 
 | Name       | Type    | Description                          |
 |------------|---------|--------------------------------------|
-| Email      | string  | The email of the userDisplay.               |
-| Password   | string  | The password of the userDisplay.            |
-| RememberMe | boolean | Whether or not to remember the userDisplay. |
+| Email      | string  | The email of the user.               |
+| Password   | string  | The password of the user.            |
+| RememberMe | boolean | Whether or not to remember the user. |
 
 ### Response Codes
 
 | Code | Description            |
 |------|------------------------|
-| 200  | Logs in a userDisplay.        |
+| 200  | Logs in a user.        |
 | 400  | Bad Request.           |
 | 500  | Internal Server Error. |
 

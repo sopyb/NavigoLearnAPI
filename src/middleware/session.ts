@@ -63,7 +63,7 @@ export async function sessionMiddleware(
   // get Database
   const db = new DatabaseDriver();
 
-  // get userDisplay from database
+  // get user from database
   const session = await db.getWhere<ISession>('sessions', 'token', token);
 
   // if session exists, extend it

@@ -17,7 +17,7 @@ UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 // Update routes
 UsersRouter.use(Paths.Users.Update.Base, UsersUpdate);
 
-// Delete route - delete userDisplay - requires session
+// Delete route - delete user - requires session
 UsersRouter.delete(Paths.Users.Delete, requireSessionMiddleware);
 UsersRouter.delete(Paths.Users.Delete, async (req: RequestWithSession, res) => {
   // get database
@@ -30,10 +30,10 @@ UsersRouter.delete(Paths.Users.Delete, async (req: RequestWithSession, res) => {
     // send error json
     return res
       .status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'No userDisplay specified' });
+      .json({ error: 'No user specified' });
   }
 
-  // delete userDisplay from database
+  // delete user from database
   const success = await db.delete('users', userId);
 
   if (success) {
@@ -43,7 +43,7 @@ UsersRouter.delete(Paths.Users.Delete, async (req: RequestWithSession, res) => {
     // send error json
     return res
       .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Failed to delete userDisplay' });
+      .json({ error: 'Failed to delete user' });
   }
 });
 

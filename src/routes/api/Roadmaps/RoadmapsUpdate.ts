@@ -44,7 +44,7 @@ async function isRoadmapValid(
     return;
   }
 
-  // check if the userDisplay is the owner of the roadmap
+  // check if the user is the owner of the roadmap
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   if (roadmap.ownerId !== req.session?.userId) {

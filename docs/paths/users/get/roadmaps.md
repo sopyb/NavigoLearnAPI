@@ -2,7 +2,7 @@
 
 ## User roadmaps [GET - /api/users/:userId([0-9]+)?/roadmaps]
 
-Returns all roadmaps created by userDisplay with :userId.
+Returns all roadmaps created by user with :userId.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Returns all roadmaps created by userDisplay with :userId.
 
 | Code | Description                                        |
 |------|----------------------------------------------------|
-| 200  | Returns all roadmaps created by userDisplay with :userId. |
+| 200  | Returns all roadmaps created by user with :userId. |
 | 400  | Profile not found or doesn't exist                 |
 | 500  | Internal Server Error.                             |
 

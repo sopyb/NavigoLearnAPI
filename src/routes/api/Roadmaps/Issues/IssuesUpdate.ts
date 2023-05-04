@@ -69,7 +69,7 @@ async function checkArguments(
       .json({ error: 'Roadmap does not exist.' });
     return;
   }
-  // check if userDisplay is allowed to update issue
+  // check if user is allowed to update issue
   if (
     issue.userId !== session.userId &&
     (roadmapOwnerCanEdit ? roadmap?.ownerId !== session.userId : true)
@@ -161,7 +161,7 @@ IssuesUpdate.post(
         .json({ error: 'Issue does not belong to roadmap.' });
     }
 
-    // check if userDisplay is allowed to update issue
+    // check if user is allowed to update issue
     if (issue.userId !== session.userId) {
       return res
         .status(HttpStatusCodes.UNAUTHORIZED)
@@ -228,7 +228,7 @@ IssuesUpdate.post(
         .json({ error: 'Issue does not belong to roadmap.' });
     }
 
-    // check if userDisplay is allowed to update issue
+    // check if user is allowed to update issue
     if (issue.userId !== session.userId) {
       return res
         .status(HttpStatusCodes.UNAUTHORIZED)

@@ -106,7 +106,7 @@ function handleExternalAuthError(error, res: Response): void {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: "Couldn't get access token from external service",
+      error: 'Couldn\'t get access token from external service',
     });
   } else {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -128,7 +128,7 @@ AuthRouter.post(Paths.Auth.Login, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if userDisplay exists
+  // check if user exists
   const user = await db.getWhere<User>('users', 'email', email);
   // if not, return error
   if (!user) {
@@ -146,7 +146,7 @@ AuthRouter.post(Paths.Auth.Login, async (req, res) => {
     });
   }
 
-  // check if userDisplay has userInfo
+  // check if user has userInfo
   const userInfo = db.getWhere('userInfo', 'userId', user.id);
 
   if (!userInfo) {
@@ -190,7 +190,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if userDisplay exists
+  // check if user exists
   const user = await db.getWhere<User>('users', 'email', email);
   // if yes, return error
   if (!!user) {
@@ -203,10 +203,10 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   const username = email.split('@')[0];
   const saltedPassword = saltPassword(password);
 
-  // create userDisplay
+  // create user
   const newUser = new User(username, email, UserRoles.Standard, saltedPassword);
 
-  // save userDisplay
+  // save user
   const result = await db.insert('users', newUser);
   newUser.id = result;
 
@@ -254,13 +254,13 @@ AuthRouter.post(
     // get database
     const db = new DatabaseDriver();
 
-    // check if userDisplay exists
+    // check if user exists
     const user = await db.get<User>('users', req.session.userId);
 
     // if not, return error
     if (!user) {
       return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Invalid userDisplay',
+        error: 'Invalid user',
       });
     }
 
@@ -277,7 +277,7 @@ AuthRouter.post(
     // change password
     const saltedPassword = saltPassword(newPassword as string);
 
-    // update userDisplay
+    // update user
     const result = await db.update('users', req.session.userId, {
       pwdHash: saltedPassword,
     });
@@ -309,7 +309,7 @@ AuthRouter.post(Paths.Auth.ForgotPassword, async (req, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // check if userDisplay exists
+  // check if user exists
   const user = await db.getWhere<User>('users', 'email', email);
 
   // if not, return error
@@ -359,7 +359,7 @@ AuthRouter.get(Paths.Auth.GoogleCallback, async (req, res) => {
     // if no token, return error
     if (!accessToken) throw new AxiosError('No access token received');
 
-    // get userDisplay data
+    // get user data
     response = await axios.get(
       'https://www.googleapis.com/oauth2/v2/userinfo',
       {
@@ -462,7 +462,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const response1 = await axios.get('https://api.github.com/user', {
       headers: {
-        Authorization: `token ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         Accept: 'application/json',
       },
     });
@@ -470,7 +470,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
     // get userDisplay email
     const response2 = await axios.get('https://api.github.com/user/emails', {
       headers: {
-        Authorization: `token ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         Accept: 'application/json',
         'X-GitHub-Api-Version': '2022-11-28',
         'X-OAuth-Scopes': 'userDisplay:email',

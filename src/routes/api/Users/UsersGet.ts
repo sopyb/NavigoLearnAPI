@@ -44,7 +44,7 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   // get database
   const db = new DatabaseDriver();
 
-  // get userDisplay from database
+  // get user from database
   const user = await db.get<User>('users', userId);
   const userInfo = await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
   const roadmapsCount = await db.countWhere('roadmaps', 'ownerId', userId);
@@ -113,7 +113,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     const db = new DatabaseDriver();
 
@@ -150,7 +150,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     const db = new DatabaseDriver();
 
@@ -172,7 +172,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     const db = new DatabaseDriver();
 
@@ -198,7 +198,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     const db = new DatabaseDriver();
 
@@ -224,7 +224,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     // get database
     const db = new DatabaseDriver();
@@ -248,7 +248,7 @@ UsersGet.get(
     if (userId === undefined)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
+        .json({ error: 'No user specified' });
 
     // get database
     const db = new DatabaseDriver();

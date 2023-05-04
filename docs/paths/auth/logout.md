@@ -2,7 +2,7 @@
 
 ## DELETE - /api/auth/logout
 
-Logs out a userDisplay.
+Logs out a user.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Logs out a userDisplay.
 
 | Code | Description            |
 |------|------------------------|
-| 200  | Logs out a userDisplay.       |
+| 200  | Logs out a user.       |
 | 500  | Internal Server Error. |
 
 ### Response

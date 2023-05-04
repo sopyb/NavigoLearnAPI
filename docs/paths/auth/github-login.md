@@ -2,7 +2,7 @@
 
 ## GET - /api/auth/github-login
 
-Logs in a userDisplay using GitHub OAuth.
+Logs in a user using GitHub OAuth.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Logs in a userDisplay using GitHub OAuth.
 
 | Code | Description            |
 |------|------------------------|
-| 200  | Logs in a userDisplay.        |
+| 200  | Logs in a user.        |
 | 401  | Unauthorized.          |
 | 500  | Internal Server Error. |
 
