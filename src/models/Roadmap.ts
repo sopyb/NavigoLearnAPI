@@ -84,9 +84,9 @@ export class Roadmap implements IRoadmap {
     );
   }
 
-  // toJSON()
-  public toJSON(): string {
-    return JSON.stringify({
+  // toJSONSafe()
+  public toJSONSafe(): object {
+    return {
       id: this.id.toString(),
       ownerId: this.ownerId.toString(),
       name: this.name,
@@ -95,7 +95,7 @@ export class Roadmap implements IRoadmap {
       updatedAt: this.updatedAt,
       isPublic: this.isPublic,
       data: this.data,
-    });
+    };
   }
 }
 

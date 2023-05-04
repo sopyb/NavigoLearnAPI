@@ -2,7 +2,7 @@
 
 ## Username [POST - /api/users/:userId([0-9]+)?/name]
 
-Updates user's username.
+Updates userDisplay's username.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Updates user's username.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

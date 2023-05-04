@@ -24,8 +24,8 @@ Logs in a user using Google OAuth.
 
 ## [GithubLogin](github-login.md) [GET - /api/auth/github-login]
 
-Logs in a user using GitHub OAuth.
+Logs in a userDisplay using GitHub OAuth.
 
 ## [Logout](logout.md) [DELETE - /api/auth/logout]
 
-Logs out a user.
+Logs out a userDisplay.

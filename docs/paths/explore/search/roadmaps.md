@@ -16,7 +16,7 @@ This route will prioritize based on the following:
 1. Tags that match the query
 2. Titles that match the query
 3. Descriptions that contain the query
-4. Roadmaps that the user has left a review on
+4. Roadmaps that the userDisplay has left a review on
 
 ### Parameters
 

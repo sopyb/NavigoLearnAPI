@@ -2,7 +2,7 @@
 
 ## User quote [POST - /api/users/:userId([0-9]+)?/quote]
 
-Updates user's quote.
+Updates userDisplay's quote.
 
 ### Parameters
 

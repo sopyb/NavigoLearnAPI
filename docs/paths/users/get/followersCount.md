@@ -2,7 +2,7 @@
 
 ## Followers count [GET - /api/users/:userId([0-9]+)?/follower-count]
 
-Returns the number of followers for user with :userId or logged-in user.
+Returns the number of followers for userDisplay with :userId or logged-in userDisplay.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Returns the number of followers for user with :userId or logged-in user.
 
 | Code | Description                                            |
 |------|--------------------------------------------------------|
-| 200  | Returns the number of followers for user with :userId. |
+| 200  | Returns the number of followers for userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist                     |
 | 500  | Internal Server Error.                                 |
 

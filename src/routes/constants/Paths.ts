@@ -59,7 +59,8 @@ const Paths = {
     Issues: {
       Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
-      Get: '/:issueId([0-9]+)?',
+      Get: '/:issueId([0-9]+)',
+      GetAll: '/',
       Update: {
         Base: '/:issueId([0-9]+)',
         Title: '/title',
@@ -99,6 +100,7 @@ const Paths = {
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
       Follow: '/follow',
+      IsFollowing: '/is-following',
     },
     Update: {
       Base: '/:userId([0-9]+)?',

@@ -2,7 +2,7 @@
 
 ## User blog url [POST - /api/users/:userId([0-9]+)?/blog-url]
 
-Updates user's blog url.
+Updates userDisplay's blog url.
 
 ### Parameters
 
@@ -20,7 +20,7 @@ Updates user's blog url.
 
 | Code | Description                                  |
 |------|----------------------------------------------|
-| 200  | Returns information about user with :userId. |
+| 200  | Returns information about userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist           |
 | 500  | Internal Server Error.                       |
 

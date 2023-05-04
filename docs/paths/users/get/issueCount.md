@@ -2,8 +2,8 @@
 
 ## Issue count [GET - /api/users/:userId([0-9]+)?/issue-count]
 
-Returns the number of discussions created by user with :userId or logged-in
-user.
+Returns the number of discussions created by userDisplay with :userId or logged-in
+userDisplay.
 
 ### Parameters
 
@@ -21,7 +21,7 @@ user.
 
 | Code | Description                                                     |
 |------|-----------------------------------------------------------------|
-| 200  | Returns the number of discussions created by user with :userId. |
+| 200  | Returns the number of discussions created by userDisplay with :userId. |
 | 400  | Profile not found or doesn't exist                              |
 | 500  | Internal Server Error.                                          |
 

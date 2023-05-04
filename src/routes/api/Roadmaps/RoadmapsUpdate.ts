@@ -12,15 +12,22 @@ import User from '@src/models/User';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
-async function isRoadmapValid(req: RequestWithSession, res: Response): Promise<{
-  id: bigint,
-  roadmap: Roadmap
-} | undefined> {
+async function isRoadmapValid(
+  req: RequestWithSession,
+  res: Response,
+): Promise<
+  | {
+      id: bigint;
+      roadmap: Roadmap;
+    }
+  | undefined
+> {
   // get data from request
   const id = req?.params?.roadmapId;
 
   if (!id) {
-    res.status(HttpStatusCodes.BAD_REQUEST)
+    res
+      .status(HttpStatusCodes.BAD_REQUEST)
       .json({ error: 'Roadmap id is missing.' });
   }
 
@@ -31,7 +38,8 @@ async function isRoadmapValid(req: RequestWithSession, res: Response): Promise<{
 
   // check if the roadmap is valid
   if (!roadmap) {
-    res.status(HttpStatusCodes.NOT_FOUND)
+    res
+      .status(HttpStatusCodes.NOT_FOUND)
       .json({ error: 'Roadmap does not exist.' });
     return;
   }
@@ -40,7 +48,8 @@ async function isRoadmapValid(req: RequestWithSession, res: Response): Promise<{
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   if (roadmap.ownerId !== req.session?.userId) {
-    res.status(HttpStatusCodes.FORBIDDEN)
+    res
+      .status(HttpStatusCodes.FORBIDDEN)
       .json({ error: 'User is not the owner of the roadmap.' });
 
     return;
@@ -51,13 +60,16 @@ async function isRoadmapValid(req: RequestWithSession, res: Response): Promise<{
 
 RoadmapsUpdate.post('*', requireSessionMiddleware);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Title,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Title,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const title = req.body?.title as string;
-    if (!title) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap title is missing.' });
+    if (!title)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap title is missing.' });
 
     // check if the roadmap is valid
     const data = await isRoadmapValid(req, res);
@@ -72,20 +84,25 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Title,
     roadmap.updatedAt = new Date();
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Roadmap could not be updated.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Description,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Description,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const description = req.body?.description as string;
-    if (!description) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap description is missing.' });
+    if (!description)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap description is missing.' });
 
     // check if the roadmap is valid
     const data = await isRoadmapValid(req, res);
@@ -100,20 +117,25 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Description,
     roadmap.updatedAt = new Date();
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Roadmap could not be updated.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Tags,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Tags,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const tags: string[] = req?.body?.tags;
-    if (!tags) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap tags are missing.' });
+    if (!tags)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap tags are missing.' });
 
     // check if the roadmap is valid
     const data = await isRoadmapValid(req, res);
@@ -124,8 +146,11 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Tags,
     const db = new Database();
 
     // get all tags from database
-    const allTags =
-      await db.getAllWhere<Tag>('roadmapTags', 'roadmapId', roadmap.id);
+    const allTags = await db.getAllWhere<Tag>(
+      'roadmapTags',
+      'roadmapId',
+      roadmap.id,
+    );
 
     const success: boolean[] = [];
 
@@ -139,36 +164,41 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Tags,
       }
 
       // filter out tags that are already in the database
-      const tagsNames = allTags.map(e => e.name);
-      const tagsToCreate =
-        tags.filter((tag) => !tagsNames.includes(tag));
+      const tagsNames = allTags.map((e) => e.name);
+      const tagsToCreate = tags.filter((tag) => !tagsNames.includes(tag));
 
       // create tags that are not in the database
       for (const tag of tagsToCreate) {
-        success.push(await db.insert('roadmapTags', {
-          tagName: tag,
-          roadmapId: roadmap.id,
-        }) >= 0);
+        success.push(
+          (await db.insert('roadmapTags', {
+            tagName: tag,
+            roadmapId: roadmap.id,
+          })) >= 0,
+        );
       }
     } else {
       for (const tag of tags) {
-        success.push(await db.insert('roadmapTags', {
-          tagName: tag,
-          roadmapId: roadmap.id,
-        }) >= 0);
+        success.push(
+          (await db.insert('roadmapTags', {
+            tagName: tag,
+            roadmapId: roadmap.id,
+          })) >= 0,
+        );
       }
     }
     roadmap.updatedAt = new Date();
 
     if (success.includes(false))
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Visibility,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Visibility,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -177,12 +207,15 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Visibility,
     try {
       visibility = Boolean(visibilityData);
     } catch (e) {
-      return res.status(HttpStatusCodes.BAD_REQUEST)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Roadmap visibility is invalid.' });
     }
 
-    if (visibility === undefined) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap visibility is missing.' });
+    if (visibility === undefined)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap visibility is missing.' });
 
     // check if the roadmap is valid
     const data = await isRoadmapValid(req, res);
@@ -197,20 +230,25 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Visibility,
     roadmap.updatedAt = new Date();
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Roadmap could not be updated.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Owner,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Owner,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
     const newOwnerId = BigInt(req?.body?.newOwnerId || -1);
-    if (newOwnerId < 0) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap new owner id is missing.' });
+    if (newOwnerId < 0)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap new owner id is missing.' });
 
     // check if the roadmap is valid
     const data = await isRoadmapValid(req, res);
@@ -222,29 +260,36 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Owner,
 
     // check if the new owner exists
     const newOwner = await db.get<User>('users', BigInt(newOwnerId));
-    if (!newOwner) return res.status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'New owner does not exist.' });
+    if (!newOwner)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'New owner does not exist.' });
 
     // update roadmap
     roadmap.ownerId = BigInt(newOwnerId);
     roadmap.updatedAt = new Date();
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Roadmap could not be updated.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
-RoadmapsUpdate.post(Paths.Roadmaps.Update.Data,
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Data,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const data = req.body?.data as string;
 
-    if (!data) return res.status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'Roadmap data is missing.' });
+    if (!data)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap data is missing.' });
 
     // check if the roadmap is valid
     const dataP = await isRoadmapValid(req, res);
@@ -259,11 +304,13 @@ RoadmapsUpdate.post(Paths.Roadmaps.Update.Data,
     roadmap.updatedAt = new Date();
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
-    if (!success) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Roadmap could not be updated.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Roadmap could not be updated.' });
 
-    return res.status(HttpStatusCodes.OK)
-      .json({ success: true });
-  });
+    return res.status(HttpStatusCodes.OK).json({ success: true });
+  },
+);
 
 export default RoadmapsUpdate;
