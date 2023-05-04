@@ -8,7 +8,7 @@ import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
 import { Tag } from '@src/models/Tags';
-import * as console from 'console';
+import User from '@src/models/User';
 
 const RoadmapsGet = Router({ mergeParams: true });
 
@@ -60,8 +60,11 @@ RoadmapsGet.get(
     if (!data) return;
 
     // get likes where roadmapId = id
-    const likes = await new Database()
-      .countWhere('roadmapLikes', 'roadmapId', data.id.toString());
+    const likes = await new Database().countWhere(
+      'roadmapLikes',
+      'roadmapId',
+      data.id.toString(),
+    );
 
     const { roadmap, issueCount } = data;
 
@@ -90,8 +93,15 @@ RoadmapsGet.get(
     if (!data) return;
 
     // get likes where roadmapId = id
-    const likes = await new Database()
-      .countWhere('roadmapLikes', 'roadmapId', data.id.toString());
+    const likes = await new Database().countWhere(
+      'roadmapLikes',
+      'roadmapId',
+      data.id.toString(),
+    );
+    let user = await new Database().get<User>('users', data.roadmap.ownerId);
+    if (!user) {
+      user = new User('Unknown User');
+    }
 
     const { roadmap, issueCount } = data;
 
@@ -102,6 +112,7 @@ RoadmapsGet.get(
       description: roadmap.description,
       likes: likes.toString(),
       issueCount: issueCount.toString(),
+      ownerName: user.name,
       ownerId: roadmap.ownerId.toString(),
     });
   },

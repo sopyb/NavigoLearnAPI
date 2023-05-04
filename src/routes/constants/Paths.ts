@@ -20,6 +20,7 @@ const Paths = {
   },
   Explore: {
     Base: '/explore',
+    Default: '/',
     New: '/new',
     Popular: '/popular',
     Trending: '/trending',

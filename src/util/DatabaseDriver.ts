@@ -88,8 +88,8 @@ function getFirstResult<T>(
 }
 
 class Database {
-  private static pool: Pool;
-  private static isSetup = false;
+  protected static pool: Pool;
+  protected static isSetup = false;
 
   public constructor(config: DatabaseConfig = DBCred as DatabaseConfig) {
     if (!Database.pool) this.initialize(config);
@@ -304,7 +304,7 @@ class Database {
     return (result as CountDataPacket[])[0]['COUNT(*)'];
   }
 
-  private async _setup() {
+  protected async _setup() {
     // get setup.sql file
     let setupSql = fs.readFileSync(
       path.join(__dirname, '..', 'sql', 'setup.sql'),
@@ -338,7 +338,7 @@ class Database {
     }
   }
 
-  private async _query(
+  public async _query(
     sql: string,
     params?: unknown[],
   ): Promise<ResultSetHeader | RowDataPacket[]> {
