@@ -59,18 +59,20 @@ export class Issue implements IIssue {
   }
 
   public static isIssue(param: object): param is IIssue {
-    return 'id' in param &&
+    return (
+      'id' in param &&
       'roadmapId' in param &&
       'userId' in param &&
       'open' in param &&
       'title' in param &&
       'content' in param &&
       'createdAt' in param &&
-      'updatedAt' in param;
+      'updatedAt' in param
+    );
   }
 
-  public toJSON(): string {
-    return JSON.stringify({
+  public toJSONSafe(): unknown {
+    return {
       id: this.id.toString(),
       roadmapId: this.roadmapId.toString(),
       userId: this.userId.toString(),
@@ -79,6 +81,6 @@ export class Issue implements IIssue {
       content: this.content,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-    });
+    };
   }
 }

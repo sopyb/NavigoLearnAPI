@@ -16,14 +16,16 @@ describe('CommentsRouter', () => {
 
   beforeAll(async () => {
     // create users
-    let res = await request(app).post('/api/auth/register')
+    let res = await request(app)
+      .post('/api/auth/register')
       .send({ email: 'user1@email.com', password: 'password1' })
       .expect(HttpStatusCodes.CREATED);
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     token1 = res.header['set-cookie'][0].split(';')[0].split('=')[1] as string;
 
-    res = await request(app).post('/api/auth/register')
+    res = await request(app)
+      .post('/api/auth/register')
       .send({ email: 'user2@email.com', password: 'password2' })
       .expect(HttpStatusCodes.CREATED);
 
@@ -31,7 +33,8 @@ describe('CommentsRouter', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     token2 = res.header['set-cookie'][0].split(';')[0].split('=')[1] as string;
 
-    res = await request(app).post('/api/auth/register')
+    res = await request(app)
+      .post('/api/auth/register')
       .send({ email: 'user3@email.com', password: 'password3' })
       .expect(HttpStatusCodes.CREATED);
 
@@ -56,13 +59,16 @@ describe('CommentsRouter', () => {
     user3 = user;
 
     // create roadmaps
-    await request(app).post('/api/roadmaps/create')
-      .set('Cookie', [ `token=${token1}` ])
-      .send(
-        { roadmap: new Roadmap(user1.id, 'roadmap1', 'test', 'st').toJSON() })
+    await request(app)
+      .post('/api/roadmaps/create')
+      .set('Cookie', [`token=${token1}`])
+      .send({
+        roadmap: new Roadmap(user1.id, 'roadmap1', 'test', 'st').toJSONSafe(),
+      })
       .expect(HttpStatusCodes.CREATED);
-    await request(app).post('/api/roadmaps/create')
-      .set('Cookie', [ `token=${token2}` ])
+    await request(app)
+      .post('/api/roadmaps/create')
+      .set('Cookie', [`token=${token2}`])
       .send({
         roadmap: new Roadmap(
           user2.id,
@@ -71,7 +77,8 @@ describe('CommentsRouter', () => {
           'ksf',
           undefined,
           undefined,
-          false).toJSON(),
+          false,
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED);
 
@@ -85,27 +92,45 @@ describe('CommentsRouter', () => {
     roadmap2 = roadmap;
 
     // create issues
-    await request(app).post(`/api/roadmaps/${roadmap1.id}/issues/create`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(`/api/roadmaps/${roadmap1.id}/issues/create`)
+      .set('Cookie', [`token=${token1}`])
       .send({
-        issue: new Issue(roadmap1.id, user1.id, true,
-          'issue1', 'fd').toJSON(),
+        issue: new Issue(
+          roadmap1.id,
+          user1.id,
+          true,
+          'issue1',
+          'fd',
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED);
 
-    await request(app).post(`/api/roadmaps/${roadmap2.id}/issues/create`)
-      .set('Cookie', [ `token=${token2}` ])
+    await request(app)
+      .post(`/api/roadmaps/${roadmap2.id}/issues/create`)
+      .set('Cookie', [`token=${token2}`])
       .send({
-        issue: new Issue(roadmap2.id, user2.id, true,
-          'issue3', 'ksf').toJSON(),
+        issue: new Issue(
+          roadmap2.id,
+          user2.id,
+          true,
+          'issue3',
+          'ksf',
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED);
 
-    await request(app).post(`/api/roadmaps/${roadmap2.id}/issues/create`)
-      .set('Cookie', [ `token=${token2}` ])
+    await request(app)
+      .post(`/api/roadmaps/${roadmap2.id}/issues/create`)
+      .set('Cookie', [`token=${token2}`])
       .send({
-        issue: new Issue(roadmap2.id, user2.id, true,
-          'issue4', 'ksf').toJSON(),
+        issue: new Issue(
+          roadmap2.id,
+          user2.id,
+          true,
+          'issue4',
+          'ksf',
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED);
 
@@ -133,9 +158,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should create a comment', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -150,8 +177,11 @@ describe('CommentsRouter', () => {
     // get database
     const db = new Database();
     // get comment
-    const comment =
-      await db.getWhere<Comment>('issueComments', 'userId', user1.id);
+    const comment = await db.getWhere<Comment>(
+      'issueComments',
+      'userId',
+      user1.id,
+    );
     if (!comment) throw new Error('Comment not found.');
     // check comment
     expect(comment.content).toBe(new Array(100).fill('a').join(''));
@@ -163,9 +193,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should not create a comment with invalid content', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: '',
       })
@@ -173,9 +205,13 @@ describe('CommentsRouter', () => {
   });
 
   it('should not create a comment with invalid issue id', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${Number(issue4.id) + 1}/comments/create`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${
+          Number(issue4.id) + 1
+        }/comments/create`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -183,9 +219,13 @@ describe('CommentsRouter', () => {
   });
 
   it('should not create a comment with invalid roadmap id', async () => {
-    await request(app).post(`/api/roadmaps/${
-      Number(roadmap2.id) + 1}/issues/${issue1.id.toString()}/comments/create`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${
+          Number(roadmap2.id) + 1
+        }/issues/${issue1.id.toString()}/comments/create`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -193,8 +233,10 @@ describe('CommentsRouter', () => {
   });
 
   it('should not create a comment without login', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`)
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`,
+      )
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -202,9 +244,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should fail to create a comment with invalid token', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`)
-      .set('Cookie', [ `token=${token1}a` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/create`,
+      )
+      .set('Cookie', [`token=${token1}a`])
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -212,9 +256,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should fail to create a comment on private roadmap', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap2.id.toString()}/issues/${issue3.id.toString()}/comments/create`)
-      .set('Cookie', [ `token=${token3}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap2.id.toString()}/issues/${issue3.id.toString()}/comments/create`,
+      )
+      .set('Cookie', [`token=${token3}`])
       .send({
         content: new Array(100).fill('a').join(''),
       })
@@ -222,9 +268,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should get comments', async () => {
-    await request(app).get(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .get(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -232,29 +280,39 @@ describe('CommentsRouter', () => {
         // eslint-disable-next-line max-len,@typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const comments = JSON.parse(res.body)?.comments as Array<Comment>;
+        const comments = res.body?.comments as Array<Comment>;
         expect(comments).toBeDefined();
         expect(comments.length).toBe(1);
       });
   });
 
   it('should not get comments with invalid issue id', async () => {
-    await request(app).get(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${Number(issue4.id) + 1}/comments`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .get(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${
+          Number(issue4.id) + 1
+        }/comments`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .expect(HttpStatusCodes.NOT_FOUND);
   });
 
   it('should not get comments with invalid roadmap id', async () => {
-    await request(app).get(`/api/roadmaps/${
-      Number(roadmap1.id) + 1}/issues/${issue1.id.toString()}/comments`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .get(
+        `/api/roadmaps/${
+          Number(roadmap1.id) + 1
+        }/issues/${issue1.id.toString()}/comments`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .expect(HttpStatusCodes.BAD_REQUEST);
   });
 
   it('should get comments without login', async () => {
-    await request(app).get(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments`)
+    await request(app)
+      .get(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments`,
+      )
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {
@@ -262,17 +320,18 @@ describe('CommentsRouter', () => {
         // eslint-disable-next-line max-len,@typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const comments = JSON.parse(res.body)?.comments as Array<Comment>;
+        const comments = res.body?.comments as Array<Comment>;
         expect(comments).toBeDefined();
         expect(comments.length).toBe(1);
       });
   });
 
   it('should be able to update a comment', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('b').join(''),
       })
@@ -286,10 +345,11 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment with invalid content', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: '',
       })
@@ -297,10 +357,13 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment with invalid comment id', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      Number(comment1.id) + 1}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
+          Number(comment1.id) + 1
+        }/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('b').join(''),
       })
@@ -308,10 +371,13 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment with invalid issue id', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${Number(issue1.id) + 1}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${
+          Number(issue1.id) + 1
+        }/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('b').join(''),
       })
@@ -319,10 +385,13 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment with invalid roadmap id', async () => {
-    await request(app).post(`/api/roadmaps/${
-      Number(roadmap2.id) + 21}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${
+          Number(roadmap2.id) + 21
+        }/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .send({
         content: new Array(100).fill('b').join(''),
       })
@@ -330,9 +399,10 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment without login', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
       .send({
         content: new Array(100).fill('b').join(''),
       })
@@ -340,63 +410,73 @@ describe('CommentsRouter', () => {
   });
 
   it('should not update a comment with invalid token', async () => {
-    await request(app).post(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}a` ])
+    await request(app)
+      .post(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}a`])
       .send({
         content: new Array(100).fill('b').join(''),
       })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it('should not be able to delete a comment with invalid comment id',
-    async () => {
-      await request(app).delete(`/api/roadmaps/${
-        roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-        Number(comment1.id) + 1}/`)
-        .set('Cookie', [ `token=${token1}` ])
-        .expect(HttpStatusCodes.NOT_FOUND);
-    });
+  it('should not be able to delete a comment with invalid comment id', async () => {
+    await request(app)
+      .delete(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
+          Number(comment1.id) + 1
+        }/`,
+      )
+      .set('Cookie', [`token=${token1}`])
+      .expect(HttpStatusCodes.NOT_FOUND);
+  });
 
-  it('should not be able to delete a comment with invalid issue id',
-    async () => {
-      await request(app).delete(`/api/roadmaps/${
-        roadmap1.id.toString()}/issues/${Number(issue1.id) + 1}/comments/${
-        comment1.id.toString()}/`)
-        .set('Cookie', [ `token=${token1}` ])
-        .expect(HttpStatusCodes.BAD_REQUEST);
-    });
+  it('should not be able to delete a comment with invalid issue id', async () => {
+    await request(app)
+      .delete(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${
+          Number(issue1.id) + 1
+        }/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
+      .expect(HttpStatusCodes.BAD_REQUEST);
+  });
 
-  it('should not be able to delete a comment with invalid roadmap id',
-    async () => {
-      await request(app).delete(`/api/roadmaps/${
-        Number(roadmap1.id) + 1}/issues/${issue1.id.toString()}/comments/${
-        comment1.id.toString()}/`)
-        .set('Cookie', [ `token=${token1}` ])
-        .expect(HttpStatusCodes.BAD_REQUEST);
-    });
+  it('should not be able to delete a comment with invalid roadmap id', async () => {
+    await request(app)
+      .delete(
+        `/api/roadmaps/${
+          Number(roadmap1.id) + 1
+        }/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
+      .expect(HttpStatusCodes.BAD_REQUEST);
+  });
 
   it('should not be able to delete a comment without login', async () => {
-    await request(app).delete(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
+    await request(app)
+      .delete(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
   it('should not be able to delete a comment with invalid token', async () => {
-    await request(app).delete(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}a` ])
+    await request(app)
+      .delete(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}a`])
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
   it('should be able to delete a comment', async () => {
-    await request(app).delete(`/api/roadmaps/${
-      roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${
-      comment1.id.toString()}/`)
-      .set('Cookie', [ `token=${token1}` ])
+    await request(app)
+      .delete(
+        `/api/roadmaps/${roadmap1.id.toString()}/issues/${issue1.id.toString()}/comments/${comment1.id.toString()}/`,
+      )
+      .set('Cookie', [`token=${token1}`])
       .expect(HttpStatusCodes.OK)
       .expect('Content-Type', /json/)
       .expect((res) => {

@@ -39,14 +39,14 @@ export class TabInfo implements ITabInfo {
     );
   }
 
-  public toJSON(): string {
-    return JSON.stringify({
+  public toJSONSafe(): object {
+    return {
       id: this.id.toString(),
       stringId: this.stringId,
       roadmapId: this.roadmapId.toString(),
       userId: this.userId.toString(),
       content: this.content,
-    });
+    };
   }
 
   public static from(param: object): ITabInfo {

@@ -65,7 +65,7 @@ describe('Roadmap Issues', () => {
           'Test Roadmap',
           'Test Description',
           'datra',
-        ).toJSON(),
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED);
 
@@ -104,13 +104,13 @@ describe('Roadmap Issues', () => {
       .post(`/api/roadmaps/${roadmap.id}/issues/create`)
       .set('Cookie', `token=${token}`)
       .send({
-        issue: {
-          roadmapId: roadmap.id,
-          userId: user.id,
-          open: true,
-          title: 'datra',
-          content: 'Test content',
-        },
+        issue: new Issue(
+          roadmap.id,
+          user2.id,
+          true,
+          'datra',
+          'Test content',
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED)
       .expect((res) => {
@@ -136,7 +136,7 @@ describe('Roadmap Issues', () => {
           true,
           'datra',
           'Test content',
-        ).toJSON(),
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.CREATED)
       .expect((res) => {
@@ -161,7 +161,7 @@ describe('Roadmap Issues', () => {
           true,
           'datra',
           'Test content',
-        ).toJSON(),
+        ).toJSONSafe(),
       })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });

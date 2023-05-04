@@ -90,7 +90,7 @@ describe('Roadmap Router', () => {
     const res = await request(app)
       .post('/api/roadmaps/create')
       .set('Cookie', `token=${token}`)
-      .send({ roadmap: roadmap.toJSON() })
+      .send({ roadmap: roadmap.toJSONSafe() })
       .expect(HttpStatusCodes.CREATED);
 
     // if id is undefined
@@ -124,7 +124,7 @@ describe('Roadmap Router', () => {
     // create roadmap
     await request(app)
       .post('/api/roadmaps/create')
-      .send({ roadmap: roadmap.toJSON() })
+      .send({ roadmap: roadmap.toJSONSafe() })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
@@ -132,7 +132,7 @@ describe('Roadmap Router', () => {
     // create roadmap
     await request(app)
       .post('/api/roadmaps/create')
-      .send({ roadmap: roadmap.toJSON() })
+      .send({ roadmap: roadmap.toJSONSafe() })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
@@ -141,7 +141,7 @@ describe('Roadmap Router', () => {
     await request(app)
       .post('/api/roadmaps/create')
       .set('Cookie', 'token=invalidtoken')
-      .send({ roadmap: roadmap.toJSON() })
+      .send({ roadmap: roadmap.toJSONSafe() })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
@@ -253,7 +253,7 @@ describe('Roadmap Router', () => {
   `! Update Roadmap Tests
    */
 
-  it("Should be able to update a roadmap's title", async () => {
+  it('Should be able to update a roadmap\'s title', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/title`)
       .set('Cookie', `token=${token}`)
@@ -267,14 +267,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's title if not logged in", async () => {
+  it('Should fail to update a roadmap\'s title if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/title`)
       .send({ title: 'new title' })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's title if not owner", async () => {
+  it('Should fail to update a roadmap\'s title if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/title`)
       .set('Cookie', `token=${token2}`)
@@ -282,7 +282,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.FORBIDDEN);
   });
 
-  it("Should be able to update a roadmap's description", async () => {
+  it('Should be able to update a roadmap\'s description', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/description`)
       .set('Cookie', `token=${token}`)
@@ -296,14 +296,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's description if not logged in", async () => {
+  it('Should fail to update a roadmap\'s description if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/description`)
       .send({ description: 'new description' })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's description if not owner", async () => {
+  it('Should fail to update a roadmap\'s description if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/description`)
       .set('Cookie', `token=${token2}`)
@@ -311,7 +311,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.FORBIDDEN);
   });
 
-  it("Should be able to update a roadmap's tags", async () => {
+  it('Should be able to update a roadmap\'s tags', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/tags`)
       .set('Cookie', `token=${token}`)
@@ -325,7 +325,7 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should be able to update a roadmap's tags with multiple tags", async () => {
+  it('Should be able to update a roadmap\'s tags with multiple tags', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/tags`)
       .set('Cookie', `token=${token}`)
@@ -339,7 +339,7 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should be able to update a roadmap's tags with empty array", async () => {
+  it('Should be able to update a roadmap\'s tags with empty array', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/tags`)
       .set('Cookie', `token=${token}`)
@@ -353,14 +353,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's tags if not logged in", async () => {
+  it('Should fail to update a roadmap\'s tags if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/tags`)
       .send({ tags: ['new tag'] })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's tags if not owner", async () => {
+  it('Should fail to update a roadmap\'s tags if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/tags`)
       .set('Cookie', `token=${token2}`)
@@ -368,7 +368,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.FORBIDDEN);
   });
 
-  it("Should be able to update a roadmap's visibility", async () => {
+  it('Should be able to update a roadmap\'s visibility', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/visibility`)
       .set('Cookie', `token=${token}`)
@@ -383,14 +383,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's visibility if not logged in", async () => {
+  it('Should fail to update a roadmap\'s visibility if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/visibility`)
       .send({ visibility: 'public' })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's visibility if not owner", async () => {
+  it('Should fail to update a roadmap\'s visibility if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/visibility`)
       .set('Cookie', `token=${token2}`)
@@ -398,7 +398,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.FORBIDDEN);
   });
 
-  it("Should be able to update a roadmap's owner", async () => {
+  it('Should be able to update a roadmap\'s owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/owner`)
       .set('Cookie', `token=${token}`)
@@ -425,14 +425,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's owner if not logged in", async () => {
+  it('Should fail to update a roadmap\'s owner if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/owner`)
       .send({ newOwnerId: user2.id.toString() })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's owner if not owner", async () => {
+  it('Should fail to update a roadmap\'s owner if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/owner`)
       .set('Cookie', `token=${token2}`)
@@ -440,7 +440,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.FORBIDDEN);
   });
 
-  it("Should be able to update a roadmap's data", async () => {
+  it('Should be able to update a roadmap\'s data', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/data`)
       .set('Cookie', `token=${token}`)
@@ -454,14 +454,14 @@ describe('Roadmap Router', () => {
       });
   });
 
-  it("Should fail to update a roadmap's data if not logged in", async () => {
+  it('Should fail to update a roadmap\'s data if not logged in', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/data`)
       .send({ data: 'test s' })
       .expect(HttpStatusCodes.UNAUTHORIZED);
   });
 
-  it("Should fail to update a roadmap's data if not owner", async () => {
+  it('Should fail to update a roadmap\'s data if not owner', async () => {
     await request(app)
       .post(`/api/roadmaps/${roadmap.id}/data`)
       .set('Cookie', `token=${token2}`)
@@ -480,7 +480,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.OK);
   });
 
-  it("shouldn't be able to like a roadmap twice", async () => {
+  it('shouldn\'t be able to like a roadmap twice', async () => {
     // like roadmap
     await request(app)
       .get(`/api/roadmaps/${roadmap.id}/like`)
@@ -496,7 +496,7 @@ describe('Roadmap Router', () => {
       .expect(HttpStatusCodes.OK);
   });
 
-  it("shouldn't be able to dislike a roadmap twice", async () => {
+  it('shouldn\'t be able to dislike a roadmap twice', async () => {
     // dislike roadmap
     await request(app)
       .delete(`/api/roadmaps/${roadmap.id}/like`)
