@@ -42,6 +42,11 @@ RoadmapsRouter.post(
       roadmapDataJson.ownerId = session?.userId || BigInt(-1);
       roadmapDataJson.id = undefined;
 
+      // if Title is empty, edit it to be "Untitled Roadmap"
+      if (roadmapDataJson.name === '') {
+        roadmapDataJson.name = 'Untitled';
+      }
+
       // convert date strings to date objects
       roadmapDataJson.createdAt = new Date(roadmapDataJson.createdAt);
       roadmapDataJson.updatedAt = new Date(roadmapDataJson.updatedAt);

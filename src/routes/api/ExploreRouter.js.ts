@@ -9,7 +9,6 @@ interface RoadmapResult {
   name: string;
   description: string;
   likes: bigint | string;
-  issueCount: bigint | string;
   ownerName: string;
   ownerId: bigint | string;
 }
@@ -46,7 +45,6 @@ ExploreRouter.get(Paths.Explore.Default, async (req, res) => {
   roadmaps.forEach((roadmap) => {
     roadmap.id = roadmap.id.toString();
     roadmap.likes = roadmap.likes.toString();
-    roadmap.issueCount = roadmap.issueCount.toString();
     roadmap.ownerId = roadmap.ownerId.toString();
   });
   // send roadmaps
