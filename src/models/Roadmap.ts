@@ -13,6 +13,15 @@ export interface IRoadmap {
   data: string; // base64 encoded json
 }
 
+export interface RoadmapMini {
+  id: bigint | string;
+  name: string;
+  description: string;
+  likes: bigint | string;
+  ownerName: string;
+  ownerId: bigint | string;
+}
+
 // class
 export class Roadmap implements IRoadmap {
   public id: bigint;

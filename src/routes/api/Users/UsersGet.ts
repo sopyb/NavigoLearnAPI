@@ -8,7 +8,7 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
 import { IUserInfo } from '@src/models/UserInfo';
-import { Roadmap } from '@src/models/Roadmap';
+import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
 import * as console from 'console';
@@ -123,16 +123,36 @@ UsersGet.get(
       userId,
     );
 
-    // parse bigint to string
-    const parsedRoadmaps = roadmaps?.map((roadmap) => {
-      return {
-        ...roadmap,
+    if (!roadmaps) {
+      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
+      return;
+    }
+
+    // get user
+    const user = await db.get<User>('users', userId);
+
+    if (!user) {
+          res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
+          return;
+    }
+
+    // get Like count
+    const likes = await db.countWhere('likes', 'userId', userId);
+
+    const parsedRoadmaps: RoadmapMini[] = [];
+
+    // convert roadmaps to RoadmapMini
+    for(let i = 0; i < roadmaps.length; i++) {
+      const roadmap = roadmaps[i];
+      parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
+        name: roadmap.name,
+        description: roadmap.description,
+        likes: likes.toString(),
+        ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
-        // data is not needed when displaying a card for a roadmap
-        data: '',
       };
-    });
+    }
 
     res.status(HttpStatusCodes.OK).json({
       type: 'roadmaps',

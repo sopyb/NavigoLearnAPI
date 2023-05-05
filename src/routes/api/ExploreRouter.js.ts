@@ -1,17 +1,9 @@
 import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import { ExploreDB } from '@src/util/ExploreDB';
+import { RoadmapMini } from "@src/models/Roadmap";
 
 const ExploreRouter = Router();
-
-interface RoadmapResult {
-  id: bigint | string;
-  name: string;
-  description: string;
-  likes: bigint | string;
-  ownerName: string;
-  ownerId: bigint | string;
-}
 
 ExploreRouter.get(Paths.Explore.Default, async (req, res) => {
   // get query, count, and page from url
@@ -35,7 +27,7 @@ ExploreRouter.get(Paths.Explore.Default, async (req, res) => {
 
   // get roadmaps from database
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const roadmaps = await ExploreDB.searchRoadmapsByLiked<RoadmapResult>(
+  const roadmaps = await ExploreDB.searchRoadmapsByLiked<RoadmapMini>(
     query,
     countNum,
     pageNum,
