@@ -80,9 +80,9 @@ export async function sessionMiddleware(
         sameSite: 'strict',
       });
 
-      res.status(HttpStatusCodes.UNAUTHORIZED).json({
-        error: 'Token expired, please login',
-      });
+      req.session = undefined;
+
+      next();
 
       return;
     } else {
@@ -94,12 +94,14 @@ export async function sessionMiddleware(
 
   // if session still doesn't exist, delete cookie
   if (!req.session) {
-    res.status(HttpStatusCodes.UNAUTHORIZED).json({
-      error: 'Token not found, please login',
+    res.cookie('token', '', {
+      httpOnly: false,
+      secure: EnvVars.NodeEnv === NodeEnvs.Production,
+      maxAge: 0,
+      sameSite: 'strict',
     });
   }
 
-  // if the token is valid, call next()
   next();
 }
 
