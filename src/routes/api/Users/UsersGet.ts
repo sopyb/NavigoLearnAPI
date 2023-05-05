@@ -132,12 +132,12 @@ UsersGet.get(
     const user = await db.get<User>('users', userId);
 
     if (!user) {
-          res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-          return;
+      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
+      return;
     }
 
     // get Like count
-    const likes = await db.countWhere('likes', 'userId', userId);
+    const likes = await db.countWhere('roadmapLikes', 'userId', userId);
 
     const parsedRoadmaps: RoadmapMini[] = [];
 
