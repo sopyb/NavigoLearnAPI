@@ -52,6 +52,7 @@ const Paths = {
     },
     Delete: '/:roadmapId([0-9]+)',
     Like: '/:roadmapId([0-9]+)/like',
+    CheckLike: '/:roadmapId([0-9]+)/check-like',
     Progress: {
       Base: '/:roadmapId/progress',
       Get: '/:userId?',

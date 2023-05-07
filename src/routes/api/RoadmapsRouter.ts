@@ -141,6 +141,62 @@ RoadmapsRouter.delete(
 RoadmapsRouter.use(Paths.Roadmaps.Issues.Base, RoadmapIssues);
 RoadmapsRouter.use(Paths.Roadmaps.TabsInfo.Base, RoadmapTabsInfo);
 
+
+RoadmapsRouter.all(Paths.Roadmaps.CheckLike, requireSessionMiddleware);
+
+RoadmapsRouter.get(
+  Paths.Roadmaps.CheckLike,
+  async (req: RequestWithSession, res) => {
+    // get data from body and session
+    const session = req.session;
+    const id = BigInt(req.params.roadmapId || -1);
+
+    // check if id is valid
+    if (id < 0)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'Roadmap id is missing.' });
+
+    // check if session exists
+    if (!session)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Session is missing from user.' });
+
+    // get database connection
+    const db = new Database();
+
+    // check if roadmap exists
+    const roadmap = await db.get<Roadmap>('roadmaps', id);
+    if (!roadmap)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Roadmap does not exist.' });
+
+    // check if user has already liked the roadmap
+    const liked = await db.getAllWhere<{ roadmapId: bigint; userId: bigint }>(
+      'roadmapLikes',
+      'userId',
+      session.userId.toString(),
+    );
+
+    // check if likes exist
+    if (!liked) return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR);
+
+    if (liked.some((like) => like.roadmapId === id)) {
+      return res
+        .status(HttpStatusCodes.OK)
+        .json({ status: true, message: 'User has already liked the roadmap.'});
+    } else {
+      return res
+      .status(HttpStatusCodes.OK)
+      .json({ status: false, message: 'User has not liked the roadmap.'});
+    }
+  },
+);
+
+
+
 /*
  ! like roadmaps
  */
