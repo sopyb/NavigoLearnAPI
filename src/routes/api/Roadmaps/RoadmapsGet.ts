@@ -21,6 +21,7 @@ async function checkIfRoadmapExists(
       roadmap: Roadmap;
       issueCount: bigint;
       likes: bigint;
+      isLiked: boolean;
     }
   | undefined
 > {
@@ -56,7 +57,24 @@ async function checkIfRoadmapExists(
     id,
   );
 
-  return { id: BigInt(id), roadmap, issueCount, likes };
+
+  let isLiked = false;
+
+  if (req.session) {
+    const liked = await new Database().getAllWhere<{ roadmapId: bigint; userId: bigint }>(
+      'roadmapLikes',
+      'userId',
+      req.session.userId,
+    );
+
+    if (liked) {
+      if (liked.some((like) => like.roadmapId === BigInt(id))) {
+        isLiked = true;
+      }
+    }
+  }
+
+  return { id: BigInt(id), roadmap, issueCount, likes, isLiked };
 }
 
 RoadmapsGet.get(
@@ -67,7 +85,7 @@ RoadmapsGet.get(
 
     if (!data) return;
 
-    const { roadmap, issueCount, likes } = data;
+    const { roadmap, issueCount, likes, isLiked } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -77,6 +95,7 @@ RoadmapsGet.get(
       ownerId: roadmap.ownerId.toString(),
       issueCount: issueCount.toString(),
       likes: likes.toString(),
+      isLiked,
       createdAt: roadmap.createdAt,
       updatedAt: roadmap.updatedAt,
       isPublic: roadmap.isPublic,
@@ -98,7 +117,7 @@ RoadmapsGet.get(
       user = new User('Unknown User');
     }
 
-    const { roadmap, likes } = data;
+    const { roadmap, likes, isLiked } = data;
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -106,6 +125,7 @@ RoadmapsGet.get(
       name: roadmap.name,
       description: roadmap.description,
       likes: likes.toString(),
+      isLiked,
       ownerName: user.name,
       ownerId: roadmap.ownerId.toString(),
     });
