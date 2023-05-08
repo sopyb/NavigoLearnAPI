@@ -2,10 +2,13 @@ import { Router } from 'express';
 import Paths from '@src/routes/constants/Paths';
 import { ExploreDB } from '@src/util/ExploreDB';
 import { RoadmapMini } from "@src/models/Roadmap";
+import Database from "@src/util/DatabaseDriver";
+import { RequestWithSession } from "@src/middleware/session";
 
 const ExploreRouter = Router();
 
-ExploreRouter.get(Paths.Explore.Default, async (req, res) => {
+ExploreRouter.get(Paths.Explore.Default,
+  async (req: RequestWithSession, res) => {
   // get query, count, and page from url
   // eslint-disable-next-line max-len
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,prefer-const
@@ -31,18 +34,29 @@ ExploreRouter.get(Paths.Explore.Default, async (req, res) => {
     query,
     countNum,
     pageNum,
+    !req?.session?.userId ? -1 : parseInt(req.session?.userId?.toString()),
   );
+
+  let db = new Database();
+
+  // get total roadmaps
+  const totalRoadmaps = await db.count('roadmaps');
+
+  // page count
+  const pageCount = Math.ceil( parseInt(totalRoadmaps.toString()) / countNum);
 
   // process roadmaps
   roadmaps.forEach((roadmap) => {
     roadmap.id = roadmap.id.toString();
     roadmap.likes = roadmap.likes.toString();
     roadmap.ownerId = roadmap.ownerId.toString();
+    roadmap.isLiked = Boolean(roadmap.isLiked);
   });
   // send roadmaps
   res.status(200).json({
     success: true,
     roadmaps,
+    pageCount,
   });
 });
 

@@ -18,6 +18,7 @@ export interface RoadmapMini {
   name: string;
   description: string;
   likes: bigint | string;
+  isLiked: boolean | number;
   ownerName: string;
   ownerId: bigint | string;
 }

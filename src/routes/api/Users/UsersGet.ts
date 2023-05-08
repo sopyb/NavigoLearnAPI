@@ -139,6 +139,11 @@ UsersGet.get(
     // get Like count
     const likes = await db.countWhere('roadmapLikes', 'userId', userId);
 
+    let userLikes = await db.getAllWhere<{
+      roadmapId: bigint;
+      userId: bigint;
+    }>('roadmapLikes', 'userId', userId) || [];
+
     const parsedRoadmaps: RoadmapMini[] = [];
 
     // convert roadmaps to RoadmapMini
@@ -149,6 +154,7 @@ UsersGet.get(
         name: roadmap.name,
         description: roadmap.description,
         likes: likes.toString(),
+        isLiked: userLikes.some((like) => like.roadmapId === roadmap.id),
         ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
       };
