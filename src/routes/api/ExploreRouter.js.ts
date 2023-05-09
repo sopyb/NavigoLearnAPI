@@ -40,7 +40,7 @@ ExploreRouter.get(Paths.Explore.Default,
   let db = new Database();
 
   // get total roadmaps
-  const totalRoadmaps = await db.count('roadmaps');
+  const totalRoadmaps = await db.countWhereLike('roadmaps', 'name', `%${query}%`);
 
   // page count
   const pageCount = Math.ceil( parseInt(totalRoadmaps.toString()) / countNum);
