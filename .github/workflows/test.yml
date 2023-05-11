@@ -36,7 +36,5 @@ jobs:
           sudo mysql -u root -e "GRANT ALL PRIVILEGES ON $MARIADB_DATABASE.* TO '$MARIADB_USERNAME'@'localhost';"
       - name: Install dependencies
         run: npm install
-      - name: test database specifically
-        run: npm test -- --testFile="database"
       - name: Run tests
         run: npm run test:no-reloading
