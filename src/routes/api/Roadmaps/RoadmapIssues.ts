@@ -105,6 +105,7 @@ RoadmapIssues.get(Paths.Roadmaps.Issues.Get, async (req, res) => {
       id: issue.id.toString(),
       title: issue.title,
       content: issue.content,
+      open: issue.open,
       roadmapId: issue.roadmapId.toString(),
       userId: issue.userId.toString(),
       createdAt: issue.createdAt,
@@ -147,6 +148,7 @@ RoadmapIssues.get(Paths.Roadmaps.Issues.GetAll, async (req, res) => {
         content: issue.content,
         roadmapId: issue.roadmapId.toString(),
         userId: issue.userId.toString(),
+        open: Boolean(issue.open),
         createdAt: issue.createdAt,
         updatedAt: issue.updatedAt,
       };
