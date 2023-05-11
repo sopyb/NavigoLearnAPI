@@ -193,7 +193,7 @@ class Database {
     table: string,
     like: boolean,
     ...values: unknown[]
-  ) {
+  ): Promise<T | undefined> {
     // format values
     let keyString = '';
     let params: unknown[] = [];
@@ -231,34 +231,40 @@ class Database {
 
   public async getAllWhere<T>(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<T[] | undefined> {
-    // create sql query - select * from table where key = ?
-    const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${key} = ?`;
-
-    // execute query
-    const result = await this._query(sql, [ value ]);
-
-    // check if T has any properties that are JSON
-    // if so parse them
-    return parseResult(result) as T[];
+    return this._getAllWhere<T>(table, false, ...values);
   }
 
   public async getAllWhereLike<T>(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<T[] | undefined> {
-    // create sql query - select * from table where key = ?
+    return this._getAllWhere<T>(table, true, ...values);
+  }
+
+  private async _getAllWhere<T>(
+    table: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<T[] | undefined> {
+    // format values
+    let keyString = '';
+    let params: unknown[] = [];
+
+    for (let i = 0; i < values.length - 1; i += 2) {
+      if (i > 0) keyString += ' AND ';
+      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      params = [ ...params, values[i + 1] ];
+    }
+
+    // create sql query
     const sql = `SELECT *
                  FROM ${table}
-                 WHERE ${key} LIKE ?`;
+                 WHERE ${keyString}`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, params);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -340,7 +346,6 @@ class Database {
     } finally {
       // release connection
       await conn.release();
-
       Database.isSetup = true;
     }
   }
