@@ -66,23 +66,6 @@ create table if not exists issues
             on delete cascade
 );
 
-create table if not exists tabsInfo
-(
-    id        bigint auto_increment
-        primary key,
-    roadmapId bigint                                 not null,
-    userId    bigint                                 not null,
-    content   text                                   null,
-    stringId        varchar(255)                     not null,
-    constraint tabInfo_roadmaps_id_fk
-    foreign key (roadmapId) references roadmaps (id)
-    on delete cascade,
-    constraint tabInfo_users_id_fk
-    foreign key (userId) references users (id)
-    on delete cascade
-);
-
-
 create table if not exists issueComments
 (
     id        bigint auto_increment
@@ -179,6 +162,22 @@ create index if not exists sessionTable_expires_index
 
 create index if not exists sessions_index
     on sessionTable (userId, token);
+
+create table if not exists tabsInfo
+(
+    id        bigint auto_increment
+        primary key,
+    roadmapId bigint       not null,
+    userId    bigint       not null,
+    content   text         null,
+    stringId  varchar(255) not null,
+    constraint tabInfo_roadmaps_id_fk
+        foreign key (roadmapId) references roadmaps (id)
+            on delete cascade,
+    constraint tabInfo_users_id_fk
+        foreign key (userId) references users (id)
+            on delete cascade
+);
 
 create table if not exists userInfo
 (

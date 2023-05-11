@@ -101,7 +101,6 @@ const Paths = {
       FollowerCount: '/follower-count',
       FollowingCount: '/following-count',
       Follow: '/follow',
-      IsFollowing: '/is-following',
     },
     Update: {
       Base: '/:userId([0-9]+)?',

@@ -1,5 +1,5 @@
 import EnvVars from '@src/constants/EnvVars';
-import mariadb, { Pool } from 'mariadb';
+import { createPool, Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
@@ -96,7 +96,7 @@ class Database {
   }
 
   public initialize(config: DatabaseConfig = DBCred as DatabaseConfig) {
-    Database.pool = mariadb.createPool(config);
+    Database.pool = createPool(config);
     this._setup();
   }
 
@@ -131,7 +131,7 @@ class Database {
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE id = ?`;
-    const params = [...values, id];
+    const params = [ ...values, id ];
     // execute query
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await this._query(sql, params);
@@ -150,7 +150,7 @@ class Database {
     const sql = `DELETE
                  FROM ${table}
                  WHERE id = ?`;
-    const result = await this._query(sql, [id]);
+    const result = await this._query(sql, [ id ]);
 
     let affectedRows = -1;
     if (result) {
@@ -168,7 +168,7 @@ class Database {
                  FROM ${table}
                  WHERE id = ?`;
     // execute query
-    const result = await this._query(sql, [id]);
+    const result = await this._query(sql, [ id ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -177,34 +177,41 @@ class Database {
 
   public async getWhere<T>(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<T | undefined> {
-    // create sql query - select * from table where id = ?
-    const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${key} = ?`;
-    // execute query
-    const result = await this._query(sql, [value]);
-
-    // check if T has any properties that are JSON
-    // if so parse them
-    return getFirstResult<T>(result);
+    return this._getWhere<T>(table, false, ...values);
   }
 
   public async getWhereLike<T>(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<T | undefined> {
-    // create sql query - select * from table where id = ?
+    return this._getWhere<T>(table, true, ...values);
+  }
+
+  private async _getWhere<T>(
+    table: string,
+    like: boolean,
+    ...values: unknown[]
+  ) {
+    // format values
+    let keyString = '';
+    let params: unknown[] = [];
+
+    for (let i = 0; i < values.length - 1; i += 2) {
+      if (i > 0) keyString += ' AND ';
+      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      params = [ ...params, values[i + 1] ];
+    }
+
+    // create sql query
     const sql = `SELECT *
                  FROM ${table}
-                 WHERE ${key} LIKE ?`;
-    // execute query
-    const result = await this._query(sql, [value]);
+                 WHERE ${keyString}`;
 
-    // check if T has any properties that are JSON
+    // execute query
+    const result = await this._query(sql, params);
+
     // if so parse them
     return getFirstResult<T>(result);
   }
@@ -233,7 +240,7 @@ class Database {
                  WHERE ${key} = ?`;
 
     // execute query
-    const result = await this._query(sql, [value]);
+    const result = await this._query(sql, [ value ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -251,7 +258,7 @@ class Database {
                  WHERE ${key} LIKE ?`;
 
     // execute query
-    const result = await this._query(sql, [value]);
+    const result = await this._query(sql, [ value ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -281,7 +288,7 @@ class Database {
                  WHERE ${key} = ?`;
 
     // execute query
-    const result = await this._query(sql, [value]);
+    const result = await this._query(sql, [ value ]);
 
     // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
@@ -298,7 +305,7 @@ class Database {
                  WHERE ${key} LIKE ?`;
 
     // execute query
-    const result = await this._query(sql, [value]);
+    const result = await this._query(sql, [ value ]);
 
     // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
