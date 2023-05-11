@@ -11,7 +11,6 @@ import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
-import * as console from 'console';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -52,6 +51,14 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   const followerCount = await db.countWhere('followers', 'userId', userId);
   const followingCount = await db.countWhere('followers', 'followerId', userId);
 
+  let isFollowing = false;
+  if (req.session?.userId) {
+    const follower = await db.getWhere<Follower>('followers', 'userId', userId, 'followerId', req.session.userId);
+    if (follower) {
+      isFollowing = true;
+    }
+  }
+
   if (!user || !userInfo) {
     res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
     return;
@@ -73,6 +80,7 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
     githubUrl: userInfo.githubUrl,
     githubLink: !!user.githubId,
     googleLink: !!user.googleId,
+    isFollowing,
   });
 });
 
@@ -136,15 +144,22 @@ UsersGet.get(
       return;
     }
 
-    let userLikes = await db.getAllWhere<{
-      roadmapId: bigint;
-      userId: bigint;
-    }>('roadmapLikes', 'userId', userId) || [];
+    let isLiked = false;
+
+    if (req.session?.userId) {
+      const likedRoadmap = await db.getWhere(
+        'roadmapLikes',
+        'userId', req.session.userId,
+        'roadmapId', userId);
+      if (likedRoadmap) {
+        isLiked = true;
+      }
+    }
 
     const parsedRoadmaps: RoadmapMini[] = [];
 
     // convert roadmaps to RoadmapMini
-    for(let i = 0; i < roadmaps.length; i++) {
+    for (let i = 0; i < roadmaps.length; i++) {
       const roadmap = roadmaps[i];
       parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
@@ -155,7 +170,7 @@ UsersGet.get(
           'roadmapId',
           roadmap.id,
         )).toString(),
-        isLiked: userLikes.some((like) => like.roadmapId === roadmap.id),
+        isLiked,
         ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
       };
@@ -340,55 +355,6 @@ UsersGet.get(
       userId: userId.toString(),
       followingCount: followingCount.toString(),
     });
-  },
-);
-
-UsersGet.get(Paths.Users.Get.IsFollowing, requireSessionMiddleware);
-UsersGet.get(
-  Paths.Users.Get.IsFollowing,
-  async (req: RequestWithSession, res) => {
-    // get the target userDisplay id
-    const userId = BigInt(req.params.userId || -1);
-
-    // get the current userDisplay id
-    const followerId = req.session?.userId;
-
-    if (userId === followerId)
-      return res
-        .status(HttpStatusCodes.FORBIDDEN)
-        .json({ error: 'Cannot follow  yourself' });
-
-    // if either of the ids are undefined, return a bad request
-    if (!followerId || !userId || userId < 0)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
-
-    // get database
-    const db = new DatabaseDriver();
-
-    // check if the userDisplay is already following the target userDisplay
-    const following = await db.getAllWhere<Follower>(
-      'followers',
-      'followerId',
-      followerId,
-    );
-    console.log(following);
-
-    if (!!following)
-      if (following.some((f) => f.userId === userId)) {
-        return res
-          .status(HttpStatusCodes.OK)
-          .json({ status: true, userId: userId.toString() });
-      } else {
-        return res
-          .status(HttpStatusCodes.OK)
-          .json({ status: false, userId: userId.toString() });
-      }
-    else
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'something went wrong' });
   },
 );
 
