@@ -212,10 +212,10 @@ class Database {
     // execute query
     const result = await this._query(sql, params);
 
-    // check if T has any properties that are JSON
     // if so parse them
     return getFirstResult<T>(result);
   }
+
   public async getAll<T>(table: string): Promise<T[] | undefined> {
     // create sql query - select * from table
     const sql = `SELECT *
