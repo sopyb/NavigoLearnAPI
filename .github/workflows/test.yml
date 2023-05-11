@@ -27,7 +27,7 @@ jobs:
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
         with:
-          root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          mariadb-version: 10.10
       - name: Setup MariaDB environment
         run: |
           sudo mysql -u root -e "CREATE DATABASE $MARIADB_DATABASE;"
