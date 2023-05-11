@@ -1,5 +1,5 @@
 import EnvVars from '@src/constants/EnvVars';
-import mariadb, { Pool } from 'mariadb';
+import { createPool, Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
@@ -96,7 +96,7 @@ class Database {
   }
 
   public initialize(config: DatabaseConfig = DBCred as DatabaseConfig) {
-    Database.pool = mariadb.createPool(config);
+    Database.pool = createPool(config);
     this._setup();
   }
 
