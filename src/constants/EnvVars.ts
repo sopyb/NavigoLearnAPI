@@ -27,6 +27,7 @@ const EnvVars = {
   DBCred: {
     host: (process.env.MARIADB_HOST ?? ''),
     user: (process.env.MARIADB_USER ?? ''),
+    port: (process.env.MARIADB_PORT ?? 3306),
     password: (process.env.MARIADB_PASSWORD ?? ''),
     database: (process.env.MARIADB_DATABASE ?? ''),
   },

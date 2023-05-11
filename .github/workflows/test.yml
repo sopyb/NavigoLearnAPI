@@ -24,11 +24,12 @@ jobs:
             echo "::add-mask::$value"
             echo "$key=$value" >> $GITHUB_ENV
           done < <(grep -o '^[^#]*' ./env/test.env)
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
       - name: Setup MariaDB
         uses: ankane/setup-mariadb@v1
         with:
-          root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          mariadb-version: '10.11'
+          mariadb-version: 10.11
       - name: Setup MariaDB environment
         run: |
           sudo mysql -u root -e "CREATE DATABASE $MARIADB_DATABASE;"
