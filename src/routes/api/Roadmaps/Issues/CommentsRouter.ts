@@ -277,7 +277,7 @@ CommentsRouter.delete(
     // check if ids are valid
     const args = await checkParams(req, res);
     if (!args) return;
-    const { issue } = args;
+    const { issue, roadmap } = args;
 
     // get userDisplay info
     const userArgs = await checkUser(req, res);
@@ -312,7 +312,7 @@ CommentsRouter.delete(
         .json({ error: 'Comment does not belong to issue.' });
 
     // check if the userDisplay is allowed to delete comment
-    if (comment.userId !== userId) {
+    if (comment.userId !== userId || roadmap.ownerId !== userId) {
       res
         .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'Only the comment owner can delete comments.' });
