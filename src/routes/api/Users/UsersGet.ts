@@ -144,22 +144,11 @@ UsersGet.get(
       return;
     }
 
-    let isLiked = false;
-
-    if (req.session?.userId) {
-      const likedRoadmap = await db.getWhere(
-        'roadmapLikes',
-        'userId', req.session.userId,
-        'roadmapId', userId);
-      if (likedRoadmap) {
-        isLiked = true;
-      }
-    }
-
     const parsedRoadmaps: RoadmapMini[] = [];
 
     // convert roadmaps to RoadmapMini
     for (let i = 0; i < roadmaps.length; i++) {
+
       const roadmap = roadmaps[i];
       parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
@@ -170,7 +159,7 @@ UsersGet.get(
           'roadmapId',
           roadmap.id,
         )).toString(),
-        isLiked,
+        isLiked: !!(await db.getWhere('roadmapLikes', 'userId', userId, 'roadmapId', roadmap.id)),
         ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
       };
