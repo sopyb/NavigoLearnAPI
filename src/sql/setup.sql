@@ -41,7 +41,7 @@ create table if not exists roadmaps
     createdAt   timestamp    not null,
     updatedAt   timestamp    not null,
     isPublic    tinyint(1)   not null,
-    data        text         not null,
+    data        longtext     not null,
     constraint roadmaps_users_id_fk
         foreign key (ownerId) references users (id)
             on delete cascade
