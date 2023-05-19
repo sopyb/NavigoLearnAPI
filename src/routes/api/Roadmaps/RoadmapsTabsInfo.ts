@@ -3,17 +3,16 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Paths from '@src/routes/constants/Paths';
 import {
   RequestWithSession,
-  requireSessionMiddleware
+  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { ITabInfo, TabInfo } from '@src/models/TabInfo';
 import Database from '@src/util/DatabaseDriver';
 import * as console from 'console';
-import { IRoadmap } from "@src/models/Roadmap";
+import { IRoadmap } from '@src/models/Roadmap';
 
 const RoadmapTabsInfo = Router({ mergeParams: true });
 
 RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Create, requireSessionMiddleware);
-
 RoadmapTabsInfo.post(
   Paths.Roadmaps.TabsInfo.Create,
   async (req: RequestWithSession, res) => {
@@ -85,7 +84,7 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
     'stringId',
     stringId,
     'roadmapId',
-    roadmapId
+    roadmapId,
   );
 
   if (!tabData) res.status(HttpStatusCodes.NOT_FOUND)
@@ -102,9 +101,10 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
   return res.status(HttpStatusCodes.OK).json({ tabInfo: result });
 });
 
+RoadmapTabsInfo.delete(Paths.Roadmaps.TabsInfo.Update, requireSessionMiddleware);
 RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
   async (req: RequestWithSession,
-         res) => {
+    res) => {
     const stringId = req.params?.tabInfoId;
     const roadmapId = BigInt(req.params?.roadmapId || -1);
 
@@ -125,15 +125,15 @@ RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
     const roadmapReq = db.getWhere<IRoadmap>(
       'roadmaps',
       'id',
-      roadmapId
-    )
+      roadmapId,
+    );
     // gets previous data from the table
     const tabDataReq = db.getWhere<ITabInfo>(
       'tabsInfo',
       'stringId',
       stringId,
       'roadmapId',
-      roadmapId
+      roadmapId,
     );
 
     const roadmap = await roadmapReq;
