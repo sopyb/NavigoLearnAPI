@@ -428,7 +428,7 @@ AuthRouter.get(Paths.Auth.GithubLogin, (req, res) => {
       EnvVars.GitHub.ClientID +
       '&redirect_uri=' +
       EnvVars.GitHub.RedirectUri +
-      '&scope=user',
+      '&scope=user:email',
   );
 });
 
