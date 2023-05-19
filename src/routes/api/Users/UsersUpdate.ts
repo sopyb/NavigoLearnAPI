@@ -88,10 +88,10 @@ UsersUpdate.post(
   Paths.Users.Update.Bio,
   async (req: RequestWithSession, res) => {
     // get userId from request
-    const userId = req.session?.userId,
+    const userId = req.session?.userId;
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      bio: string = req.body?.bio;
+    let bio: string = req.body?.bio;
 
     // send error json
     if (userId === undefined)
@@ -100,10 +100,12 @@ UsersUpdate.post(
         .json({ error: 'No user specified' });
 
     // if no bio is specified
-    if (bio === undefined || bio.length > 255)
+    if (bio.length > 255)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'No bio specified' });
+
+    if (!bio) bio = '';
 
     // get database
     const db = new DatabaseDriver();
@@ -135,10 +137,10 @@ UsersUpdate.post(
   Paths.Users.Update.Quote,
   async (req: RequestWithSession, res) => {
     // get userId from request
-    const userId = req.session?.userId,
+    const userId = req.session?.userId;
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      quote: string = req.body?.quote;
+    let quote: string = req.body?.quote;
 
     // send error json
     if (userId === undefined)
@@ -147,10 +149,12 @@ UsersUpdate.post(
         .json({ error: 'No user' });
 
     // check if quote was given
-    if (!quote || quote.length > 255)
+    if (quote.length > 255)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No quote provided' });
+        .json({ error: 'Quote provided is too long' });
+
+    if (!quote) quote = '';
 
     // get database
     const db = new DatabaseDriver();
@@ -220,10 +224,10 @@ UsersUpdate.post(
   Paths.Users.Update.BlogUrl,
   async (req: RequestWithSession, res) => {
     // get userId from request
-    const userId = req.session?.userId,
+    const userId = req.session?.userId;
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      blogUrl: string = req.body?.blogUrl;
+    let blogUrl: string = req.body?.blogUrl;
 
     // send error json
     if (userId === undefined)
@@ -232,10 +236,12 @@ UsersUpdate.post(
         .json({ error: 'No user' });
 
     // check if quote was given
-    if (!blogUrl || blogUrl.length > 255)
+    if (blogUrl.length > 255)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'No blog url valid provided' });
+
+    if (!blogUrl) blogUrl = '';
 
     // get database
     const db = new DatabaseDriver();
@@ -266,10 +272,10 @@ UsersUpdate.post(
 UsersUpdate.post(
   Paths.Users.Update.WebsiteUrl,
   async (req: RequestWithSession, res) => {
-    const userId = req.session?.userId,
+    const userId = req.session?.userId;
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      websiteUrl: string = req.body?.websiteUrl;
+    let websiteUrl: string = req.body?.websiteUrl;
 
     // send error json
     if (userId === undefined)
@@ -278,10 +284,12 @@ UsersUpdate.post(
         .json({ error: 'No userDisplay' });
 
     // check if quote was given
-    if (!websiteUrl || websiteUrl.length > 255)
+    if (websiteUrl.length > 255)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'No website url valid provided' });
+
+    if (!websiteUrl) websiteUrl = '';
 
     // get database
     const db = new DatabaseDriver();
@@ -312,10 +320,10 @@ UsersUpdate.post(
 UsersUpdate.post(
   Paths.Users.Update.GithubUrl,
   async (req: RequestWithSession, res) => {
-    const userId = req.session?.userId,
+    const userId = req.session?.userId;
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      githubUrl: string = req.body?.githubUrl;
+    let githubUrl: string = req.body?.githubUrl;
 
     // send error json
     if (userId === undefined)
@@ -324,10 +332,12 @@ UsersUpdate.post(
         .json({ error: 'No userDisplay' });
 
     // check if quote was given
-    if (!githubUrl || githubUrl.length > 255)
+    if (githubUrl.length > 255)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'No github url valid provided' });
+
+    if (!githubUrl) githubUrl = '';
 
     // get database
     const db = new DatabaseDriver();
@@ -406,7 +416,7 @@ UsersUpdate.post(
     const emailTaken = await db.getWhere<User>('users', 'email', email);
 
     // check if email is already taken
-    if (!!emailTaken)
+    if (emailTaken)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Email is already taken' });
