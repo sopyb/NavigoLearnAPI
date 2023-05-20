@@ -87,7 +87,7 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
     roadmapId,
   );
 
-  if (!tabData) res.status(HttpStatusCodes.NOT_FOUND)
+  if (!tabData) return res.status(HttpStatusCodes.NOT_FOUND)
     .json({ error: 'TabInfo not found.' });
 
   const result = {
@@ -101,7 +101,7 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
   return res.status(HttpStatusCodes.OK).json({ tabInfo: result });
 });
 
-RoadmapTabsInfo.delete(Paths.Roadmaps.TabsInfo.Update, requireSessionMiddleware);
+RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, requireSessionMiddleware);
 RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
   async (req: RequestWithSession,
     res) => {
