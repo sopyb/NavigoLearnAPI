@@ -7,10 +7,45 @@ import logger from 'jet-logger';
 // database credentials
 const { DBCred } = EnvVars;
 
+const trustedColumns = [
+  'name',
+  'email',
+  'role',
+  'pwdHash',
+  'googleId',
+  'githubId',
+  'description',
+  'profilePictureUrl',
+  'bio',
+  'email',
+  'quote',
+  'blogUrl',
+  'websiteUrl',
+  'githubUrl',
+  'ownerId',
+  'isPublic',
+  'content',
+  'title',
+  'open',
+  'tagName',
+  'id',
+  'followerId',
+  'issueId',
+  'roadmapId',
+  'userId',
+  'token',
+  'createdAt',
+  'updatedAt',
+  'expiresAt',
+  'stringId',
+
+
+];
+
 // data interface
 interface Data {
   keys: string[];
-  values: unknown[];
+  values: never[];
 }
 
 // config interface
@@ -43,20 +78,13 @@ interface ResultSetHeader {
 function processData(data: Object): Data {
   // get keys and values
   const keys = Object.keys(data);
-  const values = Object.values(data);
+  const values = Object.values(data) as never[];
 
   // remove id from keys and values
   const idIndex = keys.indexOf('id');
   if (idIndex > -1) {
     keys.splice(idIndex, 1);
     values.splice(idIndex, 1);
-  }
-
-  // if value is array or object stringify it
-  for (let i = 0; i < values.length; i++) {
-    if (Array.isArray(values[i])) {
-      values[i] = `JSON-${JSON.stringify(values[i])}`;
-    }
   }
 
   return { keys, values };
@@ -102,6 +130,10 @@ class Database {
 
   public async insert(table: string, data: object): Promise<bigint> {
     const { keys, values } = processData(data);
+
+    // check if keys are trusted
+    if (keys.every((key) => !trustedColumns.includes(key))) return BigInt(-1);
+
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
@@ -124,6 +156,9 @@ class Database {
     data: object,
   ): Promise<boolean> {
     const { keys, values } = processData(data);
+
+    // check if keys are trusted
+    if (keys.every((key) => !trustedColumns.includes(key))) return false;
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params
@@ -199,6 +234,9 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
+      // check if key is trusted
+      if (!trustedColumns.includes(values[i] as string)) return undefined;
+
       if (i > 0) keyString += ' AND ';
       keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
       params = [ ...params, values[i + 1] ];
@@ -253,6 +291,9 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
+      // check if key is trusted
+      if (!trustedColumns.includes(values[i] as string)) return undefined;
+
       if (i > 0) keyString += ' AND ';
       keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
       params = [ ...params, values[i + 1] ];
@@ -285,33 +326,43 @@ class Database {
 
   public async countWhere(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<bigint> {
-    // create sql query - select count(*) from table where key = ?
-    const sql = `SELECT COUNT(*)
-                 FROM ${table}
-                 WHERE ${key} = ?`;
-
-    // execute query
-    const result = await this._query(sql, [ value ]);
-
-    // return count
-    return (result as CountDataPacket[])[0]['COUNT(*)'];
+    return await this._countWhere(table, false, ...values);
   }
 
   public async countWhereLike(
     table: string,
-    key: string,
-    value: string | bigint,
+    ...values: unknown[]
   ): Promise<bigint> {
+    return await this._countWhere(table, true, ...values);
+  };
+
+  private async _countWhere(
+    table: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<bigint> {
+    // format values
+    let keyString = '';
+    let params: unknown[] = [];
+
+    for (let i = 0; i < values.length - 1; i += 2) {
+      // check if key is trusted
+      if (!trustedColumns.includes(values[i] as string)) return BigInt(0);
+
+      if (i > 0) keyString += ' AND ';
+      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      params = [ ...params, values[i + 1] ];
+    }
+
     // create sql query - select count(*) from table where key = ?
     const sql = `SELECT COUNT(*)
-                 FROM ${table}
-                 WHERE ${key} LIKE ?`;
+                    FROM ${table}
+                    WHERE ${keyString}`;
 
     // execute query
-    const result = await this._query(sql, [ value ]);
+    const result = await this._query(sql, params);
 
     // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
