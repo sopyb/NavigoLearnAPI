@@ -34,7 +34,7 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   // get userId from request
   const userId = getUserId(req);
 
-  if (userId === undefined)
+  if (!userId)
     // send error json
     return res
       .status(HttpStatusCodes.NOT_FOUND)
@@ -51,13 +51,7 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   const followerCount = await db.countWhere('followers', 'userId', userId);
   const followingCount = await db.countWhere('followers', 'followerId', userId);
 
-  let isFollowing = false;
-  if (req.session?.userId) {
-    const follower = await db.getWhere<Follower>('followers', 'userId', userId, 'followerId', req.session.userId);
-    if (follower) {
-      isFollowing = true;
-    }
-  }
+  let isFollowing = !!(await db.getWhere<Follower>('followers', 'userId', req.session?.userId || -1, 'followerId', userId));
 
   if (!user || !userInfo) {
     res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
@@ -67,17 +61,17 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   res.status(HttpStatusCodes.OK).json({
     type: 'profile',
     name: user.name,
-    profilePictureUrl: userInfo.profilePictureUrl,
+    profilePictureUrl: userInfo.profilePictureUrl || '',
     userId: user.id.toString(),
-    bio: userInfo.bio,
-    quote: userInfo.quote,
-    blogUrl: userInfo.blogUrl,
-    roadmapsCount: roadmapsCount.toString(),
-    issueCount: issueCount.toString(),
-    followerCount: followerCount.toString(),
-    followingCount: followingCount.toString(),
-    websiteUrl: userInfo.websiteUrl,
-    githubUrl: userInfo.githubUrl,
+    bio: userInfo.bio || '',
+    quote: userInfo.quote || '',
+    blogUrl: userInfo.blogUrl || '',
+    roadmapsCount: roadmapsCount.toString() || '0',
+    issueCount: issueCount.toString() || '0',
+    followerCount: followerCount.toString() || '0',
+    followingCount: followingCount.toString() || '0',
+    websiteUrl: userInfo.websiteUrl || '',
+    githubUrl: userInfo.githubUrl || '',
     githubLink: !!user.githubId,
     googleLink: !!user.googleId,
     isFollowing,
@@ -107,7 +101,7 @@ UsersGet.get(
     res.status(HttpStatusCodes.OK).json({
       type: 'mini',
       name: user.name,
-      profilePictureUrl: userInfo.profilePictureUrl,
+      profilePictureUrl: userInfo.profilePictureUrl || '',
       userId: user.id.toString(),
     });
   },
@@ -152,7 +146,7 @@ UsersGet.get(
       parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
         name: roadmap.name,
-        description: roadmap.description,
+        description: roadmap.description || "",
         likes: (await db.countWhere(
           'roadmapLikes',
           'roadmapId',
@@ -186,11 +180,16 @@ UsersGet.get(
 
     const issues = await db.getAllWhere<Issue>('issues', 'userId', userId);
 
-    res.status(HttpStatusCodes.OK).json({
+    res.status(HttpStatusCodes.OK).json(JSON.stringify({
       type: 'issues',
       userId: userId.toString(),
       issues: issues,
-    });
+    }, (_, value) => {
+        if (typeof value === 'bigint') {
+            return value.toString();
+        }
+        return value;
+    }));
   },
 );
 
