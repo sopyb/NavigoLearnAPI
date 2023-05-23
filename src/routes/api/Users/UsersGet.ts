@@ -213,11 +213,16 @@ UsersGet.get(
       userId,
     );
 
-    res.status(HttpStatusCodes.OK).json({
+    res.status(HttpStatusCodes.OK).json(JSON.stringify({
       type: 'followers',
       userId: userId.toString(),
       followers: followers,
-    });
+    }, (_, value) => {
+        if (typeof value === 'bigint') {
+            return value.toString();
+        }
+        return value;
+    }));
   },
 );
 
@@ -239,11 +244,16 @@ UsersGet.get(
       userId,
     );
 
-    res.status(HttpStatusCodes.OK).json({
+    res.status(HttpStatusCodes.OK).json(JSON.stringify({
       type: 'following',
       userId: userId.toString(),
       following: following,
-    });
+    }, (_, value) => {
+        if (typeof value === 'bigint') {
+            return value.toString();
+        }
+        return value;
+    }));
   },
 );
 
@@ -370,14 +380,15 @@ UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
   const db = new DatabaseDriver();
 
   // check if the userDisplay is already following the target userDisplay
-  const following = await db.getAllWhere<Follower>(
+  const following = await db.getWhere<Follower>(
     'followers',
     'followerId',
     followerId,
+    'userId',
+    userId,
   );
 
-  if (!!following)
-    if (following.some((f) => f.userId === userId))
+  if (following)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Already following' });
@@ -431,33 +442,21 @@ UsersGet.delete(
     const db = new DatabaseDriver();
 
     // check if the userDisplay is already following the target userDisplay
-    const following = await db.getAllWhere<Follower>(
+    const following = await db.getWhere<Follower>(
       'followers',
       'followerId',
       followerId,
+      'userId',
+      userId,
     );
-
-    if (!!following)
-      if (!following.some((f) => f.userId === userId))
-        return res
-          .status(HttpStatusCodes.BAD_REQUEST)
-          .json({ error: 'Not following' });
 
     if (!following)
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ error: 'Not following' });
 
-    // get the follower object to delete
-    const follower = following.find((f) => f.userId === userId);
-
-    if (!follower)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'Not following' });
-
     // delete the follower from the database
-    const deleted = await db.delete('followers', follower.id);
+    const deleted = await db.delete('followers', following.id);
 
     // if the delete was successful, return the follower
     if (deleted) {
