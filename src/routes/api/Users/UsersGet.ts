@@ -148,7 +148,6 @@ UsersGet.get(
 
     // convert roadmaps to RoadmapMini
     for (let i = 0; i < roadmaps.length; i++) {
-
       const roadmap = roadmaps[i];
       parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
@@ -159,7 +158,7 @@ UsersGet.get(
           'roadmapId',
           roadmap.id,
         )).toString(),
-        isLiked: !!(await db.getWhere('roadmapLikes', 'userId', userId, 'roadmapId', roadmap.id)),
+        isLiked: !!(await db.getWhere('roadmapLikes', 'userId', req.session?.userId || -1, 'roadmapId', roadmap.id)),
         ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
       };
