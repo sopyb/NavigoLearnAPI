@@ -11,11 +11,13 @@
     - GithubLogin: /github-login
     - Logout: /logout
 - [Explore](explore/README.md)
+    > :memo: /explore/[new, popular, trending] are not implemented
     - Base URL: /api/explore
     - New: /new
     - Popular: /popular
     - Trending: /trending
     - [Search](explore/search/README.md):
+    > :memo: /explore/search/roadmaps uses /explore?query="query"
         - Base URL: /api/explore/search
         - Users: /users
         - Roadmaps: /roadmaps
