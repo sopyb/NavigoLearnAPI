@@ -219,3 +219,11 @@ create index if not exists userInfo_index
 
 create index if not exists users_index
     on users (email, name);
+
+create view if not exists sessions as
+select `navigo`.`sessionTable`.`id`      AS `id`,
+       `navigo`.`sessionTable`.`userId`  AS `userId`,
+       `navigo`.`sessionTable`.`token`   AS `token`,
+       `navigo`.`sessionTable`.`expires` AS `expires`
+from `navigo`.`sessionTable`
+where `navigo`.`sessionTable`.`expires` >= current_timestamp();
