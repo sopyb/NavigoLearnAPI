@@ -3,6 +3,7 @@ import { createPool, Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
+import User from '@src/models/User';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -38,8 +39,7 @@ const trustedColumns = [
   'updatedAt',
   'expiresAt',
   'stringId',
-
-
+  'full',
 ];
 
 // data interface
@@ -75,14 +75,14 @@ interface ResultSetHeader {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-function processData(data: Object): Data {
+function processData(data: Object, discardId = true): Data {
   // get keys and values
   const keys = Object.keys(data);
   const values = Object.values(data) as never[];
 
   // remove id from keys and values
   const idIndex = keys.indexOf('id');
-  if (idIndex > -1) {
+  if (idIndex > -1 && discardId) {
     keys.splice(idIndex, 1);
     values.splice(idIndex, 1);
   }
@@ -128,8 +128,9 @@ class Database {
     this._setup();
   }
 
-  public async insert(table: string, data: object): Promise<bigint> {
-    const { keys, values } = processData(data);
+  public async insert(table: string, data: object, discardId = true):
+    Promise<bigint> {
+    const { keys, values } = processData(data, discardId);
 
     // check if keys are trusted
     if (keys.every((key) => !trustedColumns.includes(key))) return BigInt(-1);
@@ -154,8 +155,9 @@ class Database {
     table: string,
     id: bigint,
     data: object,
+    discardId = true,
   ): Promise<boolean> {
-    const { keys, values } = processData(data);
+    const { keys, values } = processData(data, discardId);
 
     // check if keys are trusted
     if (keys.every((key) => !trustedColumns.includes(key))) return false;
@@ -234,11 +236,14 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
-      // check if key is trusted
-      if (!trustedColumns.includes(values[i] as string)) return undefined;
+      const key = values[i];
+
+      // check if key is trusted and is a string
+      if (typeof key !== 'string' || !trustedColumns.includes(key))
+        return undefined;
 
       if (i > 0) keyString += ' AND ';
-      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
       params = [ ...params, values[i + 1] ];
     }
 
@@ -291,11 +296,14 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
-      // check if key is trusted
-      if (!trustedColumns.includes(values[i] as string)) return undefined;
+      const key = values[i];
+
+      // check if key is trusted and is a string
+      if (typeof key !== 'string' || !trustedColumns.includes(key))
+        return undefined;
 
       if (i > 0) keyString += ' AND ';
-      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
       params = [ ...params, values[i + 1] ];
     }
 
@@ -336,7 +344,7 @@ class Database {
     ...values: unknown[]
   ): Promise<bigint> {
     return await this._countWhere(table, true, ...values);
-  };
+  }
 
   private async _countWhere(
     table: string,
@@ -348,18 +356,21 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
-      // check if key is trusted
-      if (!trustedColumns.includes(values[i] as string)) return BigInt(0);
+      const key = values[i];
+
+      // check if key is trusted and is a string
+      if (typeof key !== 'string' || !trustedColumns.includes(key))
+        return BigInt(0);
 
       if (i > 0) keyString += ' AND ';
-      keyString += `${values[i]} ${like ? 'LIKE' : '='} ?`;
+      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
       params = [ ...params, values[i + 1] ];
     }
 
     // create sql query - select count(*) from table where key = ?
     const sql = `SELECT COUNT(*)
-                    FROM ${table}
-                    WHERE ${keyString}`;
+                 FROM ${table}
+                 WHERE ${keyString}`;
 
     // execute query
     const result = await this._query(sql, params);
@@ -399,6 +410,23 @@ class Database {
       await conn.release();
       Database.isSetup = true;
     }
+
+    // create dummy user
+    const user = new User(
+      'Unknown User',
+      'unknown',
+      0,
+      '',
+      BigInt(-1),
+      '',
+      '',
+    );
+    // see if user exists
+    const existingUser = await this.get('users', user.id);
+
+    if (existingUser) {
+      await this.update('users', user.id, user, false);
+    } else await this.insert('users', user, false);
   }
 
   public async _query(

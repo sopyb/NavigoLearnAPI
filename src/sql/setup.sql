@@ -133,6 +133,25 @@ create index if not exists roadmapTags_roadmapId_index
 create index if not exists roadmapTags_tagName_index
     on roadmapTags (tagName);
 
+create table if not exists roadmapViews
+(
+    id        bigint auto_increment
+        primary key,
+    userId    bigint    default -1                  not null,
+    roadmapId bigint                                not null,
+    full      tinyint(1)                            not null,
+    createdAt timestamp default current_timestamp() not null,
+    constraint roadmapViews_roadmaps_id_fk
+        foreign key (roadmapId) references roadmaps (id)
+            on delete cascade,
+    constraint roadmapViews_users_id_fk
+        foreign key (userId) references users (id)
+            on delete cascade
+);
+
+create index if not exists roadmapViews_roadmapId_createdAt_index
+    on roadmapViews (roadmapId, createdAt);
+
 create index if not exists roadmaps_createdAt_index
     on roadmaps (createdAt desc);
 
@@ -200,11 +219,3 @@ create index if not exists userInfo_index
 
 create index if not exists users_index
     on users (email, name);
-
-create view if not exists sessions as
-select `navigo`.`sessionTable`.`id`      AS `id`,
-       `navigo`.`sessionTable`.`userId`  AS `userId`,
-       `navigo`.`sessionTable`.`token`   AS `token`,
-       `navigo`.`sessionTable`.`expires` AS `expires`
-from `navigo`.`sessionTable`
-where `navigo`.`sessionTable`.`expires` >= current_timestamp();

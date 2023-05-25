@@ -11,6 +11,7 @@ import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
+import { addView } from '@src/routes/api/Roadmaps/RoadmapsGet';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -51,7 +52,12 @@ UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
   const followerCount = await db.countWhere('followers', 'userId', userId);
   const followingCount = await db.countWhere('followers', 'followerId', userId);
 
-  let isFollowing = !!(await db.getWhere<Follower>('followers', 'userId', req.session?.userId || -1, 'followerId', userId));
+  const isFollowing = !!(await db.getWhere<Follower>(
+    'followers',
+    'userId',
+    req.session?.userId || -1,
+    'followerId',
+    userId));
 
   if (!user || !userInfo) {
     res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
@@ -111,6 +117,7 @@ UsersGet.get(
   Paths.Users.Get.UserRoadmaps,
   async (req: RequestWithSession, res) => {
     const userId = getUserId(req);
+    const viewerId = req.session?.userId || BigInt(-1);
 
     if (userId === undefined)
       return res
@@ -143,16 +150,23 @@ UsersGet.get(
     // convert roadmaps to RoadmapMini
     for (let i = 0; i < roadmaps.length; i++) {
       const roadmap = roadmaps[i];
+      addView(viewerId, roadmap.id, false);
       parsedRoadmaps[i] = {
         id: roadmap.id.toString(),
         name: roadmap.name,
-        description: roadmap.description || "",
+        description: roadmap.description || '',
         likes: (await db.countWhere(
           'roadmapLikes',
           'roadmapId',
           roadmap.id,
         )).toString(),
-        isLiked: !!(await db.getWhere('roadmapLikes', 'userId', req.session?.userId || -1, 'roadmapId', roadmap.id)),
+        isLiked: !!(await db.getWhere(
+          'roadmapLikes',
+          'userId',
+          viewerId,
+          'roadmapId',
+          roadmap.id,
+        )),
         ownerName: user.name,
         ownerId: roadmap.ownerId.toString(),
       };
@@ -185,10 +199,11 @@ UsersGet.get(
       userId: userId.toString(),
       issues: issues,
     }, (_, value) => {
-        if (typeof value === 'bigint') {
-            return value.toString();
-        }
-        return value;
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return value;
     }));
   },
 );
@@ -216,10 +231,11 @@ UsersGet.get(
       userId: userId.toString(),
       followers: followers,
     }, (_, value) => {
-        if (typeof value === 'bigint') {
-            return value.toString();
-        }
-        return value;
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return value;
     }));
   },
 );
@@ -247,10 +263,11 @@ UsersGet.get(
       userId: userId.toString(),
       following: following,
     }, (_, value) => {
-        if (typeof value === 'bigint') {
-            return value.toString();
-        }
-        return value;
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return value;
     }));
   },
 );
@@ -387,9 +404,9 @@ UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
   );
 
   if (following)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'Already following' });
+    return res
+      .status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'Already following' });
 
   // create a new follower
   const follower = new Follower(followerId, userId);

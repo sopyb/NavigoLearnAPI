@@ -82,7 +82,7 @@ export class Roadmap implements IRoadmap {
   // Check if object is a roadmap.
   public static isRoadmap(param: object): param is IRoadmap {
     return (
-      !!param &&
+      param &&
       'id' in param &&
       'ownerId' in param &&
       'name' in param &&

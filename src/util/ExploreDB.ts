@@ -1,12 +1,11 @@
 import Database from '@src/util/DatabaseDriver';
-import * as console from "console";
 
 class ExploreDB {
   public static async searchRoadmapsByLiked<T>(
     query: string,
+    userId: bigint,
     count = 9,
     page = 0,
-    userId: number,
   ) {
     // add % to query
     query = `%${query}%`;

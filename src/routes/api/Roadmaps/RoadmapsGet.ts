@@ -9,6 +9,7 @@ import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
 import { Tag } from '@src/models/Tags';
 import User from '@src/models/User';
+import { RoadmapView } from '@src/models/RoadmapView';
 
 const RoadmapsGet = Router({ mergeParams: true });
 
@@ -61,11 +62,12 @@ async function checkIfRoadmapExists(
   let isLiked = false;
 
   if (req.session) {
-    const liked = await new Database().getAllWhere<{ roadmapId: bigint; userId: bigint }>(
-      'roadmapLikes',
-      'userId',
-      req.session.userId,
-    );
+    const liked =
+      await new Database().getAllWhere<{ roadmapId: bigint; userId: bigint }>(
+        'roadmapLikes',
+        'userId',
+        req.session.userId,
+      );
 
     if (liked) {
       if (liked.some((like) => like.roadmapId === BigInt(id))) {
@@ -77,6 +79,26 @@ async function checkIfRoadmapExists(
   return { id: BigInt(id), roadmap, issueCount, likes, isLiked };
 }
 
+export async function addView(
+  userId: bigint,
+  roadmapId: bigint,
+  full: boolean,
+): Promise<void> {
+  // get database connection
+  const db = new Database();
+
+  // get roadmap from database
+  const roadmap =
+    await db.get<Roadmap>('roadmaps', roadmapId);
+
+  // check if roadmap is valid
+  if (!roadmap) return;
+
+  const view = new RoadmapView(userId, roadmapId, full);
+
+  await db.insert('roadmapViews', view);
+}
+
 RoadmapsGet.get(
   Paths.Roadmaps.Get.Roadmap,
   async (req: RequestWithSession, res) => {
@@ -86,6 +108,9 @@ RoadmapsGet.get(
     if (!data) return;
 
     const { roadmap, issueCount, likes, isLiked } = data;
+
+    // add view
+    await addView(req.session?.userId || BigInt(-1), roadmap.id, true);
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
@@ -118,6 +143,9 @@ RoadmapsGet.get(
     }
 
     const { roadmap, likes, isLiked } = data;
+
+    // add view
+    await addView(req.session?.userId || BigInt(-1), roadmap.id, false);
 
     // return roadmap
     return res.status(HttpStatusCodes.OK).json({
