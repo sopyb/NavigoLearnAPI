@@ -1,13 +1,14 @@
 create table if not exists users
 (
-    id       bigint auto_increment
+    id        bigint auto_increment
         primary key,
-    name     varchar(255)            not null,
-    email    varchar(255)            not null,
-    role     int          default 0  not null,
-    pwdHash  varchar(255) default '' not null,
-    googleId varchar(255)            null,
-    githubId varchar(255)            null
+    name      varchar(255)                             not null,
+    email     varchar(255)                             not null,
+    role      int          default 0                   not null,
+    pwdHash   varchar(255) default ''                  not null,
+    googleId  varchar(255)                             null,
+    githubId  varchar(255)                             null,
+    createdAt timestamp    default current_timestamp() not null
 );
 
 create table if not exists followers
