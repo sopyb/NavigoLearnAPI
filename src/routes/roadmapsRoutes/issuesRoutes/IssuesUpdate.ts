@@ -1,13 +1,13 @@
 import { Response, Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { Issue } from '@src/models/Issue';
 import { Roadmap } from '@src/models/Roadmap';
+import validateSession from "@src/validators/validateSession";
 
 const IssuesUpdate = Router({ mergeParams: true });
 
@@ -253,14 +253,14 @@ IssuesUpdate.post(
   },
 );
 
-IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, requireSessionMiddleware);
+IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, validateSession);
 IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
   statusChangeIssue(req, res, true),
 );
 
 IssuesUpdate.delete(
   Paths.Roadmaps.Issues.Update.Status,
-  requireSessionMiddleware,
+  validateSession,
 );
 IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
   statusChangeIssue(req, res, false),

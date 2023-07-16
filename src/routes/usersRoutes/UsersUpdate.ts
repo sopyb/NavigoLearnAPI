@@ -1,8 +1,7 @@
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import { Router } from 'express';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import axios from 'axios';
@@ -11,10 +10,11 @@ import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
 import User from '@src/models/User';
 import { UserInfo } from '@src/models/UserInfo';
+import validateSession from "@src/validators/validateSession";
 
 const UsersUpdate = Router({ mergeParams: true });
 
-UsersUpdate.post('*', requireSessionMiddleware);
+UsersUpdate.post('*', validateSession);
 UsersUpdate.post(
   Paths.Users.Update.ProfilePicture,
   async (req: RequestWithSession, res) => {

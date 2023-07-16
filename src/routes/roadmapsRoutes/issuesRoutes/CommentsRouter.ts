@@ -1,15 +1,15 @@
 import { Request, Response, Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { Roadmap } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import User from '@src/models/User';
 import Database from '@src/util/DatabaseDriver';
 import { Comment } from '@src/models/Comment';
+import validateSession from "@src/validators/validateSession";
 
 const CommentsRouter = Router({ mergeParams: true });
 
@@ -108,7 +108,7 @@ async function checkUser(
 
 CommentsRouter.post(
   Paths.Roadmaps.Issues.Comments.Create,
-  requireSessionMiddleware,
+  validateSession,
 );
 CommentsRouter.post(
   Paths.Roadmaps.Issues.Comments.Create,
@@ -188,7 +188,7 @@ CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get, async (req, res) => {
 
 CommentsRouter.use(
   Paths.Roadmaps.Issues.Comments.Update,
-  requireSessionMiddleware,
+  validateSession,
 );
 CommentsRouter.post(
   Paths.Roadmaps.Issues.Comments.Update,
@@ -266,7 +266,7 @@ CommentsRouter.post(
 
 CommentsRouter.use(
   Paths.Roadmaps.Issues.Comments.Delete,
-  requireSessionMiddleware,
+  validateSession,
 );
 CommentsRouter.delete(
   Paths.Roadmaps.Issues.Comments.Delete,

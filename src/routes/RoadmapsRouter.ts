@@ -1,23 +1,23 @@
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import { Router } from 'express';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { IRoadmap, Roadmap } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
-import GetRouter from '@src/routes/api/Roadmaps/RoadmapsGet';
-import UpdateRouter from '@src/routes/api/Roadmaps/RoadmapsUpdate';
+import GetRouter from '@src/routes/roadmapsRoutes/RoadmapsGet';
+import UpdateRouter from '@src/routes/roadmapsRoutes/RoadmapsUpdate';
 import * as console from 'console';
-import RoadmapIssues from '@src/routes/api/Roadmaps/RoadmapIssues';
-import RoadmapTabsInfo from '@src/routes/api/Roadmaps/RoadmapsTabsInfo';
+import RoadmapIssues from '@src/routes/roadmapsRoutes/RoadmapIssues';
+import RoadmapTabsInfo from '@src/routes/roadmapsRoutes/RoadmapsTabsInfo';
 import envVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
+import validateSession from "@src/validators/validateSession";
 
 const RoadmapsRouter = Router();
 
-RoadmapsRouter.post(Paths.Roadmaps.Create, requireSessionMiddleware);
+RoadmapsRouter.post(Paths.Roadmaps.Create, validateSession);
 RoadmapsRouter.post(
   Paths.Roadmaps.Create,
   async (req: RequestWithSession, res) => {
@@ -88,7 +88,7 @@ RoadmapsRouter.use(Paths.Roadmaps.Get.Base, GetRouter);
 
 RoadmapsRouter.use(Paths.Roadmaps.Update.Base, UpdateRouter);
 
-RoadmapsRouter.delete(Paths.Roadmaps.Delete, requireSessionMiddleware);
+RoadmapsRouter.delete(Paths.Roadmaps.Delete, validateSession);
 RoadmapsRouter.delete(
   Paths.Roadmaps.Delete,
   async (req: RequestWithSession, res) => {
@@ -144,7 +144,7 @@ RoadmapsRouter.use(Paths.Roadmaps.TabsInfo.Base, RoadmapTabsInfo);
 /*
  ! like roadmaps
  */
-RoadmapsRouter.all(Paths.Roadmaps.Like, requireSessionMiddleware);
+RoadmapsRouter.all(Paths.Roadmaps.Like, validateSession);
 
 RoadmapsRouter.get(
   Paths.Roadmaps.Like,

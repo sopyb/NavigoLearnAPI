@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
@@ -11,7 +10,8 @@ import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
-import { addView } from '@src/routes/api/Roadmaps/RoadmapsGet';
+import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
+import validateSession from "@src/validators/validateSession";
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -372,7 +372,7 @@ UsersGet.get(
   },
 );
 
-UsersGet.get(Paths.Users.Get.Follow, requireSessionMiddleware);
+UsersGet.get(Paths.Users.Get.Follow, validateSession);
 UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
   // get the target userDisplay id
   const userId = BigInt(req.params.userId || -1);
@@ -432,7 +432,7 @@ UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
     .json({ error: 'Failed to follow' });
 });
 
-UsersGet.delete(Paths.Users.Get.Follow, requireSessionMiddleware);
+UsersGet.delete(Paths.Users.Get.Follow, validateSession);
 UsersGet.delete(
   Paths.Users.Get.Follow,
   async (req: RequestWithSession, res) => {

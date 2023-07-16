@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
-import UsersGet from '@src/routes/api/Users/UsersGet';
+import Paths from '@src/constants/Paths';
+import UsersGet from '@src/routes/usersRoutes/UsersGet';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import UsersUpdate from '@src/routes/api/Users/UsersUpdate';
+import UsersUpdate from '@src/routes/usersRoutes/UsersUpdate';
+import validateSession from "@src/validators/validateSession";
 
 const UsersRouter = Router();
 
@@ -18,7 +18,7 @@ UsersRouter.use(Paths.Users.Get.Base, UsersGet);
 UsersRouter.use(Paths.Users.Update.Base, UsersUpdate);
 
 // Delete route - delete user - requires session
-UsersRouter.delete(Paths.Users.Delete, requireSessionMiddleware);
+UsersRouter.delete(Paths.Users.Delete, validateSession);
 UsersRouter.delete(Paths.Users.Delete, async (req: RequestWithSession, res) => {
   // get database
   const db = new DatabaseDriver();

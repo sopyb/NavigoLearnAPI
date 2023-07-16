@@ -1,14 +1,14 @@
 import { Response, Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
 import { Tag } from '@src/models/Tags';
 import User from '@src/models/User';
+import validateSession from "@src/validators/validateSession";
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
@@ -58,7 +58,7 @@ async function isRoadmapValid(
   return { id: BigInt(id), roadmap };
 }
 
-RoadmapsUpdate.post('*', requireSessionMiddleware);
+RoadmapsUpdate.post('*', validateSession);
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Title,

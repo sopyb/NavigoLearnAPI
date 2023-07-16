@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import { ExploreDB } from '@src/util/ExploreDB';
 import { RoadmapMini } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
 import { RequestWithSession } from '@src/middleware/session';
-import { addView } from '@src/routes/api/Roadmaps/RoadmapsGet';
+import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
 
 const ExploreRouter = Router();
 

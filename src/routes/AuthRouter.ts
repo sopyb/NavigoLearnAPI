@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
@@ -12,9 +12,9 @@ import logger from 'jet-logger';
 import { UserInfo } from '@src/models/UserInfo';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { checkEmail } from '@src/util/EmailUtil';
+import validateSession from '@src/validators/validateSession';
 
 const AuthRouter = Router();
 
@@ -233,7 +233,7 @@ AuthRouter.post(Paths.Auth.Register, async (req, res) => {
   });
 });
 
-AuthRouter.use(Paths.Auth.ChangePassword, requireSessionMiddleware);
+AuthRouter.use(Paths.Auth.ChangePassword, validateSession);
 AuthRouter.post(
   Paths.Auth.ChangePassword,
   async (req: RequestWithSession, res) => {
@@ -565,7 +565,7 @@ AuthRouter.get(Paths.Auth.GithubCallback, async (req, res) => {
   }
 });
 
-AuthRouter.delete(Paths.Auth.Logout, requireSessionMiddleware);
+AuthRouter.delete(Paths.Auth.Logout, validateSession);
 AuthRouter.delete(Paths.Auth.Logout, async (req: RequestWithSession, res) => {
   // get session
   const token = req.session?.token;

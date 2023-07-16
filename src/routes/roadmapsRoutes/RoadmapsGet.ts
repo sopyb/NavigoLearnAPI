@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';

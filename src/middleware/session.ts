@@ -104,20 +104,3 @@ export async function sessionMiddleware(
 
   next();
 }
-
-export function requireSessionMiddleware(
-  req: RequestWithSession,
-  res: Response,
-  next: NextFunction,
-): void {
-  // if session isn't set, return forbidden
-  if (!req.session) {
-    res
-      .status(HttpStatusCodes.UNAUTHORIZED)
-      .json({ error: 'Token not found, please login' });
-    return;
-  }
-
-  // call next()
-  next();
-}

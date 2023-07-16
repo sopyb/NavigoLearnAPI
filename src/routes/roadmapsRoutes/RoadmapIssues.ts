@@ -1,19 +1,19 @@
 import { Router } from 'express';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { IIssue, Issue } from '@src/models/Issue';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
-import IssuesUpdate from '@src/routes/api/Roadmaps/Issues/IssuesUpdate';
-import Comments from '@src/routes/api/Roadmaps/Issues/CommentsRouter';
+import IssuesUpdate from '@src/routes/roadmapsRoutes/issuesRoutes/IssuesUpdate';
+import Comments from '@src/routes/roadmapsRoutes/issuesRoutes/CommentsRouter';
+import validateSession from "@src/validators/validateSession";
 
 const RoadmapIssues = Router({ mergeParams: true });
 
-RoadmapIssues.post(Paths.Roadmaps.Issues.Create, requireSessionMiddleware);
+RoadmapIssues.post(Paths.Roadmaps.Issues.Create, validateSession);
 RoadmapIssues.post(
   Paths.Roadmaps.Issues.Create,
   async (req: RequestWithSession, res) => {
@@ -158,11 +158,11 @@ RoadmapIssues.get(Paths.Roadmaps.Issues.GetAll, async (req, res) => {
   return res.status(HttpStatusCodes.OK).json({ issues: result });
 });
 
-RoadmapIssues.post(Paths.Roadmaps.Issues.Update.Base, requireSessionMiddleware);
+RoadmapIssues.post(Paths.Roadmaps.Issues.Update.Base, validateSession);
 RoadmapIssues.use(Paths.Roadmaps.Issues.Update.Base, IssuesUpdate);
 
 // Delete Issue
-RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete, requireSessionMiddleware);
+RoadmapIssues.delete(Paths.Roadmaps.Issues.Delete, validateSession);
 RoadmapIssues.delete(
   Paths.Roadmaps.Issues.Delete,
   async (req: RequestWithSession, res) => {

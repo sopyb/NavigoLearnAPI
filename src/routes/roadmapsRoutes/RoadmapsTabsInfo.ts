@@ -1,18 +1,18 @@
 import { Router } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import Paths from '@src/routes/constants/Paths';
+import Paths from '@src/constants/Paths';
 import {
   RequestWithSession,
-  requireSessionMiddleware,
 } from '@src/middleware/session';
 import { ITabInfo, TabInfo } from '@src/models/TabInfo';
 import Database from '@src/util/DatabaseDriver';
 import * as console from 'console';
 import { IRoadmap } from '@src/models/Roadmap';
+import validateSession from "@src/validators/validateSession";
 
 const RoadmapTabsInfo = Router({ mergeParams: true });
 
-RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Create, requireSessionMiddleware);
+RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Create, validateSession);
 RoadmapTabsInfo.post(
   Paths.Roadmaps.TabsInfo.Create,
   async (req: RequestWithSession, res) => {
@@ -101,7 +101,7 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
   return res.status(HttpStatusCodes.OK).json({ tabInfo: result });
 });
 
-RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, requireSessionMiddleware);
+RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, validateSession);
 RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
   async (req: RequestWithSession,
     res) => {

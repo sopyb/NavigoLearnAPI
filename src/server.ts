@@ -12,8 +12,8 @@ import { sessionMiddleware } from '@src/middleware/session';
 
 import 'express-async-errors';
 
-import BaseRouter from '@src/routes/api/api';
-import Paths from '@src/routes/constants/Paths';
+import BaseRouter from '@src/routes/entry';
+import Paths from '@src/constants/Paths';
 
 import EnvVars from '@src/constants/EnvVars';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
