@@ -19,17 +19,17 @@ import EnvVars from '@src/constants/EnvVars';
 const AuthRouter = Router();
 const LoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999,
+    max: EnvVars.NodeEnv === 'production' ? 10 : 99999,
     message: 'Too many login attempts, please try again later.',
   }),
   RegisterLimiter = rateLimit({
     windowMs: 360 * 1000, // 1 hour
-    max: EnvVars.NodeEnv !== 'test' ? 5 : 99999,
+    max: EnvVars.NodeEnv === 'production' ? 5 : 99999,
     message: 'Too many register attempts, please try again later.',
   }),
   ResetPasswordLimiter = rateLimit({
     windowMs: 360 * 1000, // 1 hour
-    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999,
+    max: EnvVars.NodeEnv === 'production' ? 10 : 99999,
     message: 'Too many reset password attempts, please try again later.',
   });
 

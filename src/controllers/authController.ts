@@ -21,7 +21,7 @@ import {
   insertUserInfo,
   updateUser,
   updateUserInfo,
-} from '@src/controllers/helpers/databaseManagement';
+} from '@src/helpers/databaseManagement';
 import {
   accountCreated,
   emailConflict,
@@ -34,7 +34,7 @@ import {
   passwordChanged,
   serverError,
   unauthorized,
-} from '@src/controllers/helpers/apiResponses';
+} from '@src/helpers/apiResponses';
 
 /*
  * Interfaces

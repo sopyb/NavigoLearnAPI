@@ -1,5 +1,9 @@
 import { Response } from 'express';
 import { HttpStatusCode } from 'axios';
+import User from '@src/models/User';
+import { UserInfo } from '@src/models/UserInfo';
+import { UserStats } from '@src/helpers/databaseManagement';
+import JSONStringify from '@src/util/JSONStringify';
 
 /*
  ! Failure responses
@@ -33,6 +37,13 @@ export function invalidLogin(res: Response): void {
   });
 }
 
+export function invalidParameters(res: Response): void {
+  res.status(HttpStatusCode.BadRequest).json({
+    error: 'Invalid request paramteres',
+    success: false,
+  });
+}
+
 export function notImplemented(res: Response): void {
   res.status(HttpStatusCode.NotImplemented).json({
     error: 'Not implemented',
@@ -47,6 +58,13 @@ export function serverError(res: Response): void {
   });
 }
 
+export function userNotFound(res: Response): void {
+  res.status(HttpStatusCode.NotFound).json({
+    error: "User couldn't be found",
+    success: false,
+  });
+}
+
 export function unauthorized(res: Response): void {
   res.status(HttpStatusCode.Unauthorized).json({
     error: 'Unauthorized',
@@ -57,7 +75,9 @@ export function unauthorized(res: Response): void {
 /*
  ? Success responses
  */
+
 // ! Authentication Responses
+
 export function accountCreated(res: Response): void {
   res
     .status(HttpStatusCode.Created)
@@ -83,8 +103,66 @@ export function passwordChanged(res: Response): void {
 }
 
 // ! User Responses
+
 export function userDeleted(res: Response): void {
   res
     .status(HttpStatusCode.Ok)
     .json({ message: 'Account successfully deleted', success: true });
+}
+
+export function userProfile(
+  res: Response,
+  user: User,
+  userInfo: UserInfo,
+  userStats: UserStats,
+  isFollowing: boolean,
+): void {
+  const { roadmapsCount, issueCount, followerCount, followingCount } =
+      userStats,
+    { profilePictureUrl, bio, quote, blogUrl, websiteUrl, githubUrl } =
+      userInfo,
+    { name, githubId, googleId } = user;
+  res
+    .status(HttpStatusCode.Ok)
+    .contentType('application/json')
+    .send(
+      JSONStringify({
+        name,
+        profilePictureUrl,
+        userId: user.id,
+        bio,
+        quote,
+        blogUrl,
+        websiteUrl,
+        githubUrl,
+        roadmapsCount,
+        issueCount,
+        followerCount,
+        followingCount,
+        isFollowing,
+        githubLink: !!githubId,
+        googleLink: !!googleId,
+        success: true,
+      }),
+    );
+}
+
+export function userMiniProfile(
+  res: Response,
+  user: User,
+  userInfo: UserInfo,
+): void {
+  const { profilePictureUrl } = userInfo,
+    { name } = user;
+  res
+    .status(HttpStatusCode.Ok)
+    .contentType('application/json')
+    .send(
+      JSONStringify({
+        name,
+        profilePictureUrl,
+        userId: user.id,
+        success: true,
+      }),
+    );
 }

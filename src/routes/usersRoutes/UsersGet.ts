@@ -1,17 +1,19 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
-import { IUserInfo } from '@src/models/UserInfo';
 import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
 import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
+import validateUser from '@src/validators/validateUser';
+import {
+  usersGetMiniProfile,
+  usersGetProfile,
+} from '@src/controllers/usersController';
 
 // ! What would I do without StackOverflow?
 // ! https://stackoverflow.com/a/60848873
@@ -31,87 +33,9 @@ function getUserId(req: RequestWithSession): bigint | undefined {
   return userId;
 }
 
-UsersGet.get(Paths.Users.Get.Profile, async (req: RequestWithSession, res) => {
-  // get userId from request
-  const userId = getUserId(req);
+UsersGet.get(Paths.Users.Get.Profile, validateUser(), usersGetProfile);
 
-  if (!userId)
-    // send error json
-    return res
-      .status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'User not found' });
-
-  // get database
-  const db = new DatabaseDriver();
-
-  // get user from database
-  const user = await db.get<User>('users', userId);
-  const userInfo = await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
-  const roadmapsCount = await db.countWhere('roadmaps', 'ownerId', userId);
-  const issueCount = await db.countWhere('issues', 'userId', userId);
-  const followerCount = await db.countWhere('followers', 'userId', userId);
-  const followingCount = await db.countWhere('followers', 'followerId', userId);
-
-  const isFollowing = !!(await db.getWhere<Follower>(
-    'followers',
-    'userId',
-    req.session?.userId || -1,
-    'followerId',
-    userId));
-
-  if (!user || !userInfo) {
-    res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-    return;
-  }
-
-  res.status(HttpStatusCodes.OK).json({
-    type: 'profile',
-    name: user.name,
-    profilePictureUrl: userInfo.profilePictureUrl || '',
-    userId: user.id.toString(),
-    bio: userInfo.bio || '',
-    quote: userInfo.quote || '',
-    blogUrl: userInfo.blogUrl || '',
-    roadmapsCount: roadmapsCount.toString() || '0',
-    issueCount: issueCount.toString() || '0',
-    followerCount: followerCount.toString() || '0',
-    followingCount: followingCount.toString() || '0',
-    websiteUrl: userInfo.websiteUrl || '',
-    githubUrl: userInfo.githubUrl || '',
-    githubLink: !!user.githubId,
-    googleLink: !!user.googleId,
-    isFollowing,
-  });
-});
-
-UsersGet.get(
-  Paths.Users.Get.MiniProfile,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.NOT_FOUND)
-        .json({ error: 'User not found' });
-
-    const db = new DatabaseDriver();
-
-    const user = await db.get<User>('users', userId);
-    const userInfo = await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
-
-    if (!user || !userInfo) {
-      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-      return;
-    }
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'mini',
-      name: user.name,
-      profilePictureUrl: userInfo.profilePictureUrl || '',
-      userId: user.id.toString(),
-    });
-  },
-);
+UsersGet.get(Paths.Users.Get.MiniProfile, validateUser(), usersGetMiniProfile);
 
 UsersGet.get(
   Paths.Users.Get.UserRoadmaps,
@@ -155,11 +79,9 @@ UsersGet.get(
         id: roadmap.id.toString(),
         name: roadmap.name,
         description: roadmap.description || '',
-        likes: (await db.countWhere(
-          'roadmapLikes',
-          'roadmapId',
-          roadmap.id,
-        )).toString(),
+        likes: (
+          await db.countWhere('roadmapLikes', 'roadmapId', roadmap.id)
+        ).toString(),
         isLiked: !!(await db.getWhere(
           'roadmapLikes',
           'userId',
@@ -194,17 +116,22 @@ UsersGet.get(
 
     const issues = await db.getAllWhere<Issue>('issues', 'userId', userId);
 
-    res.status(HttpStatusCodes.OK).json(JSON.stringify({
-      type: 'issues',
-      userId: userId.toString(),
-      issues: issues,
-    }, (_, value) => {
-      if (typeof value === 'bigint') {
-        return value.toString();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return value;
-    }));
+    res.status(HttpStatusCodes.OK).json(
+      JSON.stringify(
+        {
+          type: 'issues',
+          userId: userId.toString(),
+          issues: issues,
+        },
+        (_, value) => {
+          if (typeof value === 'bigint') {
+            return value.toString();
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return value;
+        },
+      ),
+    );
   },
 );
 
@@ -226,17 +153,22 @@ UsersGet.get(
       userId,
     );
 
-    res.status(HttpStatusCodes.OK).json(JSON.stringify({
-      type: 'followers',
-      userId: userId.toString(),
-      followers: followers,
-    }, (_, value) => {
-      if (typeof value === 'bigint') {
-        return value.toString();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return value;
-    }));
+    res.status(HttpStatusCodes.OK).json(
+      JSON.stringify(
+        {
+          type: 'followers',
+          userId: userId.toString(),
+          followers: followers,
+        },
+        (_, value) => {
+          if (typeof value === 'bigint') {
+            return value.toString();
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return value;
+        },
+      ),
+    );
   },
 );
 
@@ -258,17 +190,22 @@ UsersGet.get(
       userId,
     );
 
-    res.status(HttpStatusCodes.OK).json(JSON.stringify({
-      type: 'following',
-      userId: userId.toString(),
-      following: following,
-    }, (_, value) => {
-      if (typeof value === 'bigint') {
-        return value.toString();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return value;
-    }));
+    res.status(HttpStatusCodes.OK).json(
+      JSON.stringify(
+        {
+          type: 'following',
+          userId: userId.toString(),
+          following: following,
+        },
+        (_, value) => {
+          if (typeof value === 'bigint') {
+            return value.toString();
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return value;
+        },
+      ),
+    );
   },
 );
 

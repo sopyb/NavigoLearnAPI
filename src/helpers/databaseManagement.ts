@@ -2,6 +2,20 @@ import DatabaseDriver from '@src/util/DatabaseDriver';
 import { UserInfo } from '@src/models/UserInfo';
 import User from '@src/models/User';
 
+/*
+ * Interfaces
+ */
+export interface UserStats {
+  roadmapsCount: bigint;
+  issueCount: bigint;
+  followerCount: bigint;
+  followingCount: bigint;
+}
+
+/*
+ * Functions
+ */
+
 // TODO: add the annoying grace period for deleting users
 export async function deleteUser(
   db: DatabaseDriver,
@@ -37,7 +51,41 @@ export async function getUserInfo(
   db: DatabaseDriver,
   userId: bigint,
 ): Promise<UserInfo | undefined> {
-  return await db.get<UserInfo>('userInfo', userId);
+  return await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+}
+
+export async function getUserStats(
+  db: DatabaseDriver,
+  userId: bigint,
+): Promise<UserStats> {
+  const roadmapsCount = await db.countWhere('roadmaps', 'ownerId', userId);
+  const issueCount = await db.countWhere('issues', 'userId', userId);
+  const followerCount = await db.countWhere('followers', 'userId', userId);
+  const followingCount = await db.countWhere('followers', 'followerId', userId);
+
+  return {
+    roadmapsCount,
+    issueCount,
+    followerCount,
+    followingCount,
+  };
+}
+
+export async function isUserFollowing(
+  db: DatabaseDriver,
+  targetId: bigint,
+  authUserId: bigint,
+): Promise<boolean> {
+  if (targetId === authUserId) return true;
+  return (
+    (await db.countWhere(
+      'followers',
+      'userId',
+      targetId,
+      'followerId',
+      authUserId,
+    )) > 0
+  );
 }
 
 export async function insertUser(

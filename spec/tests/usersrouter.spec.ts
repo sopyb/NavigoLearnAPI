@@ -16,7 +16,7 @@ async function checkProfile(
     .expect(
       !!loginCookie || !!target
         ? HttpStatusCodes.OK
-        : HttpStatusCodes.NOT_FOUND,
+        : HttpStatusCodes.BAD_REQUEST,
     )
     .expect('Content-Type', /json/)
     .expect((res) => {
@@ -29,7 +29,6 @@ async function checkProfile(
         return;
       }
 
-      expect(objKeys).toContain('type');
       expect(objKeys).toContain('name');
       expect(objKeys).toContain('profilePictureUrl');
       expect(objKeys).toContain('userId');
@@ -232,8 +231,7 @@ describe('Users Router', () => {
         expect(res.body).toBeDefined();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues))
-          .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues)).toBe(true);
       });
   });
 
@@ -248,8 +246,7 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues)).toBe(true);
       });
   });
 
@@ -264,8 +261,7 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.issues)).toBe(true);
       });
   });
 
@@ -291,8 +287,9 @@ describe('Users Router', () => {
         expect(res.body).toBeDefined();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers)).toBe(
+          true,
+        );
       });
   });
 
@@ -307,8 +304,9 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers)).toBe(
+          true,
+        );
       });
   });
 
@@ -323,8 +321,9 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.followers)).toBe(
+          true,
+        );
       });
   });
 
@@ -350,8 +349,9 @@ describe('Users Router', () => {
         expect(res.body).toBeDefined();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.following))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.following)).toBe(
+          true,
+        );
       });
   });
 
@@ -366,8 +366,9 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.following))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.following)).toBe(
+          true,
+        );
       });
   });
 
@@ -382,8 +383,9 @@ describe('Users Router', () => {
         // expect it to be an array
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        expect(Array.isArray(JSON.parse(res.body || '{}')?.following))
-            .toBe(true);
+        expect(Array.isArray(JSON.parse(res.body || '{}')?.following)).toBe(
+          true,
+        );
       });
   });
 
