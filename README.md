@@ -49,11 +49,13 @@ Documentation for the api can be found [here](docs/paths/README.md).
 
 4. Rename the env.example folder to env and fill in the values for
    development.env
+
 5. Run tests to make sure everything works
     ```sh
     npm test
    ```
-5. Run the server
+
+6. Run the server
    ```sh
    npm run dev
    ```
