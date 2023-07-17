@@ -2,6 +2,23 @@ import DatabaseDriver from '@src/util/DatabaseDriver';
 import { UserInfo } from '@src/models/UserInfo';
 import User from '@src/models/User';
 
+// TODO: add the annoying grace period for deleting users
+export async function deleteUser(
+  db: DatabaseDriver,
+  userId: bigint,
+): Promise<boolean> {
+  return await db.delete('users', userId);
+}
+
+// ! uncomment if needed in the future deleteUser cascade deletes
+// ! should handle this
+// export async function deleteUserInfo(
+//   db: DatabaseDriver,
+//   userId: bigint,
+// ): Promise<boolean> {
+//   return await db.delete('userInfo', userId);
+// }
+
 export async function getUser(
   db: DatabaseDriver,
   userId: bigint,

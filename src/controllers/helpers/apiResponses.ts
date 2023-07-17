@@ -81,3 +81,10 @@ export function passwordChanged(res: Response): void {
     .status(HttpStatusCode.Ok)
     .json({ message: 'Password changed successfully', success: true });
 }
+
+// ! User Responses
+export function userDeleted(res: Response): void {
+  res
+    .status(HttpStatusCode.Ok)
+    .json({ message: 'Account successfully deleted', success: true });
+}
