@@ -28,9 +28,11 @@ const app = express();
 // **** Setup **** //
 
 // Basic middleware
-app.use(express.json({
-  limit: '10mb'
-}));
+app.use(
+  express.json({
+    limit: '10mb',
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(EnvVars.CookieProps.Secret));
 
@@ -65,20 +67,14 @@ app.use((_: Request, res: Response) => {
 });
 
 // Add error handler
-app.use(
-  (
-    err: Error,
-    _: Request,
-    res: Response,
-  ) => {
-    logger.err(err, true);
-    let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
-    if (err instanceof RouteError) {
-      status = err.status;
-    }
-    return res.status(status).json({ error: err.message });
-  },
-);
+app.use((err: Error, _: Request, res: Response) => {
+  logger.err(err, true);
+  let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
+  if (err instanceof RouteError) {
+    status = err.status;
+  }
+  return res.status(status).json({ error: err.message });
+});
 
 // ** Front-End Content ** //
 
