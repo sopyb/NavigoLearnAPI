@@ -11,7 +11,7 @@ import {
 import { UserInfo } from '@src/models/UserInfo';
 import { checkEmail } from '@src/util/EmailUtil';
 import EnvVars from '@src/constants/EnvVars';
-import axios from 'axios/index';
+import axios from 'axios';
 import logger from 'jet-logger';
 import { RequestWithSession } from '@src/middleware/session';
 
