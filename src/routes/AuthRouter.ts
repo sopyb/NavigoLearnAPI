@@ -10,94 +10,13 @@ import { NodeEnvs } from '@src/constants/misc';
 import axios, { AxiosError } from 'axios';
 import logger from 'jet-logger';
 import { UserInfo } from '@src/models/UserInfo';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import { checkEmail } from '@src/util/EmailUtil';
 import validateSession from '@src/validators/validateSession';
+import { authLogin, authRegister } from '@src/controllers/authController';
+import validateBody from '@src/validators/validateBody';
 
 const AuthRouter = Router();
-
-interface GoogleUserData {
-  id: string;
-  email: string;
-  name: string;
-  picture: string;
-}
-
-interface GitHubUserData {
-  login: string;
-  id: number;
-  name: string;
-  email: string;
-  avatar_url: string;
-  bio: string;
-  blog: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getInfoFromRequest(req: any): { email: string; password: string } {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const email = req?.body?.email as string;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const password = req?.body?.password as string;
-  return { email, password };
-}
-
-async function createSession(user: User): Promise<string> {
-  const token = randomBytes(32).toString('hex');
-
-  // get database
-  const db = new DatabaseDriver();
-
-  // check if token is already in use - statistically unlikely but possible
-  const session = await db.getWhere('sessions', 'token', token);
-  if (!!session) {
-    return createSession(user);
-  }
-
-  // save session
-  const sessionId = await db.insert('sessions', {
-    token,
-    userId: user.id,
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
-  });
-
-  // check if session was saved
-  if (sessionId < 0) {
-    return '';
-  }
-
-  return token;
-}
-
-async function saveSession(
-  res: Response,
-  user: User,
-  register = false,
-): Promise<void> {
-  // get session token
-  const token = await createSession(user);
-
-  // check if session was created
-  if (!token) {
-    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: 'Internal server error',
-    });
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    res.cookie('token', token, {
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
-      httpOnly: false,
-      secure: EnvVars.NodeEnv === NodeEnvs.Production,
-      sameSite: 'strict',
-    });
-
-    res.status(register ? HttpStatusCodes.CREATED : HttpStatusCodes.OK).json({
-      message: `${register ? 'Registe' : 'Login'} successful`,
-    });
-  }
-}
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -106,7 +25,7 @@ function handleExternalAuthError(error, res: Response): void {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error);
   if (error instanceof AxiosError) {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: 'Couldn\'t get access token from external service',
+      error: "Couldn't get access token from external service",
     });
   } else {
     res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -115,123 +34,13 @@ function handleExternalAuthError(error, res: Response): void {
   }
 }
 
-AuthRouter.post(Paths.Auth.Login, async (req, res) => {
-  // check if data is valid
-  const { email, password } = getInfoFromRequest(req);
-  // if not, return error
-  if (!email || !password) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Email and password are required',
-    });
-  }
+AuthRouter.post(Paths.Auth.Login, validateBody('email', 'password'), authLogin);
 
-  // get database
-  const db = new DatabaseDriver();
-
-  // check if user exists
-  const user = await db.getWhere<User>('users', 'email', email);
-  // if not, return error
-  if (!user) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Invalid email or password',
-    });
-  }
-
-  // check if the password is correct
-  const isPasswordCorrect = comparePassword(password, user.pwdHash || '');
-  // if not, return error
-  if (!isPasswordCorrect) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Invalid email or password',
-    });
-  }
-
-  // check if user has userInfo
-  const userInfo = db.getWhere('userInfo', 'userId', user.id);
-
-  if (!userInfo) {
-    // create userInfo
-    const row = await db.insert('userInfo', {
-      userId: user.id,
-      name: user.name,
-      email: user.email,
-      bio: '',
-      website: '',
-      profilePicture: '',
-    });
-
-    if (row < 0)
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Internal server error',
-      });
-  }
-
-  // save session
-  return await saveSession(res, user);
-});
-
-AuthRouter.post(Paths.Auth.Register, async (req, res) => {
-  // check if data is valid
-  const { email, password } = getInfoFromRequest(req);
-  // if not, return error
-  if (!email || !password) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Email and password are required',
-    });
-  }
-
-  // check if email is valid
-  // https://datatracker.ietf.org/doc/html/rfc5322#section-3.4.1
-  if (!checkEmail(email))
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({
-      error: 'Invalid Email',
-    });
-
-  // get database
-  const db = new DatabaseDriver();
-
-  // check if user exists
-  const user = await db.getWhere<User>('users', 'email', email);
-  // if yes, return error
-  if (!!user) {
-    return res.status(HttpStatusCodes.CONFLICT).json({
-      error: 'User with this Email already exists',
-    });
-  }
-
-  // parse email for username
-  const username = email.split('@')[0];
-  const saltedPassword = saltPassword(password);
-
-  // create user
-  const newUser = new User(username, email, UserRoles.Standard, saltedPassword);
-
-  // save user
-  const result = await db.insert('users', newUser);
-  newUser.id = result;
-
-  // check result
-  if (result >= 0) {
-    // create userInfo
-    const userInfo = new UserInfo(newUser.id, '', '', '', '', '', '');
-
-    // save userInfo
-    const userInfoResult = await db.insert('userInfo', userInfo);
-
-    // check if userInfo was created
-    if (userInfoResult < 0)
-      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Something went wrong',
-      });
-
-    // save session
-    return await saveSession(res, newUser, true);
-  }
-
-  return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-    error: 'Something went wrong',
-  });
-});
+AuthRouter.post(
+  Paths.Auth.Register,
+  validateBody('email', 'password', 'name'),
+  authRegister,
+);
 
 AuthRouter.use(Paths.Auth.ChangePassword, validateSession);
 AuthRouter.post(

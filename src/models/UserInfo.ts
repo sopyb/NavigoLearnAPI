@@ -25,12 +25,12 @@ export class UserInfo implements IUserInfo {
 
   public constructor(
     userId: bigint,
-    profilePictureUrl: string,
-    bio: string,
-    quote: string,
-    blogUrl: string,
-    websiteUrl: string,
-    githubUrl: string,
+    profilePictureUrl = '',
+    bio = '',
+    quote = '',
+    blogUrl = '',
+    websiteUrl = '',
+    githubUrl = '',
     id = BigInt(-1), // id last cause usually set by db
   ) {
     this.userId = userId;
