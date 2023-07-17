@@ -93,7 +93,7 @@ describe('Login Router', () => {
       .expect(HttpStatusCodes.FOUND)
       .expect(
         'Location',
-        new RegExp('https:\\/\\/accounts.google.com\\/o\\/oauth2.+'),
+        new RegExp('^https:\\/\\/accounts.google.com\\/o\\/oauth2.+'),
       );
   });
 
@@ -121,7 +121,7 @@ describe('Login Router', () => {
       .expect(HttpStatusCodes.FOUND)
       .expect(
         'Location',
-        new RegExp('https:\\/\\/github.com\\/login\\/oauth.+'),
+        new RegExp('^https:\\/\\/github\\.com\\/login\\/oauth.+'),
       );
   });
 
