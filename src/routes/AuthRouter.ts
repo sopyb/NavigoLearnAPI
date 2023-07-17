@@ -20,7 +20,7 @@ AuthRouter.post(Paths.Auth.Login, validateBody('email', 'password'), authLogin);
 
 AuthRouter.post(
   Paths.Auth.Register,
-  validateBody('email', 'password', 'name'),
+  validateBody('email', 'password'),
   authRegister,
 );
 

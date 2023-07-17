@@ -137,7 +137,7 @@ async function getUserByEmail(
 }
 
 function _handleNotOkay(res: Response, error: number): unknown {
-  logger.err(error, true);
+  if (EnvVars.NodeEnv !== 'test') logger.err(error, true);
 
   if (error >= HttpStatusCode.InternalServerError)
     return res.status(HttpStatusCode.BadGateway).json({
@@ -194,13 +194,9 @@ export async function authRegister(
   req: RequestWithBody,
   res: Response,
 ): Promise<unknown> {
-  const { email, password, name } = req.body;
+  const { email, password } = req.body;
 
-  if (
-    typeof password !== 'string' ||
-    typeof email !== 'string' ||
-    typeof name !== 'string'
-  )
+  if (typeof password !== 'string' || typeof email !== 'string')
     return _invalidBody(res);
 
   // get database
@@ -213,13 +209,18 @@ export async function authRegister(
   if (!checkEmail(email) || password.length < 8) return _invalidBody(res);
 
   // create user
-  const userId = await insertUser(db, email, name, saltPassword(password));
+  const userId = await insertUser(
+    db,
+    email,
+    email.split('@')[0],
+    saltPassword(password),
+  );
   if (userId === -1n) return _serverError(res);
 
   // create session and save it
   if (await createSaveSession(res, BigInt(userId)))
     return res
-      .status(HttpStatusCode.Ok)
+      .status(HttpStatusCode.Created)
       .json({ message: 'Registration successful', success: true });
 }
 
@@ -351,7 +352,7 @@ export async function authGoogleCallback(
         .status(HttpStatusCode.Ok)
         .json({ message: 'Registration successful', success: true });
   } catch (e) {
-    logger.err(e, true);
+    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
     return _serverError(res);
   }
 }
@@ -506,7 +507,7 @@ export async function authGitHubCallback(
       }
     }
   } catch (e) {
-    logger.err(e, true);
+    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
     return _serverError(res);
   }
 }

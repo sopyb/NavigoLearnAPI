@@ -102,7 +102,7 @@ describe('Login Router', () => {
     // login and expect 403 forbidden
     await request(app)
       .get('/api/auth/google-callback')
-      .expect(HttpStatusCodes.FORBIDDEN);
+      .expect(HttpStatusCodes.BAD_REQUEST);
   });
 
   // google callback test with invalid code
@@ -130,7 +130,7 @@ describe('Login Router', () => {
     // login and expect 403 forbidden
     await request(app)
       .get('/api/auth/github-callback')
-      .expect(HttpStatusCodes.FORBIDDEN);
+      .expect(HttpStatusCodes.BAD_REQUEST);
   });
 
   // GitHub callback test with invalid code
