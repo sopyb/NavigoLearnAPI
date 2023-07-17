@@ -19,17 +19,17 @@ import EnvVars from '@src/constants/EnvVars';
 const AuthRouter = Router();
 const LoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999, // limit each IP to 100 requests per windowMs
+    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999,
     message: 'Too many login attempts, please try again later.',
   }),
   RegisterLimiter = rateLimit({
     windowMs: 360 * 1000, // 1 hour
-    max: EnvVars.NodeEnv !== 'test' ? 5 : 99999, // limit each IP to 100 requests per windowMs
+    max: EnvVars.NodeEnv !== 'test' ? 5 : 99999,
     message: 'Too many register attempts, please try again later.',
   }),
   ResetPasswordLimiter = rateLimit({
     windowMs: 360 * 1000, // 1 hour
-    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999, // limit each IP to 100 requests per windowMs
+    max: EnvVars.NodeEnv !== 'test' ? 10 : 99999,
     message: 'Too many reset password attempts, please try again later.',
   });
 
@@ -42,16 +42,16 @@ AuthRouter.post(
 
 AuthRouter.post(
   Paths.Auth.Register,
-  validateBody('email', 'password'),
   RegisterLimiter,
+  validateBody('email', 'password'),
   authRegister,
 );
 
 AuthRouter.post(
   Paths.Auth.ChangePassword,
+  ResetPasswordLimiter,
   validateSession,
   validateBody('password', 'newPassword'),
-  ResetPasswordLimiter,
   authChangePassword,
 );
 
