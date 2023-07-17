@@ -44,7 +44,7 @@ Documentation for the api can be found [here](docs/paths/README.md).
     CREATE DATABASE navigo_learn;
        USE navigo_learn;
     CREATE USER 'navigo_learn'@'localhost' IDENTIFIED BY 'password';
-    GRANT ALL PRIVILEGES ON navigo_learn.* TO 'navigo_learn'@'localhost';
+     GRANT ALL PRIVILEGES ON navigo_learn.* TO 'navigo_learn'@'localhost';
     ```
 
 4. Rename the env.example folder to env and fill in the values for
