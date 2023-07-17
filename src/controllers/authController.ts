@@ -4,12 +4,16 @@ import DatabaseDriver from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
 import { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
-import { createSaveSession } from '@src/util/sessionManager';
+import {
+  createSaveSession,
+  deleteClearSession,
+} from '@src/util/sessionManager';
 import { UserInfo } from '@src/models/UserInfo';
 import { checkEmail } from '@src/util/EmailUtil';
 import EnvVars from '@src/constants/EnvVars';
 import axios from 'axios/index';
 import logger from 'jet-logger';
+import { RequestWithSession } from '@src/middleware/session';
 
 /*
  * Interfaces
@@ -132,6 +136,24 @@ async function getUserByEmail(
   return await db.getWhere<User>('users', 'email', email);
 }
 
+function _handleNotOkay(res: Response, error: number): unknown {
+  logger.err(error, true);
+
+  if (error >= HttpStatusCode.InternalServerError)
+    return res.status(HttpStatusCode.BadGateway).json({
+      error: 'Remote resource error',
+      success: false,
+    });
+
+  if (error === HttpStatusCode.Unauthorized)
+    return res.status(HttpStatusCode.Unauthorized).json({
+      error: 'Unauthorized',
+      success: false,
+    });
+
+  return _serverError(res);
+}
+
 /*
  * Controllers
  */
@@ -239,7 +261,7 @@ export async function authChangePassword(
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function authForgotPassword(
-  req: RequestWithBody,
+  _: unknown,
   res: Response,
 ): Promise<unknown> {
   // TODO: implement
@@ -248,7 +270,7 @@ export async function authForgotPassword(
     .json({ error: 'Not implemented', success: false });
 }
 
-export function authGoogle(_: never, res: Response): unknown {
+export function authGoogle(_: unknown, res: Response): unknown {
   return res.redirect(
     'https://accounts.google.com/o/oauth2/v2/auth?client_id=' +
       EnvVars.Google.ClientID +
@@ -277,7 +299,7 @@ export async function authGoogleCallback(
     });
 
     // check if response is valid
-    if (response.status !== 200) return _serverError(res);
+    if (response.status !== 200) return _handleNotOkay(res, response.status);
     if (!response.data) return _serverError(res);
 
     // get access token from response
@@ -332,4 +354,175 @@ export async function authGoogleCallback(
     logger.err(e, true);
     return _serverError(res);
   }
+}
+
+export function authGitHub(_: unknown, res: Response): unknown {
+  return res.redirect(
+    'https://github.com/login/oauth/authorize?client_id=' +
+      EnvVars.GitHub.ClientID +
+      '&redirect_uri=' +
+      EnvVars.GitHub.RedirectUri +
+      '&scope=user:email',
+  );
+}
+
+export async function authGitHubCallback(
+  req: RequestWithBody,
+  res: Response,
+): Promise<unknown> {
+  const code = req.query.code;
+
+  if (typeof code !== 'string') return _invalidBody(res);
+
+  try {
+    // get access token
+    let response = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: EnvVars.GitHub.ClientID,
+        client_secret: EnvVars.GitHub.ClientSecret,
+        code: code,
+        redirect_uri: EnvVars.GitHub.RedirectUri,
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+    );
+
+    // check if response is valid
+    if (response.status !== 200) return _handleNotOkay(res, response.status);
+    if (!response.data) return _serverError(res);
+
+    // get access token from response
+    const data = response.data as { access_token?: string };
+    const accessToken = data.access_token;
+    if (!accessToken) return _serverError(res);
+
+    // get user info from github
+    response = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
+
+    // check if response is valid
+    if (response.status !== 200) return _handleNotOkay(res, response.status);
+    if (!response.data) return _serverError(res);
+
+    // get user data
+    const userData = response.data as GitHubUserData;
+    if (!userData) return _serverError(res);
+
+    // if email is not public, get it from github
+    if (userData.email == '') {
+      response = await axios.get('https://api.github.com/user/emails', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'X-OAuth-Scopes': 'userDisplay:email',
+        },
+      });
+
+      const emails = response.data as {
+        email: string;
+        primary: boolean;
+        verified: boolean;
+      }[];
+
+      // check if response is valid
+      if (response.status !== 200) return _handleNotOkay(res, response.status);
+
+      // get primary email
+      userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
+    }
+
+    // check if email is valid
+    if (userData.email == '') return _serverError(res);
+
+    // get database
+    const db = new DatabaseDriver();
+
+    // check if user exists
+    let user = await getUserByEmail(db, userData.email);
+
+    if (!user) {
+      // create user
+      user = new User(userData.login, userData.email, 0, '');
+      user.githubId = userData.id.toString();
+      user.id = await insertUser(
+        db,
+        userData.email,
+        userData.name || userData.login,
+        '',
+        new UserInfo(
+          -1n,
+          userData.avatar_url,
+          userData.bio,
+          '',
+          userData.blog,
+          '',
+          `https://github.com/${userData.login}`,
+        ),
+      );
+    } else {
+      user.githubId = userData.id.toString();
+      await updateUser(db, user.id, user);
+
+      // get user info
+      const userInfo = await getUserInfo(db, user.id);
+      if (!userInfo) {
+        // create user info
+        if (
+          !(await insertUserInfo(
+            db,
+            user.id,
+            new UserInfo(
+              user.id,
+              userData.avatar_url,
+              userData.bio,
+              '',
+              userData.blog,
+              '',
+              `https://github.com/${userData.login}`,
+            ),
+          ))
+        )
+          return _serverError(res);
+      } else {
+        if (userInfo.bio == '') userInfo.bio = userData.bio;
+        if (userInfo.profilePictureUrl == '')
+          userInfo.profilePictureUrl = userData.avatar_url;
+        if (userInfo.blogUrl == '') userInfo.blogUrl = userData.blog;
+        if (userInfo.githubUrl == '')
+          userInfo.githubUrl = `https://github.com/${userData.login}`;
+
+        // update user info
+        if (!(await updateUserInfo(db, user.id, userInfo)))
+          return _serverError(res);
+      }
+    }
+  } catch (e) {
+    logger.err(e, true);
+    return _serverError(res);
+  }
+}
+
+export async function authLogout(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  if (!req.session) return _serverError(res);
+
+  // delete session
+  if (!(await deleteClearSession(res, req.session.token)))
+    return _serverError(res);
+
+  // return success
+  return res
+    .status(HttpStatusCode.Ok)
+    .json({ message: 'Logout successful', success: true });
 }

@@ -51,6 +51,50 @@ export function saveSession(res: Response, token: string): boolean {
   }
 }
 
+export async function deleteSession(token: string): Promise<boolean> {
+  // get database
+  const db = new DatabaseDriver();
+
+  // delete session
+  const session = await db.getWhere<{ id: bigint }>('sessions', 'token', token);
+
+  if (!session) {
+    return false;
+  }
+
+  await db.delete('sessions', session.id);
+
+  return true;
+}
+
+export async function deleteClearSession(
+  res: Response,
+  token: string,
+): Promise<boolean> {
+  // delete session
+  const deleted = await deleteSession(token);
+
+  if (!deleted) {
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'Internal server error',
+    });
+    return false;
+  }
+
+  // clear previous cookie header
+  res.header('Set-Cookie', '');
+
+  // set cookie
+  res.cookie('token', '', {
+    httpOnly: false,
+    secure: EnvVars.NodeEnv === NodeEnvs.Production,
+    maxAge: 0,
+    sameSite: 'strict',
+  });
+
+  return true;
+}
+
 export async function createSaveSession(
   res: Response,
   userId: bigint,
