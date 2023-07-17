@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Paths from '@src/constants/Paths';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import { ITabInfo, TabInfo } from '@src/models/TabInfo';
 import Database from '@src/util/DatabaseDriver';
 import * as console from 'console';
 import { IRoadmap } from '@src/models/Roadmap';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const RoadmapTabsInfo = Router({ mergeParams: true });
 
@@ -71,9 +69,10 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
       .json({ error: 'RoadmapId is invalid.' });
   }
 
-  if (!stringId) return res
-    .status(HttpStatusCodes.BAD_REQUEST)
-    .json({ error: 'TabID not found.' });
+  if (!stringId)
+    return res
+      .status(HttpStatusCodes.BAD_REQUEST)
+      .json({ error: 'TabID not found.' });
 
   // get database connection
   const db = new Database();
@@ -87,8 +86,10 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
     roadmapId,
   );
 
-  if (!tabData) return res.status(HttpStatusCodes.NOT_FOUND)
-    .json({ error: 'TabInfo not found.' });
+  if (!tabData)
+    return res
+      .status(HttpStatusCodes.NOT_FOUND)
+      .json({ error: 'TabInfo not found.' });
 
   const result = {
     id: tabData?.id.toString(),
@@ -102,31 +103,28 @@ RoadmapTabsInfo.get(Paths.Roadmaps.TabsInfo.Get, async (req, res) => {
 });
 
 RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update, validateSession);
-RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
-  async (req: RequestWithSession,
-    res) => {
+RoadmapTabsInfo.post(
+  Paths.Roadmaps.TabsInfo.Update,
+  async (req: RequestWithSession, res) => {
     const stringId = req.params?.tabInfoId;
     const roadmapId = BigInt(req.params?.roadmapId || -1);
 
-    if (roadmapId < 0) return res
-      .status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'RoadmapId is invalid.' });
+    if (roadmapId < 0)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'RoadmapId is invalid.' });
 
-    if (!stringId) return res
-      .status(HttpStatusCodes.BAD_REQUEST)
-      .json({ error: 'TabID not found.' });
+    if (!stringId)
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: 'TabID not found.' });
 
     // get database connection
     const db = new Database();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const sentTabData = req.body?.tabInfo as ITabInfo;
     const newContent = sentTabData.content;
-    console.log('new content', newContent);
-    const roadmapReq = db.getWhere<IRoadmap>(
-      'roadmaps',
-      'id',
-      roadmapId,
-    );
+    const roadmapReq = db.getWhere<IRoadmap>('roadmaps', 'id', roadmapId);
     // gets previous data from the table
     const tabDataReq = db.getWhere<ITabInfo>(
       'tabsInfo',
@@ -138,30 +136,35 @@ RoadmapTabsInfo.post(Paths.Roadmaps.TabsInfo.Update,
 
     const roadmap = await roadmapReq;
 
-    if (!roadmap) return res
-      .status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Roadmap not found.' });
+    if (!roadmap)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Roadmap not found.' });
 
-    if (roadmap.ownerId !== req.session?.userId) return res
-      .status(HttpStatusCodes.FORBIDDEN)
-      .json({ error: 'You don\'t have permission to edit this roadmap.' });
+    if (roadmap.ownerId !== req.session?.userId)
+      return res
+        .status(HttpStatusCodes.FORBIDDEN)
+        .json({ error: "You don't have permission to edit this roadmap." });
 
     const tabData = await tabDataReq;
 
-    if (!tabData) return res
-      .status(HttpStatusCodes.NOT_FOUND)
-      .json({ error: 'Issue not found.' });
+    if (!tabData)
+      return res
+        .status(HttpStatusCodes.NOT_FOUND)
+        .json({ error: 'Issue not found.' });
 
     tabData.content = newContent;
 
     const success = await db.update('tabsInfo', tabData.id, tabData);
 
-    if (!success) return res
-      .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Issue could not be saved to database.' });
+    if (!success)
+      return res
+        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Issue could not be saved to database.' });
 
     // return success
     return res.status(HttpStatusCodes.OK).json({ success: true });
-  });
+  },
+);
 
 export default RoadmapTabsInfo;
