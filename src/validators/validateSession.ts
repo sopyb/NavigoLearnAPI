@@ -16,9 +16,7 @@ export default async function (
   next: NextFunction,
 ): Promise<void> {
   // if session isn't set, return forbidden
-  if (!req.session) {
-    return invalidSession(res);
-  }
+  if (!req.session) return invalidSession(res);
 
   // get db session
   const db = new DatabaseDriver();
