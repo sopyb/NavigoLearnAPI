@@ -21,7 +21,7 @@ export default async function (
   // get db session
   const db = new DatabaseDriver();
 
-  // count how maynt sessions there are with token
+  // count how many sessions there are with token
   if ((await db.countWhere('sessions', 'token', req.session.token)) !== 1n)
     return invalidSession(res);
 
