@@ -2,7 +2,7 @@ import { RequestWithBody } from '@src/validators/validateBody';
 import { Response } from 'express';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import User from '@src/models/User';
-import { HttpStatusCode } from 'axios';
+import axios, { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
 import {
   createSaveSession,
@@ -11,9 +11,30 @@ import {
 import { UserInfo } from '@src/models/UserInfo';
 import { checkEmail } from '@src/util/EmailUtil';
 import EnvVars from '@src/constants/EnvVars';
-import axios from 'axios';
 import logger from 'jet-logger';
 import { RequestWithSession } from '@src/middleware/session';
+import {
+  getUser,
+  getUserByEmail,
+  getUserInfo,
+  insertUser,
+  insertUserInfo,
+  updateUser,
+  updateUserInfo,
+} from '@src/helpers/databaseManagement';
+import {
+  accountCreated,
+  emailConflict,
+  externalBadGateway,
+  invalidBody,
+  invalidLogin,
+  loginSuccessful,
+  logoutSuccessful,
+  notImplemented,
+  passwordChanged,
+  serverError,
+  unauthorized,
+} from '@src/helpers/apiResponses';
 
 /*
  * Interfaces
@@ -38,120 +59,16 @@ interface GitHubUserData {
 /*
  * Helpers
  */
-function _invalidLogin(res: Response): void {
-  res.status(HttpStatusCode.BadRequest).json({
-    error: 'Invalid email or password',
-    success: false,
-  });
-}
-
-function _invalidBody(res: Response): void {
-  res.status(HttpStatusCode.BadRequest).json({
-    error: 'Invalid request body',
-    success: false,
-  });
-}
-
-function _conflict(res: Response): void {
-  res.status(HttpStatusCode.Conflict).json({
-    error: 'Email already in use',
-    success: false,
-  });
-}
-
-function _serverError(res: Response): void {
-  res.status(HttpStatusCode.InternalServerError).json({
-    error: 'Internal server error',
-    success: false,
-  });
-}
-
-async function insertUser(
-  db: DatabaseDriver,
-  email: string,
-  name: string,
-  pwdHash: string,
-  userInfo?: UserInfo,
-): Promise<bigint> {
-  const userId = await db.insert('users', {
-    email,
-    name,
-    pwdHash,
-  });
-
-  if (await insertUserInfo(db, userId, userInfo)) {
-    return userId;
-  } else {
-    return -1n;
-  }
-}
-
-async function insertUserInfo(
-  db: DatabaseDriver,
-  userId: bigint,
-  userInfo?: UserInfo,
-): Promise<boolean> {
-  if (!userInfo) userInfo = new UserInfo(userId);
-  userInfo.userId = userId;
-  return (await db.insert('userInfo', userInfo)) >= 0;
-}
-
-async function updateUser(
-  db: DatabaseDriver,
-  userId: bigint,
-  user: User,
-  userInfo?: UserInfo,
-): Promise<boolean> {
-  if (userInfo) if (!(await updateUserInfo(db, userId, userInfo))) return false;
-
-  return await db.update('users', userId, user);
-}
-
-async function updateUserInfo(
-  db: DatabaseDriver,
-  userId: bigint,
-  userInfo: UserInfo,
-): Promise<boolean> {
-  return await db.update('userInfo', userId, userInfo);
-}
-
-async function getUserInfo(
-  db: DatabaseDriver,
-  userId: bigint,
-): Promise<UserInfo | undefined> {
-  return await db.get<UserInfo>('userInfo', userId);
-}
-
-async function getUser(
-  db: DatabaseDriver,
-  userId: bigint,
-): Promise<User | undefined> {
-  return await db.get<User>('users', userId);
-}
-
-async function getUserByEmail(
-  db: DatabaseDriver,
-  email: string,
-): Promise<User | undefined> {
-  return await db.getWhere<User>('users', 'email', email);
-}
-
-function _handleNotOkay(res: Response, error: number): unknown {
+export function _handleNotOkay(res: Response, error: number): unknown {
   if (EnvVars.NodeEnv !== 'test') logger.err(error, true);
 
-  if (error >= HttpStatusCode.InternalServerError)
-    return res.status(HttpStatusCode.BadGateway).json({
-      error: 'Remote resource error',
-      success: false,
-    });
+  if (error >= (HttpStatusCode.InternalServerError as number))
+    return externalBadGateway(res);
 
-  if (error === HttpStatusCode.Unauthorized)
-    return res.status(HttpStatusCode.Unauthorized).json({
-      error: 'Unauthorized',
-      success: false,
-    });
+  if (error === (HttpStatusCode.Unauthorized as number))
+    return unauthorized(res);
 
-  return _serverError(res);
+  return serverError(res);
 }
 
 /*
@@ -164,30 +81,29 @@ export async function authLogin(
   const { email, password } = req.body;
 
   if (typeof email !== 'string' || typeof password !== 'string')
-    return _invalidLogin(res);
+    return invalidLogin(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!user) return _invalidLogin(res);
+  if (!user) return invalidLogin(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return _invalidLogin(res);
+  if (!isCorrect) return invalidLogin(res);
 
   // check userInfo table for user
   const userInfo = await getUserInfo(db, user.id);
   if (!userInfo)
     if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
-      return _serverError(res);
+      return serverError(res);
 
   // create session and save it
-  if (await createSaveSession(res, user.id))
-    return res
-      .status(HttpStatusCode.Ok)
-      .json({ message: 'Login successful', success: true });
+  if (await createSaveSession(res, user.id)) return loginSuccessful(res);
+
+  return serverError(res);
 }
 
 export async function authRegister(
@@ -197,16 +113,16 @@ export async function authRegister(
   const { email, password } = req.body;
 
   if (typeof password !== 'string' || typeof email !== 'string')
-    return _invalidBody(res);
+    return invalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!!user) return _conflict(res);
+  if (!!user) return emailConflict(res);
 
-  if (!checkEmail(email) || password.length < 8) return _invalidBody(res);
+  if (!checkEmail(email) || password.length < 8) return invalidBody(res);
 
   // create user
   const userId = await insertUser(
@@ -215,13 +131,12 @@ export async function authRegister(
     email.split('@')[0],
     saltPassword(password),
   );
-  if (userId === -1n) return _serverError(res);
+  if (userId === -1n) return serverError(res);
 
   // create session and save it
-  if (await createSaveSession(res, BigInt(userId)))
-    return res
-      .status(HttpStatusCode.Created)
-      .json({ message: 'Registration successful', success: true });
+  if (await createSaveSession(res, BigInt(userId))) return accountCreated(res);
+
+  return serverError(res);
 }
 
 export async function authChangePassword(
@@ -231,33 +146,30 @@ export async function authChangePassword(
   const { password, newPassword } = req.body;
 
   if (typeof password !== 'string' || typeof newPassword !== 'string')
-    return _invalidBody(res);
+    return invalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user is logged in
-  if (!req.session?.userId) return _serverError(res);
+  if (!req.session?.userId) return serverError(res);
   const userId = req.session.userId;
 
   // check if user exists
   const user = await getUser(db, userId);
-  if (!user) return _serverError(res);
+  if (!user) return serverError(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return _invalidLogin(res);
+  if (!isCorrect) return invalidLogin(res);
 
   user.pwdHash = saltPassword(newPassword);
 
   // update password in ussr
   const result = await updateUser(db, userId, user);
 
-  if (result)
-    return res
-      .status(HttpStatusCode.Ok)
-      .json({ message: 'Password changed', success: true });
-  else return _serverError(res);
+  if (result) return passwordChanged(res);
+  else return serverError(res);
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -265,10 +177,8 @@ export async function authForgotPassword(
   _: unknown,
   res: Response,
 ): Promise<unknown> {
-  // TODO: implement
-  return res
-    .status(HttpStatusCode.NotImplemented)
-    .json({ error: 'Not implemented', success: false });
+  // TODO: implement after SMTP server is set up
+  return notImplemented(res);
 }
 
 export function authGoogle(_: unknown, res: Response): unknown {
@@ -287,7 +197,7 @@ export async function authGoogleCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return _invalidBody(res);
+  if (typeof code !== 'string') return invalidBody(res);
 
   try {
     // get access token
@@ -301,12 +211,12 @@ export async function authGoogleCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return _serverError(res);
+    if (!response.data) return serverError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return _serverError(res);
+    if (!accessToken) return serverError(res);
 
     // get user info
     response = await axios.get(
@@ -318,7 +228,7 @@ export async function authGoogleCallback(
       },
     );
     const userData = response?.data as GoogleUserData;
-    if (!userData) return _serverError(res);
+    if (!userData) return serverError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -335,25 +245,25 @@ export async function authGoogleCallback(
       user.googleId = userData.id;
 
       // update user
-      if (!(await updateUser(db, user.id, user))) return _serverError(res);
+      if (!(await updateUser(db, user.id, user))) return serverError(res);
 
       // check userInfo table for user
       const userInfo = await getUserInfo(db, user.id);
       if (!userInfo)
         if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
-          return _serverError(res);
+          return serverError(res);
     }
     // check if user was created
-    if (user.id === -1n) return _serverError(res);
+    if (user.id === -1n) return serverError(res);
 
     // create session and save it
     if (await createSaveSession(res, BigInt(user.id)))
-      return res
-        .status(HttpStatusCode.Ok)
-        .json({ message: 'Registration successful', success: true });
+      return loginSuccessful(res);
+
+    return serverError(res);
   } catch (e) {
     if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
-    return _serverError(res);
+    return serverError(res);
   }
 }
 
@@ -373,7 +283,7 @@ export async function authGitHubCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return _invalidBody(res);
+  if (typeof code !== 'string') return invalidBody(res);
 
   try {
     // get access token
@@ -394,12 +304,12 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return _serverError(res);
+    if (!response.data) return serverError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return _serverError(res);
+    if (!accessToken) return serverError(res);
 
     // get user info from github
     response = await axios.get('https://api.github.com/user', {
@@ -411,38 +321,36 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return _serverError(res);
+    if (!response.data) return serverError(res);
 
     // get user data
     const userData = response.data as GitHubUserData;
-    if (!userData) return _serverError(res);
+    if (!userData) return serverError(res);
 
-    // if email is not public, get it from github
-    if (userData.email == '') {
-      response = await axios.get('https://api.github.com/user/emails', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'X-OAuth-Scopes': 'userDisplay:email',
-        },
-      });
+    // get email from github
+    response = await axios.get('https://api.github.com/user/emails', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'X-OAuth-Scopes': 'userDisplay:email',
+      },
+    });
 
-      const emails = response.data as {
-        email: string;
-        primary: boolean;
-        verified: boolean;
-      }[];
+    const emails = response.data as {
+      email: string;
+      primary: boolean;
+      verified: boolean;
+    }[];
 
-      // check if response is valid
-      if (response.status !== 200) return _handleNotOkay(res, response.status);
+    // check if response is valid
+    if (response.status !== 200) return _handleNotOkay(res, response.status);
 
-      // get primary email
-      userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
-    }
+    // get primary email
+    userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
 
     // check if email is valid
-    if (userData.email == '') return _serverError(res);
+    if (userData.email == '') return serverError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -491,8 +399,7 @@ export async function authGitHubCallback(
               `https://github.com/${userData.login}`,
             ),
           ))
-        )
-          return _serverError(res);
+        ) return serverError(res);
       } else {
         if (userInfo.bio == '') userInfo.bio = userData.bio;
         if (userInfo.profilePictureUrl == '')
@@ -502,13 +409,16 @@ export async function authGitHubCallback(
           userInfo.githubUrl = `https://github.com/${userData.login}`;
 
         // update user info
-        if (!(await updateUserInfo(db, user.id, userInfo)))
-          return _serverError(res);
+        if (!(await updateUserInfo(db, userInfo.id, userInfo)))
+          return serverError(res);
       }
     }
+
+    // create session and save it
+    if (await createSaveSession(res, user.id)) return loginSuccessful(res);
   } catch (e) {
     if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
-    return _serverError(res);
+    return serverError(res);
   }
 }
 
@@ -516,14 +426,12 @@ export async function authLogout(
   req: RequestWithSession,
   res: Response,
 ): Promise<unknown> {
-  if (!req.session) return _serverError(res);
+  if (!req.session) return serverError(res);
 
-  // delete session
+  // delete session and set cookie to expire
   if (!(await deleteClearSession(res, req.session.token)))
-    return _serverError(res);
+    return serverError(res);
 
   // return success
-  return res
-    .status(HttpStatusCode.Ok)
-    .json({ message: 'Logout successful', success: true });
+  return logoutSuccessful(res);
 }
