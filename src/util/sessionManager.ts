@@ -40,7 +40,6 @@ export function saveSession(res: Response, token: string): boolean {
     });
     return false;
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     res.cookie('token', token, {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
       httpOnly: false,

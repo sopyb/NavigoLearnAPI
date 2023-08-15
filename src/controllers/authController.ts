@@ -327,29 +327,27 @@ export async function authGitHubCallback(
     const userData = response.data as GitHubUserData;
     if (!userData) return serverError(res);
 
-    // if email is not public, get it from github
-    if (userData.email == '') {
-      response = await axios.get('https://api.github.com/user/emails', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'X-OAuth-Scopes': 'userDisplay:email',
-        },
-      });
+    // get email from github
+    response = await axios.get('https://api.github.com/user/emails', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'X-OAuth-Scopes': 'userDisplay:email',
+      },
+    });
 
-      const emails = response.data as {
-        email: string;
-        primary: boolean;
-        verified: boolean;
-      }[];
+    const emails = response.data as {
+      email: string;
+      primary: boolean;
+      verified: boolean;
+    }[];
 
-      // check if response is valid
-      if (response.status !== 200) return _handleNotOkay(res, response.status);
+    // check if response is valid
+    if (response.status !== 200) return _handleNotOkay(res, response.status);
 
-      // get primary email
-      userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
-    }
+    // get primary email
+    userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
 
     // check if email is valid
     if (userData.email == '') return serverError(res);
@@ -401,8 +399,7 @@ export async function authGitHubCallback(
               `https://github.com/${userData.login}`,
             ),
           ))
-        )
-          return serverError(res);
+        ) return serverError(res);
       } else {
         if (userInfo.bio == '') userInfo.bio = userData.bio;
         if (userInfo.profilePictureUrl == '')
@@ -412,15 +409,13 @@ export async function authGitHubCallback(
           userInfo.githubUrl = `https://github.com/${userData.login}`;
 
         // update user info
-        if (!(await updateUserInfo(db, user.id, userInfo)))
+        if (!(await updateUserInfo(db, userInfo.id, userInfo)))
           return serverError(res);
       }
     }
 
     // create session and save it
     if (await createSaveSession(res, user.id)) return loginSuccessful(res);
-
-    return serverError(res);
   } catch (e) {
     if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
     return serverError(res);
