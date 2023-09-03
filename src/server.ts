@@ -5,7 +5,7 @@
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import logger from 'jet-logger';
 import { sessionMiddleware } from '@src/middleware/session';
 
@@ -68,13 +68,15 @@ app.use((_: Request, res: Response) => {
 });
 
 // Add error handler
-app.use((err: Error, _: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.err(err, true);
   let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
   if (err instanceof RouteError) {
     status = err.status;
   }
-  return res.status(status).json({ success: false, message: err.message });
+
+  res.status(status).json({ success: false, message: err.message });
 });
 
 // ** Front-End Content ** //
