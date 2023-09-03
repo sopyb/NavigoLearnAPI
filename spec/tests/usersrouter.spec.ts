@@ -161,7 +161,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -218,7 +218,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -274,7 +274,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -336,7 +336,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -398,7 +398,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -459,7 +459,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -520,7 +520,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -580,7 +580,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.BAD_REQUEST)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -641,7 +641,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -688,7 +688,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -737,7 +737,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 
@@ -865,7 +865,7 @@ describe('Users Router', () => {
       .expect(HttpStatusCodes.UNAUTHORIZED)
       .expect('Content-Type', /json/)
       .expect((res) => {
-        expect(res.body.error).toBeDefined();
+        expect(res.body.message).toBeDefined();
       });
   });
 

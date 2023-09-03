@@ -1,13 +1,14 @@
-import { IUser } from '@src/models/User';
 import 'supertest';
 
 declare module 'supertest' {
-
   export interface Response {
-    headers: Record<string, string[]>;
+    headers: {
+      'set-cookie': string[];
+    };
     body: {
-      error: string;
-      users: IUser[];
+      success: boolean;
+      message: string;
+      data: unknown;
     };
   }
 }

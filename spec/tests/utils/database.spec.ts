@@ -90,7 +90,7 @@ describe('Database', () => {
     }
   });
 
-  // test for getting userDisplay by key (email) with value (userDisplay.email) like
+  // test for getting user by key (email) with value (userDisplay.email) like
   it('should get users by key with value like', async () => {
     // get database
     const db = new Database();

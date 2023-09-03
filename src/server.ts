@@ -4,7 +4,6 @@
 
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import path from 'path';
 import helmet from 'helmet';
 import express, { Request, Response } from 'express';
 import logger from 'jet-logger';
@@ -63,7 +62,9 @@ app.use(Paths.Base, BaseRouter);
 
 // if no response is sent, send 404
 app.use((_: Request, res: Response) => {
-  res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'Route not Found' });
+  res
+    .status(HttpStatusCodes.NOT_FOUND)
+    .json({ success: false, message: 'Route not Found' });
 });
 
 // Add error handler
@@ -73,18 +74,18 @@ app.use((err: Error, _: Request, res: Response) => {
   if (err instanceof RouteError) {
     status = err.status;
   }
-  return res.status(status).json({ error: err.message });
+  return res.status(status).json({ success: false, message: err.message });
 });
 
 // ** Front-End Content ** //
 
 // Set views directory (html)
-const viewsDir = path.join(__dirname, 'views');
-app.set('views', viewsDir);
-
+// const viewsDir = path.join(__dirname, 'views');
+// app.set('views', viewsDir);
+//
 // Set static directory (js and css).
-const staticDir = path.join(__dirname, 'public');
-app.use(express.static(staticDir));
+// const staticDir = path.join(__dirname, 'public');
+// app.use(express.static(staticDir));
 
 // **** Export default **** //
 
