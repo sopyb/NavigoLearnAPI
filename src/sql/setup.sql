@@ -1,17 +1,18 @@
-create table if not exists users
+create table users
 (
     id        bigint auto_increment
         primary key,
-    name      varchar(255)                             not null,
-    email     varchar(255)                             not null,
-    role      int          default 0                   not null,
-    pwdHash   varchar(255) default ''                  not null,
-    googleId  varchar(255)                             null,
-    githubId  varchar(255)                             null,
-    createdAt timestamp    default current_timestamp() not null
+    avatar    text                                  null,
+    name      varchar(255)                          not null,
+    email     varchar(255)                          not null,
+    role      int       default 0                   null,
+    pwdHash   varchar(255)                          null,
+    googleId  varchar(255)                          null,
+    githubId  varchar(255)                          null,
+    createdAt timestamp default current_timestamp() not null
 );
 
-create table if not exists followers
+create table followers
 (
     id         bigint auto_increment
         primary key,
@@ -26,29 +27,30 @@ create table if not exists followers
             on delete cascade
 );
 
-create index if not exists followers_followerId_index
+create index followers_followerId_index
     on followers (followerId);
 
-create index if not exists followers_userId_index
+create index followers_userId_index
     on followers (userId);
 
-create table if not exists roadmaps
+create table roadmaps
 (
     id          bigint auto_increment
         primary key,
-    name        varchar(255) not null,
-    description varchar(255) not null,
-    ownerId     bigint       not null,
-    createdAt   timestamp    not null,
-    updatedAt   timestamp    not null,
-    isPublic    tinyint(1)   not null,
-    data        longtext     not null,
+    name        varchar(255)                          not null,
+    description varchar(255)                          not null,
+    userId      bigint                                not null,
+    isPublic    tinyint(1)                            not null,
+    isDraft     tinyint(1)                            null,
+    data        longtext                              not null,
+    createdAt   timestamp default current_timestamp() not null,
+    updatedAt   timestamp default current_timestamp() not null,
     constraint roadmaps_users_id_fk
-        foreign key (ownerId) references users (id)
+        foreign key (userId) references users (id)
             on delete cascade
 );
 
-create table if not exists issues
+create table issues
 (
     id        bigint auto_increment
         primary key,
@@ -58,7 +60,7 @@ create table if not exists issues
     title     varchar(255)                           not null,
     content   text                                   null,
     createdAt timestamp  default current_timestamp() null,
-    updatedAt timestamp                              null,
+    updatedAt timestamp  default current_timestamp() not null,
     constraint issues_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
             on delete cascade,
@@ -67,7 +69,7 @@ create table if not exists issues
             on delete cascade
 );
 
-create table if not exists issueComments
+create table issueComments
 (
     id        bigint auto_increment
         primary key,
@@ -75,7 +77,7 @@ create table if not exists issueComments
     userId    bigint                                not null,
     content   text                                  not null,
     createdAt timestamp default current_timestamp() not null,
-    updatedAt timestamp                             null,
+    updatedAt timestamp default current_timestamp() not null,
     constraint issueComments_issues_id_fk
         foreign key (issueId) references issues (id)
             on delete cascade,
@@ -84,27 +86,28 @@ create table if not exists issueComments
             on delete cascade
 );
 
-create index if not exists issueComments_issueId_createdAt_index
+create index issueComments_issueId_createdAt_index
     on issueComments (issueId, createdAt);
 
-create index if not exists issueComments_userid_index
+create index issueComments_userid_index
     on issueComments (userId);
 
-create index if not exists issues_roadmapId_createdAt_index
+create index issues_roadmapId_createdAt_index
     on issues (roadmapId asc, createdAt desc);
 
-create index if not exists issues_title_index
+create index issues_title_index
     on issues (title);
 
-create index if not exists issues_userId_index
+create index issues_userId_index
     on issues (userId);
 
-create table if not exists roadmapLikes
+create table roadmapLikes
 (
     id        bigint auto_increment
         primary key,
     roadmapId bigint                                not null,
     userId    bigint                                not null,
+    value     int                                   null,
     createdAt timestamp default current_timestamp() null,
     constraint roadmaplikes_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
@@ -114,27 +117,10 @@ create table if not exists roadmapLikes
             on delete cascade
 );
 
-create index if not exists roadmapLikes_roadmapId_index
+create index roadmapLikes_roadmapId_index
     on roadmapLikes (roadmapId);
 
-create table if not exists roadmapTags
-(
-    id        bigint auto_increment
-        primary key,
-    roadmapId bigint       not null,
-    tagName   varchar(255) not null,
-    constraint roadmapTags_roadmaps_id_fk
-        foreign key (roadmapId) references roadmaps (id)
-            on delete cascade
-);
-
-create index if not exists roadmapTags_roadmapId_index
-    on roadmapTags (roadmapId);
-
-create index if not exists roadmapTags_tagName_index
-    on roadmapTags (tagName);
-
-create table if not exists roadmapViews
+create table roadmapViews
 (
     id        bigint auto_increment
         primary key,
@@ -150,22 +136,22 @@ create table if not exists roadmapViews
             on delete cascade
 );
 
-create index if not exists roadmapViews_roadmapId_createdAt_index
+create index roadmapViews_roadmapId_createdAt_index
     on roadmapViews (roadmapId, createdAt);
 
-create index if not exists roadmaps_createdAt_index
+create index roadmaps_createdAt_index
     on roadmaps (createdAt desc);
 
-create index if not exists roadmaps_description_index
+create index roadmaps_description_index
     on roadmaps (description);
 
-create index if not exists roadmaps_name_index
+create index roadmaps_name_index
     on roadmaps (name);
 
-create index if not exists roadmaps_owner_index
-    on roadmaps (ownerId);
+create index roadmaps_owner_index
+    on roadmaps (userId);
 
-create table if not exists sessionTable
+create table sessionTable
 (
     id      bigint auto_increment
         primary key,
@@ -177,51 +163,33 @@ create table if not exists sessionTable
             on delete cascade
 );
 
-create index if not exists sessionTable_expires_index
+create index sessionTable_expires_index
     on sessionTable (expires);
 
-create index if not exists sessions_index
+create index sessions_index
     on sessionTable (userId, token);
 
-create table if not exists tabsInfo
+create table userInfo
 (
-    id        bigint auto_increment
+    id         bigint auto_increment
         primary key,
-    roadmapId bigint       not null,
-    userId    bigint       not null,
-    content   text         null,
-    stringId  varchar(255) not null,
-    constraint tabInfo_roadmaps_id_fk
-        foreign key (roadmapId) references roadmaps (id)
-            on delete cascade,
-    constraint tabInfo_users_id_fk
-        foreign key (userId) references users (id)
-            on delete cascade
-);
-
-create table if not exists userInfo
-(
-    id                bigint auto_increment
-        primary key,
-    userId            bigint       not null,
-    profilePictureUrl varchar(255) null,
-    bio               varchar(255) null,
-    quote             varchar(255) null,
-    blogUrl           varchar(255) null,
-    websiteUrl        varchar(255) null,
-    githubUrl         varchar(255) null,
+    userId     bigint       not null,
+    bio        varchar(255) null,
+    quote      varchar(255) null,
+    websiteUrl varchar(255) null,
+    githubUrl  varchar(255) null,
     constraint userInfo_users_id_fk
         foreign key (userId) references users (id)
             on delete cascade
 );
 
-create index if not exists userInfo_index
+create index userInfo_index
     on userInfo (userId);
 
-create index if not exists users_index
+create index users_index
     on users (email, name);
 
-create view if not exists sessions as
+create view sessions as
 select `navigo`.`sessionTable`.`id`      AS `id`,
        `navigo`.`sessionTable`.`userId`  AS `userId`,
        `navigo`.`sessionTable`.`token`   AS `token`,
