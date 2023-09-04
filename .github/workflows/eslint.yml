@@ -22,8 +22,6 @@ jobs:
   eslint:
     name: Run eslint scanning
     runs-on: ubuntu-latest
-    env:
-      PAT_TOKEN: ${{ secrets.PAT }}
     permissions:
       contents: read
       security-events: write
@@ -41,8 +39,10 @@ jobs:
         run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix || echo "ESLint fix failed"
 
       - name: Commit changes (if any)
-        run: |
-          git diff --exit-code || (git config --global user.email "github-actions@github.com" && git config --global user.name "GitHub Actions" && git commit -am "Fix ESLint issues" && git push https://$PAT_TOKEN@github.com/NavigoLearn/API.git)
+        uses: ad-m/github-push-action@v0.7.0
+        with:
+          branch: ${{ github.ref }}
+          github_token: ${{ secrets.PAT }}
 
       - name: Run ESLint
         run: npx eslint .
