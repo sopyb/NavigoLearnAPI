@@ -60,7 +60,7 @@ export function serverError(res: Response): void {
 
 export function userNotFound(res: Response): void {
   res.status(HttpStatusCode.NotFound).json({
-    error: "User couldn't be found",
+    error: 'User couldn\'t be found',
     success: false,
   });
 }

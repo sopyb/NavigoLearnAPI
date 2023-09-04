@@ -8,7 +8,7 @@ import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
 import { Tag } from '@src/models/Tags';
 import User from '@src/models/User';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 

@@ -9,7 +9,7 @@ import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
 import IssuesUpdate from '@src/routes/roadmapsRoutes/issuesRoutes/IssuesUpdate';
 import Comments from '@src/routes/roadmapsRoutes/issuesRoutes/CommentsRouter';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const RoadmapIssues = Router({ mergeParams: true });
 
