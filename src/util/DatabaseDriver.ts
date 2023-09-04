@@ -3,7 +3,7 @@ import { createPool, Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -48,6 +48,8 @@ interface Data {
   values: never[];
 }
 
+type DataType = bigint | string | number | Date | null;
+
 // config interface
 interface DatabaseConfig {
   host: string;
@@ -74,8 +76,10 @@ interface ResultSetHeader {
   warningStatus: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function processData(data: Object, discardId = true): Data {
+function processData(
+  data: object | Record<string, DataType>,
+  discardId = true,
+): Data {
   // get keys and values
   const keys = Object.keys(data);
   const values = Object.values(data) as never[];
@@ -92,7 +96,7 @@ function processData(data: Object, discardId = true): Data {
 
 function parseResult(
   result: RowDataPacket[] | ResultSetHeader,
-): RowDataPacket[] | undefined {
+): RowDataPacket[] | null {
   if (result && Object.keys(result).length > 0) {
     const keys = Object.keys((result as RowDataPacket[])[0]);
     for (const element of keys) {
@@ -111,8 +115,8 @@ function parseResult(
 
 function getFirstResult<T>(
   result: RowDataPacket[] | ResultSetHeader,
-): T | undefined {
-  return parseResult(result)?.[0] as T;
+): T | null {
+  return (parseResult(result)?.[0] as T) || null;
 }
 
 class Database {
@@ -128,8 +132,11 @@ class Database {
     this._setup();
   }
 
-  public async insert(table: string, data: object, discardId = true):
-    Promise<bigint> {
+  public async insert(
+    table: string,
+    data: object | Record<string, DataType>,
+    discardId = true,
+  ): Promise<bigint> {
     const { keys, values } = processData(data, discardId);
 
     // check if keys are trusted
@@ -140,13 +147,12 @@ class Database {
     const sql = `INSERT INTO ${table} (${keys.join(',')})
                  VALUES (${values.map(() => '?').join(',')})`;
     // execute query
-    const result = await this._query(sql, values);
+    const result = (await this._query(sql, values)) as ResultSetHeader;
 
     // return insert id
-    let insertId = BigInt(-1);
+    let insertId = -1n;
     if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      insertId = BigInt((result as ResultSetHeader)?.insertId);
+      insertId = BigInt(result.insertId);
     }
     return insertId;
   }
@@ -154,7 +160,7 @@ class Database {
   public async update(
     table: string,
     id: bigint,
-    data: object,
+    data: object | Record<string, DataType>,
     discardId = true,
   ): Promise<boolean> {
     const { keys, values } = processData(data, discardId);
@@ -168,15 +174,13 @@ class Database {
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE id = ?`;
-    const params = [ ...values, id ];
+    const params = [...values, id];
     // execute query
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await this._query(sql, params);
+    const result = (await this._query(sql, params)) as ResultSetHeader;
 
     let affectedRows = -1;
     if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
+      affectedRows = result.affectedRows || -1;
     }
 
     // return true if affected rows > 0 else false
@@ -187,25 +191,45 @@ class Database {
     const sql = `DELETE
                  FROM ${table}
                  WHERE id = ?`;
-    const result = await this._query(sql, [ id ]);
+    const result = (await this._query(sql, [id])) as ResultSetHeader;
 
     let affectedRows = -1;
     if (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      affectedRows = (result as ResultSetHeader)?.affectedRows || -1;
+      affectedRows = result.affectedRows || -1;
     }
 
     // return true if affected rows > 0 else false
     return affectedRows > 0;
   }
 
-  public async get<T>(table: string, id: bigint): Promise<T | undefined> {
+  private _buildWhereQuery = (
+    like: boolean,
+    ...values: unknown[]
+  ): { keyString: string; params: unknown[] } | null => {
+    let keyString = '';
+    let params: unknown[] = [];
+
+    for (let i = 0; i < values.length - 1; i += 2) {
+      const key = values[i];
+
+      if (typeof key !== 'string' || !trustedColumns.includes(key)) return null;
+
+      if (i > 0) keyString += ' AND ';
+      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
+
+      params = [...params, values[i + 1]];
+    }
+
+    return { keyString, params };
+  };
+
+  public async get<T>(table: string, id: bigint): Promise<T | null> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT *
                  FROM ${table}
                  WHERE id = ?`;
     // execute query
-    const result = await this._query(sql, [ id ]);
+    const result = await this._query(sql, [id]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -215,14 +239,14 @@ class Database {
   public async getWhere<T>(
     table: string,
     ...values: unknown[]
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this._getWhere<T>(table, false, ...values);
   }
 
   public async getWhereLike<T>(
     table: string,
     ...values: unknown[]
-  ): Promise<T | undefined> {
+  ): Promise<T | null> {
     return this._getWhere<T>(table, true, ...values);
   }
 
@@ -230,36 +254,19 @@ class Database {
     table: string,
     like: boolean,
     ...values: unknown[]
-  ): Promise<T | undefined> {
-    // format values
-    let keyString = '';
-    let params: unknown[] = [];
+  ): Promise<T | null> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return null;
 
-    for (let i = 0; i < values.length - 1; i += 2) {
-      const key = values[i];
-
-      // check if key is trusted and is a string
-      if (typeof key !== 'string' || !trustedColumns.includes(key))
-        return undefined;
-
-      if (i > 0) keyString += ' AND ';
-      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-      params = [ ...params, values[i + 1] ];
-    }
-
-    // create sql query
     const sql = `SELECT *
                  FROM ${table}
-                 WHERE ${keyString}`;
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
 
-    // execute query
-    const result = await this._query(sql, params);
-
-    // if so parse them
     return getFirstResult<T>(result);
   }
 
-  public async getAll<T>(table: string): Promise<T[] | undefined> {
+  public async getAll<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
                  FROM ${table}`;
@@ -269,20 +276,20 @@ class Database {
 
     // check if T has any properties that are JSON
     // if so parse them
-    return parseResult(result) as T[];
+    return parseResult(result) as T[] | null;
   }
 
   public async getAllWhere<T>(
     table: string,
     ...values: unknown[]
-  ): Promise<T[] | undefined> {
+  ): Promise<T[] | null> {
     return this._getAllWhere<T>(table, false, ...values);
   }
 
   public async getAllWhereLike<T>(
     table: string,
     ...values: unknown[]
-  ): Promise<T[] | undefined> {
+  ): Promise<T[] | null> {
     return this._getAllWhere<T>(table, true, ...values);
   }
 
@@ -290,34 +297,16 @@ class Database {
     table: string,
     like: boolean,
     ...values: unknown[]
-  ): Promise<T[] | undefined> {
-    // format values
-    let keyString = '';
-    let params: unknown[] = [];
+  ): Promise<T[] | null> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return null;
 
-    for (let i = 0; i < values.length - 1; i += 2) {
-      const key = values[i];
-
-      // check if key is trusted and is a string
-      if (typeof key !== 'string' || !trustedColumns.includes(key))
-        return undefined;
-
-      if (i > 0) keyString += ' AND ';
-      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-      params = [ ...params, values[i + 1] ];
-    }
-
-    // create sql query
     const sql = `SELECT *
                  FROM ${table}
-                 WHERE ${keyString}`;
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
 
-    // execute query
-    const result = await this._query(sql, params);
-
-    // check if T has any properties that are JSON
-    // if so parse them
-    return parseResult(result) as T[];
+    return parseResult(result) as T[] | null;
   }
 
   public async count(table: string): Promise<bigint> {
@@ -351,31 +340,14 @@ class Database {
     like: boolean,
     ...values: unknown[]
   ): Promise<bigint> {
-    // format values
-    let keyString = '';
-    let params: unknown[] = [];
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return BigInt(0);
 
-    for (let i = 0; i < values.length - 1; i += 2) {
-      const key = values[i];
-
-      // check if key is trusted and is a string
-      if (typeof key !== 'string' || !trustedColumns.includes(key))
-        return BigInt(0);
-
-      if (i > 0) keyString += ' AND ';
-      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-      params = [ ...params, values[i + 1] ];
-    }
-
-    // create sql query - select count(*) from table where key = ?
     const sql = `SELECT COUNT(*)
                  FROM ${table}
-                 WHERE ${keyString}`;
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
 
-    // execute query
-    const result = await this._query(sql, params);
-
-    // return count
     return (result as CountDataPacket[])[0]['COUNT(*)'];
   }
 
@@ -412,15 +384,11 @@ class Database {
     }
 
     // create dummy user
-    const user = new User(
-      'Unknown User',
-      'unknown',
-      0,
-      '',
-      BigInt(-1),
-      '',
-      '',
-    );
+    const user = new User({
+      id: -1n,
+      name: 'Unknown User',
+      email: 'unknown',
+    });
     // see if user exists
     const existingUser = await this.get('users', user.id);
 
