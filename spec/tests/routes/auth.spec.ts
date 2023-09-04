@@ -2,7 +2,7 @@ import { randomString } from '@spec/utils/randomString';
 import request from 'supertest';
 import app from '@src/server';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
@@ -68,7 +68,7 @@ describe('Authentification Tests', () => {
 
   it('user should be able to logout', async () => {
     await request(app)
-      .post('/api/auth/logout')
+      .delete('/api/auth/logout')
       .set('Cookie', loginCookie)
       .expect(httpStatusCodes.OK)
       .expect(({ body, headers }) => {
