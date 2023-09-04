@@ -1,21 +1,36 @@
-// TypeScript Interface
+// Interface for full RoadmapView object
 export interface IRoadmapView {
-  readonly id?: bigint;
+  readonly id: bigint;
   readonly userId: bigint;
   readonly roadmapId: bigint;
   readonly full: boolean;
   readonly createdAt: Date;
 }
 
-// TypeScript Class
+// Interface for constructing a RoadmapView
+interface IRoadmapViewConstructor {
+  readonly id?: bigint;
+  readonly userId?: bigint;
+  readonly roadmapId: bigint;
+  readonly full?: boolean;
+  readonly createdAt?: Date;
+}
+
+// Class
 export class RoadmapView implements IRoadmapView {
-  private _id?: bigint;
+  private _id: bigint;
   private _userId: bigint;
   private _roadmapId: bigint;
   private _full: boolean;
   private _createdAt: Date;
 
-  public constructor({ id, userId, roadmapId, full, createdAt }: IRoadmapView) {
+  public constructor({
+    id = -1n,
+    userId = -1n,
+    roadmapId,
+    full = false,
+    createdAt = new Date(),
+  }: IRoadmapViewConstructor) {
     this._id = id;
     this._userId = userId;
     this._roadmapId = roadmapId;
@@ -32,7 +47,7 @@ export class RoadmapView implements IRoadmapView {
     if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 

@@ -1,5 +1,18 @@
-// Interface
+// Interface for full User object
 export interface IUser {
+  readonly id: bigint;
+  readonly avatar: string | null;
+  readonly name: string;
+  readonly email: string;
+  readonly role: number | null;
+  readonly pwdHash: string | null;
+  readonly googleId: string | null;
+  readonly githubId: string | null;
+  readonly createdAt: Date;
+}
+
+// Interface for constructing a User
+interface IUserConstructor {
   readonly id?: bigint;
   readonly avatar?: string | null;
   readonly name: string;
@@ -8,23 +21,23 @@ export interface IUser {
   readonly pwdHash?: string | null;
   readonly googleId?: string | null;
   readonly githubId?: string | null;
-  readonly createdAt: Date;
+  readonly createdAt?: Date;
 }
 
 // Class
 export class User implements IUser {
-  private _id?: bigint;
-  private _avatar?: string | null;
+  private _id: bigint;
+  private _avatar: string | null;
   private _name: string;
   private _email: string;
-  private _role?: number | null;
-  private _pwdHash?: string | null;
-  private _googleId?: string | null;
-  private _githubId?: string | null;
+  private _role: number | null;
+  private _pwdHash: string | null;
+  private _googleId: string | null;
+  private _githubId: string | null;
   private _createdAt: Date;
 
   public constructor({
-    id,
+    id = -1n,
     avatar = null,
     name,
     email,
@@ -32,8 +45,8 @@ export class User implements IUser {
     pwdHash = null,
     googleId = null,
     githubId = null,
-    createdAt,
-  }: IUser) {
+    createdAt = new Date(),
+  }: IUserConstructor) {
     this._id = id;
     this._avatar = avatar;
     this._name = name;
@@ -56,7 +69,7 @@ export class User implements IUser {
     googleId,
     githubId,
     createdAt,
-  }: IUser): void {
+  }: IUserConstructor): void {
     if (id !== undefined) this._id = id;
     if (avatar !== undefined) this._avatar = avatar;
     if (name !== undefined) this._name = name;
@@ -68,11 +81,11 @@ export class User implements IUser {
     if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
-  public get avatar(): string | null | undefined {
+  public get avatar(): string | null {
     return this._avatar;
   }
 
@@ -84,19 +97,19 @@ export class User implements IUser {
     return this._email;
   }
 
-  public get role(): number | null | undefined {
+  public get role(): number | null {
     return this._role;
   }
 
-  public get pwdHash(): string | null | undefined {
+  public get pwdHash(): string | null {
     return this._pwdHash;
   }
 
-  public get googleId(): string | null | undefined {
+  public get googleId(): string | null {
     return this._googleId;
   }
 
-  public get githubId(): string | null | undefined {
+  public get githubId(): string | null {
     return this._githubId;
   }
 

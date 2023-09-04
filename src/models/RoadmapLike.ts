@@ -1,5 +1,14 @@
-// TypeScript Interface
+//  interface for RoadmapLike
 export interface IRoadmapLike {
+  readonly id: bigint;
+  readonly roadmapId: bigint;
+  readonly userId: bigint;
+  readonly value: number;
+  readonly createdAt: Date;
+}
+
+// Interface for constructing a RoadmapLike
+interface IRoadmapLikeConstructor {
   readonly id?: bigint;
   readonly roadmapId: bigint;
   readonly userId: bigint;
@@ -7,21 +16,21 @@ export interface IRoadmapLike {
   readonly createdAt?: Date;
 }
 
-// TypeScript Class
+// Class
 export class RoadmapLike implements IRoadmapLike {
-  private _id?: bigint;
+  private _id: bigint;
   private _roadmapId: bigint;
   private _userId: bigint;
-  private _value?: number;
-  private _createdAt?: Date;
+  private _value: number;
+  private _createdAt: Date;
 
   public constructor({
-    id,
+    id = -1n,
     roadmapId,
     userId,
-    value,
-    createdAt,
-  }: IRoadmapLike) {
+    value = 1,
+    createdAt = new Date(),
+  }: IRoadmapLikeConstructor) {
     this._id = id;
     this._roadmapId = roadmapId;
     this._userId = userId;
@@ -38,7 +47,7 @@ export class RoadmapLike implements IRoadmapLike {
     if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
@@ -50,11 +59,11 @@ export class RoadmapLike implements IRoadmapLike {
     return this._userId;
   }
 
-  public get value(): number | undefined {
+  public get value(): number {
     return this._value;
   }
 
-  public get createdAt(): Date | undefined {
+  public get createdAt(): Date {
     return this._createdAt;
   }
 

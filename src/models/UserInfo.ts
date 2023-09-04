@@ -1,5 +1,15 @@
-// TypeScript Interface
+// Interface for full UserInfo object
 export interface IUserInfo {
+  readonly id: bigint;
+  readonly userId: bigint;
+  readonly bio: string | null;
+  readonly quote: string | null;
+  readonly websiteUrl: string | null;
+  readonly githubUrl: string | null;
+}
+
+// Interface for constructing a UserInfo
+interface IUserInfoConstructor {
   readonly id?: bigint;
   readonly userId: bigint;
   readonly bio?: string | null;
@@ -10,21 +20,21 @@ export interface IUserInfo {
 
 // TypeScript Class
 export class UserInfo implements IUserInfo {
-  private _id?: bigint;
+  private _id: bigint;
   private _userId: bigint;
-  private _bio?: string | null;
-  private _quote?: string | null;
-  private _websiteUrl?: string | null;
-  private _githubUrl?: string | null;
+  private _bio: string | null;
+  private _quote: string | null;
+  private _websiteUrl: string | null;
+  private _githubUrl: string | null;
 
   public constructor({
-    id,
+    id = -1n,
     userId,
     bio = null,
     quote = null,
     websiteUrl = null,
     githubUrl = null,
-  }: IUserInfo) {
+  }: IUserInfoConstructor) {
     this._id = id;
     this._userId = userId;
     this._bio = bio;
@@ -43,7 +53,7 @@ export class UserInfo implements IUserInfo {
     if (githubUrl !== undefined) this._githubUrl = githubUrl;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
@@ -51,19 +61,19 @@ export class UserInfo implements IUserInfo {
     return this._userId;
   }
 
-  public get bio(): string | null | undefined {
+  public get bio(): string | null {
     return this._bio;
   }
 
-  public get quote(): string | null | undefined {
+  public get quote(): string | null {
     return this._quote;
   }
 
-  public get websiteUrl(): string | null | undefined {
+  public get websiteUrl(): string | null {
     return this._websiteUrl;
   }
 
-  public get githubUrl(): string | null | undefined {
+  public get githubUrl(): string | null {
     return this._githubUrl;
   }
 

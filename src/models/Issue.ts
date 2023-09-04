@@ -1,5 +1,17 @@
-// Interface
+// Interface for full Issue object
 export interface IIssue {
+  readonly id: bigint;
+  readonly roadmapId: bigint;
+  readonly userId: bigint;
+  readonly open: boolean;
+  readonly title: string;
+  readonly content: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// Interface for constructing an Issue
+interface IIssueConstructor {
   readonly id?: bigint;
   readonly roadmapId: bigint;
   readonly userId: bigint;
@@ -7,30 +19,30 @@ export interface IIssue {
   readonly title: string;
   readonly content?: string | null;
   readonly createdAt?: Date;
-  readonly updatedAt: Date;
+  readonly updatedAt?: Date;
 }
 
 // Class
 export class Issue implements IIssue {
-  private _id?: bigint;
+  private _id: bigint;
   private _roadmapId: bigint;
   private _userId: bigint;
   private _open: boolean;
   private _title: string;
-  private _content?: string | null;
-  private _createdAt?: Date;
+  private _content: string | null;
+  private _createdAt: Date;
   private _updatedAt: Date;
 
   public constructor({
-    id,
+    id = -1n,
     roadmapId,
     userId,
     open,
     title,
     content = null,
-    createdAt,
-    updatedAt,
-  }: IIssue) {
+    createdAt = new Date(),
+    updatedAt = new Date(),
+  }: IIssueConstructor) {
     this._id = id;
     this._roadmapId = roadmapId;
     this._userId = userId;
@@ -62,7 +74,7 @@ export class Issue implements IIssue {
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
@@ -82,11 +94,11 @@ export class Issue implements IIssue {
     return this._title;
   }
 
-  public get content(): string | null | undefined {
+  public get content(): string | null {
     return this._content;
   }
 
-  public get createdAt(): Date | undefined {
+  public get createdAt(): Date {
     return this._createdAt;
   }
 

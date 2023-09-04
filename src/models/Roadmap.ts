@@ -1,39 +1,51 @@
-// Interface
+// Interface for full Roadmap object
 export interface IRoadmap {
-  readonly id?: bigint;
+  readonly id: bigint;
   readonly name: string;
   readonly description: string;
   readonly userId: bigint;
   readonly isPublic: boolean;
-  readonly isDraft?: boolean;
+  readonly isDraft: boolean;
   readonly data: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
 
+// Interface for constructing a Roadmap
+interface IRoadmapConstructor {
+  readonly id?: bigint;
+  readonly name: string;
+  readonly description: string;
+  readonly userId: bigint;
+  readonly isPublic?: boolean;
+  readonly isDraft?: boolean;
+  readonly data: string;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
 // Class
 export class Roadmap implements IRoadmap {
-  private _id?: bigint;
+  private _id: bigint;
   private _name: string;
   private _description: string;
   private _userId: bigint;
   private _isPublic: boolean;
-  private _isDraft?: boolean;
+  private _isDraft: boolean;
   private _data: string;
   private _createdAt: Date;
   private _updatedAt: Date;
 
   public constructor({
-    id,
+    id = 0n,
     name,
     description,
     userId,
-    isPublic,
+    isPublic = true,
     isDraft = false,
     data,
-    createdAt,
-    updatedAt,
-  }: IRoadmap) {
+    createdAt = new Date(),
+    updatedAt = new Date(),
+  }: IRoadmapConstructor) {
     this._id = id;
     this._name = name;
     this._description = description;
@@ -68,7 +80,7 @@ export class Roadmap implements IRoadmap {
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
@@ -88,7 +100,7 @@ export class Roadmap implements IRoadmap {
     return this._isPublic;
   }
 
-  public get isDraft(): boolean | undefined {
+  public get isDraft(): boolean {
     return this._isDraft;
   }
 

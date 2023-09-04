@@ -1,19 +1,32 @@
-// Interface
+// Interface for full Follower object
 export interface IFollower {
-  readonly id?: bigint;
+  readonly id: bigint;
   readonly followerId: bigint;
   readonly userId: bigint;
   readonly createdAt: Date;
 }
 
+// Interface for constructing a Follower
+interface IFollowerConstructor {
+  readonly id?: bigint;
+  readonly followerId: bigint;
+  readonly userId: bigint;
+  readonly createdAt?: Date;
+}
+
 // Class
 export class Follower implements IFollower {
-  private _id?: bigint;
+  private _id: bigint;
   private _followerId: bigint;
   private _userId: bigint;
   private _createdAt: Date;
 
-  public constructor({ id, followerId, userId, createdAt }: IFollower) {
+  public constructor({
+    id = -1n,
+    followerId,
+    userId,
+    createdAt = new Date(),
+  }: IFollowerConstructor) {
     this._id = id;
     this._followerId = followerId;
     this._userId = userId;
@@ -28,7 +41,7 @@ export class Follower implements IFollower {
     if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 

@@ -37,14 +37,14 @@ create table roadmaps
 (
     id          bigint auto_increment
         primary key,
-    name        varchar(255)                          not null,
-    description varchar(255)                          not null,
-    userId      bigint                                not null,
-    isPublic    tinyint(1)                            not null,
-    isDraft     tinyint(1)                            null,
-    data        longtext                              not null,
-    createdAt   timestamp default current_timestamp() not null,
-    updatedAt   timestamp default current_timestamp() not null,
+    name        varchar(255)                           not null,
+    description varchar(255)                           not null,
+    userId      bigint                                 not null,
+    isPublic    tinyint(1) default 1                   not null,
+    isDraft     tinyint(1) default 0                   not null,
+    data        longtext                               not null,
+    createdAt   timestamp  default current_timestamp() not null,
+    updatedAt   timestamp  default current_timestamp() not null,
     constraint roadmaps_users_id_fk
         foreign key (userId) references users (id)
             on delete cascade
@@ -124,10 +124,10 @@ create table roadmapViews
 (
     id        bigint auto_increment
         primary key,
-    userId    bigint    default -1                  not null,
-    roadmapId bigint                                not null,
-    full      tinyint(1)                            not null,
-    createdAt timestamp default current_timestamp() not null,
+    userId    bigint     default -1                  not null,
+    roadmapId bigint                                 not null,
+    full      tinyint(1) default 0                   not null,
+    createdAt timestamp default current_timestamp()  not null,
     constraint roadmapViews_roadmaps_id_fk
         foreign key (roadmapId) references roadmaps (id)
             on delete cascade,

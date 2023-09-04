@@ -1,6 +1,6 @@
-// Interface
+// Interface for full IssueComment object
 export interface IIssueComment {
-  readonly id?: bigint;
+  readonly id: bigint;
   readonly issueId: bigint;
   readonly userId: bigint;
   readonly content: string;
@@ -8,9 +8,19 @@ export interface IIssueComment {
   readonly updatedAt: Date;
 }
 
+// Interface for constructing an IssueComment
+interface IIssueCommentConstructor {
+  readonly id?: bigint;
+  readonly issueId: bigint;
+  readonly userId: bigint;
+  readonly content: string;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
+
 // Class
 export class IssueComment implements IIssueComment {
-  private _id?: bigint;
+  private _id: bigint;
   private _issueId: bigint;
   private _userId: bigint;
   private _content: string;
@@ -18,13 +28,13 @@ export class IssueComment implements IIssueComment {
   private _updatedAt: Date;
 
   public constructor({
-    id,
+    id = -1n,
     issueId,
     userId,
     content,
-    createdAt,
-    updatedAt,
-  }: IIssueComment) {
+    createdAt = new Date(),
+    updatedAt = new Date(),
+  }: IIssueCommentConstructor) {
     this._id = id;
     this._issueId = issueId;
     this._userId = userId;
@@ -50,7 +60,7 @@ export class IssueComment implements IIssueComment {
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 

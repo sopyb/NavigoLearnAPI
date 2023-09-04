@@ -1,5 +1,13 @@
-// Interface
+// Interface for full Session object
 export interface ISession {
+  readonly id: bigint;
+  readonly userId: bigint;
+  readonly token: string;
+  readonly expires: Date;
+}
+
+// Interface for constructing a Session
+interface ISessionConstructor {
   readonly id?: bigint;
   readonly userId: bigint;
   readonly token: string;
@@ -8,12 +16,17 @@ export interface ISession {
 
 // Class
 export class Session implements ISession {
-  private _id?: bigint;
+  private _id: bigint;
   private _userId: bigint;
   private _token: string;
   private _expires: Date;
 
-  public constructor({ id, userId, token, expires }: ISession) {
+  public constructor({
+    id = -1n,
+    userId,
+    token,
+    expires,
+  }: ISessionConstructor) {
     this._id = id;
     this._userId = userId;
     this._token = token;
@@ -28,7 +41,7 @@ export class Session implements ISession {
     if (expires !== undefined) this._expires = expires;
   }
 
-  public get id(): bigint | undefined {
+  public get id(): bigint {
     return this._id;
   }
 
