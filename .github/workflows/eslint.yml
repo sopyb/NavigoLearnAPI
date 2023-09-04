@@ -22,6 +22,8 @@ jobs:
   eslint:
     name: Run eslint scanning
     runs-on: ubuntu-latest
+    env:
+      PAT_TOKEN: ${{ secrets.PAT }}
     permissions:
       contents: read
       security-events: write
@@ -32,15 +34,15 @@ jobs:
 
       - name: Install ESLint
         run: |
-          npm install eslint@8.10.0
-          npm install @microsoft/eslint-formatter-sarif@2.1.7
+          npm install --save-dev eslint@8.10.0
+          npm install --save-dev @microsoft/eslint-formatter-sarif@2.1.7
 
       - name: Run ESLint with --fix
         run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix || echo "ESLint fix failed"
 
       - name: Commit changes (if any)
         run: |
-          git diff --exit-code || (git config --global user.email "github-actions@github.com" && git config --global user.name "GitHub Actions" && git commit -am "Fix ESLint issues" && git push)
+          git diff --exit-code || (git config --global user.email "github-actions@github.com" && git config --global user.name "GitHub Actions" && git commit -am "Fix ESLint issues" && git push https://$PAT_TOKEN@github.com/NavigoLearn/API.git)
 
       - name: Run ESLint
         run: npx eslint .
