@@ -2,7 +2,7 @@ import { randomString } from '@spec/utils/randomString';
 import request from 'supertest';
 import app from '@src/server';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
-import { User } from '@src/models/User';
+import { User } from '@src/types/models/User';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 

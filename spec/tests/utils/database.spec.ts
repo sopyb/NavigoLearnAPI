@@ -1,5 +1,5 @@
 import Database from '@src/util/DatabaseDriver';
-import { IUser, User } from '@src/models/User';
+import { IUser, User } from '@src/types/models/User';
 import { randomString } from '@spec/utils/randomString';
 
 function testUserAttributes(user: IUser, user2?: IUser) {
