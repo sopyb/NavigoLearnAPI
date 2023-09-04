@@ -37,9 +37,15 @@ jobs:
 
       - name: Run ESLint with --fix
         run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix || echo "ESLint fix failed"
+        
+      - name: Commit files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "Add changes"
 
       - name: Commit changes (if any)
-        uses: ad-m/github-push-action@v0.7.0
+        uses: ad-m/github-push-action@v0.6.0
         with:
           branch: ${{ github.ref }}
           github_token: ${{ secrets.PAT }}
