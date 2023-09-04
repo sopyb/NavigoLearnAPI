@@ -1,6 +1,6 @@
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { UserInfo } from '@src/models/UserInfo';
-import User from '@src/models/User';
+import { IUser, User } from '@src/models/User';
 
 /*
  * Interfaces
@@ -36,22 +36,28 @@ export async function deleteUser(
 export async function getUser(
   db: DatabaseDriver,
   userId: bigint,
-): Promise<User | undefined> {
-  return await db.get<User>('users', userId);
+): Promise<User | null> {
+  const user = await db.get<IUser>('users', userId);
+  if (!user) return null;
+  return new User(user);
 }
 
 export async function getUserByEmail(
   db: DatabaseDriver,
   email: string,
-): Promise<User | undefined> {
-  return await db.getWhere<User>('users', 'email', email);
+): Promise<User | null> {
+  const user = await db.getWhere<IUser>('users', 'email', email);
+  if (!user) return null;
+  return new User(user);
 }
 
 export async function getUserInfo(
   db: DatabaseDriver,
   userId: bigint,
-): Promise<UserInfo | undefined> {
-  return await db.getWhere<UserInfo>('userInfo', 'userId', userId);
+): Promise<UserInfo | null> {
+  const userInfo = await db.get<UserInfo>('userInfo', userId);
+  if (!userInfo) return null;
+  return new UserInfo(userInfo);
 }
 
 export async function getUserStats(
@@ -90,19 +96,13 @@ export async function isUserFollowing(
 
 export async function insertUser(
   db: DatabaseDriver,
-  email: string,
-  name: string,
-  pwdHash: string,
+  user: User,
   userInfo?: UserInfo,
 ): Promise<bigint> {
-  const userId = await db.insert('users', {
-    email,
-    name,
-    pwdHash,
-  });
+  user.set({ id: await db.insert('users', user.toObject()) });
 
-  if (await insertUserInfo(db, userId, userInfo)) {
-    return userId;
+  if (await insertUserInfo(db, user.id, userInfo)) {
+    return user.id;
   } else {
     return -1n;
   }
@@ -113,9 +113,9 @@ export async function insertUserInfo(
   userId: bigint,
   userInfo?: UserInfo,
 ): Promise<boolean> {
-  if (!userInfo) userInfo = new UserInfo(userId);
-  userInfo.userId = userId;
-  return (await db.insert('userInfo', userInfo)) >= 0;
+  if (!userInfo) userInfo = new UserInfo({ userId });
+  userInfo.set({ userId });
+  return (await db.insert('userInfo', userInfo.toObject())) >= 0;
 }
 
 export async function updateUser(
@@ -126,7 +126,7 @@ export async function updateUser(
 ): Promise<boolean> {
   if (userInfo) if (!(await updateUserInfo(db, userId, userInfo))) return false;
 
-  return await db.update('users', userId, user);
+  return await db.update('users', userId, user.toObject());
 }
 
 export async function updateUserInfo(
@@ -134,5 +134,5 @@ export async function updateUserInfo(
   userId: bigint,
   userInfo: UserInfo,
 ): Promise<boolean> {
-  return await db.update('userInfo', userId, userInfo);
+  return await db.update('userInfo', userId, userInfo.toObject());
 }

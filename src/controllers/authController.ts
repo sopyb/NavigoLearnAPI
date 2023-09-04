@@ -1,7 +1,7 @@
 import { RequestWithBody } from '@src/validators/validateBody';
 import { Response } from 'express';
 import DatabaseDriver from '@src/util/DatabaseDriver';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import axios, { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
 import {
@@ -20,7 +20,6 @@ import {
   insertUser,
   insertUserInfo,
   updateUser,
-  updateUserInfo,
 } from '@src/helpers/databaseManagement';
 import {
   accountCreated,
@@ -35,6 +34,7 @@ import {
   serverError,
   unauthorized,
 } from '@src/helpers/apiResponses';
+import { NodeEnvs } from '@src/constants/misc';
 
 /*
  * Interfaces
@@ -60,7 +60,7 @@ interface GitHubUserData {
  * Helpers
  */
 export function _handleNotOkay(res: Response, error: number): unknown {
-  if (EnvVars.NodeEnv !== 'test') logger.err(error, true);
+  if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error, true);
 
   if (error >= (HttpStatusCode.InternalServerError as number))
     return externalBadGateway(res);
@@ -97,7 +97,7 @@ export async function authLogin(
   // check userInfo table for user
   const userInfo = await getUserInfo(db, user.id);
   if (!userInfo)
-    if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
+    if (!(await insertUserInfo(db, user.id, new UserInfo({ userId: user.id }))))
       return serverError(res);
 
   // create session and save it
@@ -127,9 +127,11 @@ export async function authRegister(
   // create user
   const userId = await insertUser(
     db,
-    email,
-    email.split('@')[0],
-    saltPassword(password),
+    new User({
+      email,
+      name: email.split('@')[0],
+      pwdHash: saltPassword(password),
+    }),
   );
   if (userId === -1n) return serverError(res);
 
@@ -163,7 +165,7 @@ export async function authChangePassword(
   const isCorrect = comparePassword(password, user.pwdHash || '');
   if (!isCorrect) return invalidLogin(res);
 
-  user.pwdHash = saltPassword(newPassword);
+  user.set({ pwdHash: saltPassword(newPassword) });
 
   // update password in ussr
   const result = await updateUser(db, userId, user);
@@ -172,11 +174,7 @@ export async function authChangePassword(
   else return serverError(res);
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export async function authForgotPassword(
-  _: unknown,
-  res: Response,
-): Promise<unknown> {
+export function authForgotPassword(_: unknown, res: Response): unknown {
   // TODO: implement after SMTP server is set up
   return notImplemented(res);
 }
@@ -238,11 +236,16 @@ export async function authGoogleCallback(
 
     if (!user) {
       // create user
-      user = new User(userData.name, userData.email, 0, '');
-      user.googleId = userData.id;
-      user.id = await insertUser(db, userData.email, userData.name, '');
+      user = new User({
+        name: userData.name,
+        email: userData.email,
+        googleId: userData.id,
+      });
+      user.set({
+        id: await insertUser(db, user),
+      });
     } else {
-      user.googleId = userData.id;
+      user.set({ googleId: userData.id });
 
       // update user
       if (!(await updateUser(db, user.id, user))) return serverError(res);
@@ -250,7 +253,13 @@ export async function authGoogleCallback(
       // check userInfo table for user
       const userInfo = await getUserInfo(db, user.id);
       if (!userInfo)
-        if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
+        if (
+          !(await insertUserInfo(
+            db,
+            user.id,
+            new UserInfo({ userId: user.id }),
+          ))
+        )
           return serverError(res);
     }
     // check if user was created
@@ -262,7 +271,7 @@ export async function authGoogleCallback(
 
     return serverError(res);
   } catch (e) {
-    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
+    if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
     return serverError(res);
   }
 }
@@ -311,7 +320,7 @@ export async function authGitHubCallback(
     const accessToken = data.access_token;
     if (!accessToken) return serverError(res);
 
-    // get user info from github
+    // get user info from GitHub
     response = await axios.get('https://api.github.com/user', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -360,25 +369,27 @@ export async function authGitHubCallback(
 
     if (!user) {
       // create user
-      user = new User(userData.login, userData.email, 0, '');
-      user.githubId = userData.id.toString();
-      user.id = await insertUser(
-        db,
-        userData.email,
-        userData.name || userData.login,
-        '',
-        new UserInfo(
-          -1n,
-          userData.avatar_url,
-          userData.bio,
-          '',
-          userData.blog,
-          '',
-          `https://github.com/${userData.login}`,
+      user = new User({
+        name: userData.name || userData.login,
+        avatar: userData.avatar_url,
+        email: userData.email,
+        githubId: userData.id.toString(),
+      });
+
+      user.set({
+        id: await insertUser(
+          db,
+          user,
+          new UserInfo({
+            userId: user.id,
+            bio: userData.bio,
+            websiteUrl: userData.blog,
+            githubUrl: `https://github.com/${userData.login}`,
+          }),
         ),
-      );
+      });
     } else {
-      user.githubId = userData.id.toString();
+      user.set({ githubId: userData.id.toString() });
       await updateUser(db, user.id, user);
 
       // get user info
@@ -389,27 +400,30 @@ export async function authGitHubCallback(
           !(await insertUserInfo(
             db,
             user.id,
-            new UserInfo(
-              user.id,
-              userData.avatar_url,
-              userData.bio,
-              '',
-              userData.blog,
-              '',
-              `https://github.com/${userData.login}`,
-            ),
+            new UserInfo({
+              userId: user.id,
+              bio: userData.bio,
+              websiteUrl: userData.blog,
+              githubUrl: `https://github.com/${userData.login}`,
+            }),
           ))
-        ) return serverError(res);
+        )
+          return serverError(res);
       } else {
-        if (userInfo.bio == '') userInfo.bio = userData.bio;
-        if (userInfo.profilePictureUrl == '')
-          userInfo.profilePictureUrl = userData.avatar_url;
-        if (userInfo.blogUrl == '') userInfo.blogUrl = userData.blog;
-        if (userInfo.githubUrl == '')
-          userInfo.githubUrl = `https://github.com/${userData.login}`;
+        // update user info
+        user.set({
+          avatar: user.avatar || userData.avatar_url,
+        });
+
+        userInfo.set({
+          bio: userInfo.bio || userData.bio,
+          websiteUrl: userInfo.websiteUrl || userData.blog,
+          githubUrl:
+            userInfo.githubUrl || `https://github.com/${userData.login}`,
+        });
 
         // update user info
-        if (!(await updateUserInfo(db, userInfo.id, userInfo)))
+        if (!(await updateUser(db, user.id, user, userInfo)))
           return serverError(res);
       }
     }
@@ -417,7 +431,7 @@ export async function authGitHubCallback(
     // create session and save it
     if (await createSaveSession(res, user.id)) return loginSuccessful(res);
   } catch (e) {
-    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
+    if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
     return serverError(res);
   }
 }

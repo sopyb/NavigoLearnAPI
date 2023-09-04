@@ -87,5 +87,5 @@ export async function usersGetMiniProfile(
   if (!user || !userInfo) return userNotFound(res);
 
   // send user json
-  return userMiniProfile(res, user, userInfo);
+  return userMiniProfile(res, user);
 }

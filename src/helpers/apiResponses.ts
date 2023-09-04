@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { HttpStatusCode } from 'axios';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import { UserInfo } from '@src/models/UserInfo';
 import { UserStats } from '@src/helpers/databaseManagement';
 import JSONStringify from '@src/util/JSONStringify';
@@ -11,63 +11,63 @@ import JSONStringify from '@src/util/JSONStringify';
 
 export function emailConflict(res: Response): void {
   res.status(HttpStatusCode.Conflict).json({
-    error: 'Email already in use',
+    message: 'Email already in use',
     success: false,
   });
 }
 
 export function externalBadGateway(res: Response): void {
   res.status(HttpStatusCode.BadGateway).json({
-    error: 'Remote resource error',
+    message: 'Remote resource error',
     success: false,
   });
 }
 
 export function invalidBody(res: Response): void {
   res.status(HttpStatusCode.BadRequest).json({
-    error: 'Invalid request body',
+    message: 'Invalid request body',
     success: false,
   });
 }
 
 export function invalidLogin(res: Response): void {
   res.status(HttpStatusCode.BadRequest).json({
-    error: 'Invalid email or password',
+    message: 'Invalid email or password',
     success: false,
   });
 }
 
 export function invalidParameters(res: Response): void {
   res.status(HttpStatusCode.BadRequest).json({
-    error: 'Invalid request paramteres',
+    message: 'Invalid request paramteres',
     success: false,
   });
 }
 
 export function notImplemented(res: Response): void {
   res.status(HttpStatusCode.NotImplemented).json({
-    error: 'Not implemented',
+    message: 'Not implemented',
     success: false,
   });
 }
 
 export function serverError(res: Response): void {
   res.status(HttpStatusCode.InternalServerError).json({
-    error: 'Internal server error',
+    message: 'Internal server error',
     success: false,
   });
 }
 
 export function userNotFound(res: Response): void {
   res.status(HttpStatusCode.NotFound).json({
-    error: 'User couldn\'t be found',
+    message: 'User couldn\'t be found',
     success: false,
   });
 }
 
 export function unauthorized(res: Response): void {
   res.status(HttpStatusCode.Unauthorized).json({
-    error: 'Unauthorized',
+    message: 'Unauthorized',
     success: false,
   });
 }
@@ -119,20 +119,18 @@ export function userProfile(
 ): void {
   const { roadmapsCount, issueCount, followerCount, followingCount } =
       userStats,
-    { profilePictureUrl, bio, quote, blogUrl, websiteUrl, githubUrl } =
-      userInfo,
-    { name, githubId, googleId } = user;
+    { bio, quote, websiteUrl, githubUrl } = userInfo,
+    { name, avatar, githubId, googleId } = user;
   res
     .status(HttpStatusCode.Ok)
     .contentType('application/json')
     .send(
       JSONStringify({
         name,
-        profilePictureUrl,
+        avatar,
         userId: user.id,
         bio,
         quote,
-        blogUrl,
         websiteUrl,
         githubUrl,
         roadmapsCount,
@@ -147,21 +145,16 @@ export function userProfile(
     );
 }
 
-export function userMiniProfile(
-  res: Response,
-  user: User,
-  userInfo: UserInfo,
-): void {
-  const { profilePictureUrl } = userInfo,
-    { name } = user;
+export function userMiniProfile(res: Response, user: User): void {
+  const { id, name, avatar } = user;
   res
     .status(HttpStatusCode.Ok)
     .contentType('application/json')
     .send(
       JSONStringify({
         name,
-        profilePictureUrl,
-        userId: user.id,
+        avatar,
+        userId: id,
         success: true,
       }),
     );
