@@ -1,40 +1,57 @@
-export const INVALID_CONSTRUCTOR_PARAM = 'Invalid constructor parameter';
-
+// Interface
 export interface IFollower {
-  id: bigint;
-  followerId: bigint;
-  userId: bigint;
+  readonly id?: bigint;
+  readonly followerId: bigint;
+  readonly userId: bigint;
+  readonly createdAt: Date;
 }
 
+// Class
 export class Follower implements IFollower {
-  public followerId: bigint;
-  public id: bigint;
-  public userId: bigint;
+  private _id?: bigint;
+  private _followerId: bigint;
+  private _userId: bigint;
+  private _createdAt: Date;
 
-  public constructor(
-    followerId: bigint,
-    userId: bigint,
-    id: bigint | null = null,
-  ) {
-    this.followerId = followerId;
-    this.userId = userId;
-    this.id = (id ?? -1) as bigint;
+  public constructor({ id, followerId, userId, createdAt }: IFollower) {
+    this._id = id;
+    this._followerId = followerId;
+    this._userId = userId;
+    this._createdAt = createdAt;
   }
 
-  public static from(param: object): Follower {
-    if (!Follower.isFollower(param)) {
-      throw new Error(INVALID_CONSTRUCTOR_PARAM);
-    }
+  // Method to modify the properties
+  public set({ id, followerId, userId, createdAt }: IFollower): void {
+    if (id !== undefined) this._id = id;
+    if (followerId !== undefined) this._followerId = followerId;
+    if (userId !== undefined) this._userId = userId;
+    if (createdAt !== undefined) this._createdAt = createdAt;
+  }
 
-    return new Follower(
-      param.followerId,
-      param.userId,
-      param.id,
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get followerId(): bigint {
+    return this._followerId;
+  }
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  // Static method to check if an object is of type IFollower
+  public static isFollower(obj: unknown): obj is IFollower {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'followerId' in obj &&
+      'userId' in obj &&
+      'createdAt' in obj
     );
   }
-
-  public static isFollower(param: object): param is IFollower {
-    return 'followerId' in param && 'userId' in param && 'id' in param;
-  }
-
 }

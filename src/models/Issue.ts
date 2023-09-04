@@ -1,86 +1,109 @@
-export const INVALID_CONSTRUCTOR_PARAM = 'Invalid constructor parameter';
-
+// Interface
 export interface IIssue {
-  id: bigint;
-  roadmapId: bigint;
-  userId: bigint;
-  open: boolean;
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  readonly id?: bigint;
+  readonly roadmapId: bigint;
+  readonly userId: bigint;
+  readonly open: boolean;
+  readonly title: string;
+  readonly content?: string | null;
+  readonly createdAt?: Date;
+  readonly updatedAt: Date;
 }
 
+// Class
 export class Issue implements IIssue {
-  public id: bigint;
-  public roadmapId: bigint;
-  public userId: bigint;
-  public open: boolean;
-  public title: string;
-  public content: string;
-  public createdAt: Date;
-  public updatedAt: Date;
+  private _id?: bigint;
+  private _roadmapId: bigint;
+  private _userId: bigint;
+  private _open: boolean;
+  private _title: string;
+  private _content?: string | null;
+  private _createdAt?: Date;
+  private _updatedAt: Date;
 
-  public constructor(
-    roadmapId: bigint,
-    userId: bigint,
-    open: boolean,
-    title: string,
-    content: string,
-    id: bigint | null = null,
-    createdAt: Date = new Date(),
-    updatedAt: Date = new Date(),
-  ) {
-    this.id = (id ?? -1) as bigint;
-    this.roadmapId = roadmapId;
-    this.userId = userId;
-    this.open = open;
-    this.title = title;
-    this.content = content;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+  public constructor({
+    id,
+    roadmapId,
+    userId,
+    open,
+    title,
+    content = null,
+    createdAt,
+    updatedAt,
+  }: IIssue) {
+    this._id = id;
+    this._roadmapId = roadmapId;
+    this._userId = userId;
+    this._open = open;
+    this._title = title;
+    this._content = content;
+    this._createdAt = createdAt;
+    this._updatedAt = updatedAt;
   }
 
-  public static from(param: object): Issue {
-    if (!Issue.isIssue(param)) {
-      throw new Error(INVALID_CONSTRUCTOR_PARAM);
-    }
-
-    return new Issue(
-      param.roadmapId,
-      param.userId,
-      param.open,
-      param.title,
-      param.content,
-      param.id,
-      param.createdAt,
-      param.updatedAt,
-    );
+  // Method to modify the properties
+  public set({
+    id,
+    roadmapId,
+    userId,
+    open,
+    title,
+    content,
+    createdAt,
+    updatedAt,
+  }: IIssue): void {
+    if (id !== undefined) this._id = id;
+    if (roadmapId !== undefined) this._roadmapId = roadmapId;
+    if (userId !== undefined) this._userId = userId;
+    if (open !== undefined) this._open = open;
+    if (title !== undefined) this._title = title;
+    if (content !== undefined) this._content = content;
+    if (createdAt !== undefined) this._createdAt = createdAt;
+    if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
 
-  public static isIssue(param: object): param is IIssue {
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get roadmapId(): bigint {
+    return this._roadmapId;
+  }
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  public get open(): boolean {
+    return this._open;
+  }
+
+  public get title(): string {
+    return this._title;
+  }
+
+  public get content(): string | null | undefined {
+    return this._content;
+  }
+
+  public get createdAt(): Date | undefined {
+    return this._createdAt;
+  }
+
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  // Static method to check if an object is of type IIssue
+  public static isIssue(obj: unknown): obj is IIssue {
     return (
-      'id' in param &&
-      'roadmapId' in param &&
-      'userId' in param &&
-      'open' in param &&
-      'title' in param &&
-      'content' in param &&
-      'createdAt' in param &&
-      'updatedAt' in param
+      typeof obj === 'object' &&
+      obj !== null &&
+      'roadmapId' in obj &&
+      'userId' in obj &&
+      'open' in obj &&
+      'title' in obj &&
+      'updatedAt' in obj
     );
-  }
-
-  public toJSONSafe(): unknown {
-    return {
-      id: this.id.toString(),
-      roadmapId: this.roadmapId.toString(),
-      userId: this.userId.toString(),
-      open: this.open,
-      title: this.title,
-      content: this.content,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-    };
   }
 }

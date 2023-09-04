@@ -1,78 +1,74 @@
-const INVALID_CONSTRUCTOR_PARAM =
-  'nameOrObj arg must a string or an object ' +
-  'with the appropriate user keys.';
-
+// TypeScript Interface
 export interface IUserInfo {
-  id: bigint;
-  userId: bigint;
-  profilePictureUrl: string;
-  bio: string;
-  quote: string;
-  blogUrl: string;
-  websiteUrl: string;
-  githubUrl: string;
+  readonly id?: bigint;
+  readonly userId: bigint;
+  readonly bio?: string | null;
+  readonly quote?: string | null;
+  readonly websiteUrl?: string | null;
+  readonly githubUrl?: string | null;
 }
 
+// TypeScript Class
 export class UserInfo implements IUserInfo {
-  public id: bigint;
-  public userId: bigint;
-  public profilePictureUrl: string;
-  public bio: string;
-  public quote: string;
-  public blogUrl: string;
-  public websiteUrl: string;
-  public githubUrl: string;
+  private _id?: bigint;
+  private _userId: bigint;
+  private _bio?: string | null;
+  private _quote?: string | null;
+  private _websiteUrl?: string | null;
+  private _githubUrl?: string | null;
 
-  public constructor(
-    userId: bigint,
-    profilePictureUrl = '',
-    bio = '',
-    quote = '',
-    blogUrl = '',
-    websiteUrl = '',
-    githubUrl = '',
-    id = BigInt(-1), // id last cause usually set by db
-  ) {
-    this.userId = userId;
-    this.profilePictureUrl = profilePictureUrl;
-    this.bio = bio;
-    this.quote = quote;
-    this.blogUrl = blogUrl;
-    this.websiteUrl = websiteUrl;
-    this.githubUrl = githubUrl;
-    this.id = id;
+  public constructor({
+    id,
+    userId,
+    bio = null,
+    quote = null,
+    websiteUrl = null,
+    githubUrl = null,
+  }: IUserInfo) {
+    this._id = id;
+    this._userId = userId;
+    this._bio = bio;
+    this._quote = quote;
+    this._websiteUrl = websiteUrl;
+    this._githubUrl = githubUrl;
   }
 
-  public static from(param: object): UserInfo {
-    // check if param is user
-    if (!UserInfo.isUserInfo(param)) {
-      throw new Error(INVALID_CONSTRUCTOR_PARAM);
-    }
-
-    const info = param as IUserInfo;
-
-    // create user
-    return new UserInfo(
-      info.userId,
-      info.profilePictureUrl,
-      info.bio,
-      info.quote,
-      info.blogUrl,
-      info.websiteUrl,
-      info.githubUrl,
-    );
+  // Method to modify the properties
+  public set({ id, userId, bio, quote, websiteUrl, githubUrl }: IUserInfo) {
+    if (id !== undefined) this._id = id;
+    if (userId !== undefined) this._userId = userId;
+    if (bio !== undefined) this._bio = bio;
+    if (quote !== undefined) this._quote = quote;
+    if (websiteUrl !== undefined) this._websiteUrl = websiteUrl;
+    if (githubUrl !== undefined) this._githubUrl = githubUrl;
   }
 
-  public static isUserInfo(param: object): boolean {
-    return (
-      'id' in param &&
-      'userId' in param &&
-      'profilePictureUrl' in param &&
-      'bio' in param &&
-      'quote' in param &&
-      'blogUrl' in param &&
-      'websiteUrl' in param &&
-      'githubUrl' in param
-    );
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  public get bio(): string | null | undefined {
+    return this._bio;
+  }
+
+  public get quote(): string | null | undefined {
+    return this._quote;
+  }
+
+  public get websiteUrl(): string | null | undefined {
+    return this._websiteUrl;
+  }
+
+  public get githubUrl(): string | null | undefined {
+    return this._githubUrl;
+  }
+
+  // Static method to check if an object is of type IUserInfo
+  public static isUserInfo(obj: unknown): obj is IUserInfo {
+    return typeof obj === 'object' && obj !== null && 'userId' in obj;
   }
 }

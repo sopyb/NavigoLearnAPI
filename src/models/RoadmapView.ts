@@ -1,59 +1,66 @@
+// TypeScript Interface
 export interface IRoadmapView {
-  id: bigint;
-  userId: bigint;
-  roadmapId: bigint;
-  createdAt: Date;
-  full: boolean;
+  readonly id?: bigint;
+  readonly userId: bigint;
+  readonly roadmapId: bigint;
+  readonly full: boolean;
+  readonly createdAt: Date;
 }
 
+// TypeScript Class
 export class RoadmapView implements IRoadmapView {
-  public id: bigint;
-  public userId: bigint;
-  public roadmapId: bigint;
-  public createdAt: Date;
-  public full: boolean;
+  private _id?: bigint;
+  private _userId: bigint;
+  private _roadmapId: bigint;
+  private _full: boolean;
+  private _createdAt: Date;
 
-  public constructor(
-    userId: bigint | number,
-    roadmapId: bigint | number,
-    full: boolean,
-    createdAt: Date | string = new Date(),
-    id?: bigint | number | string,
-  ) {
-    this.id = BigInt(id || 0);
-    this.userId = BigInt(userId);
-    this.roadmapId = BigInt(roadmapId);
-    this.full = full;
-
-    if (typeof createdAt === 'string') {
-      this.createdAt = new Date(createdAt);
-    } else this.createdAt = createdAt;
+  public constructor({ id, userId, roadmapId, full, createdAt }: IRoadmapView) {
+    this._id = id;
+    this._userId = userId;
+    this._roadmapId = roadmapId;
+    this._full = full;
+    this._createdAt = createdAt;
   }
 
-  // Get roadmap instance from object.
-  public static from(param: object): RoadmapView {
-    // chekc if param is a roadmapView instance
-    if (!this.isRoadmapView(param)) throw new Error('Invalid param');
-
-    // return new roadmapView instance
-    return new RoadmapView(
-      param.userId,
-      param.roadmapId,
-      param.full,
-      param.createdAt,
-      param.id,
-    );
+  // Method to modify the properties
+  public set({ id, userId, roadmapId, full, createdAt }: IRoadmapView): void {
+    if (id !== undefined) this._id = id;
+    if (userId !== undefined) this._userId = userId;
+    if (roadmapId !== undefined) this._roadmapId = roadmapId;
+    if (full !== undefined) this._full = full;
+    if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  // Check if object is a roadmapView
-  public static isRoadmapView(param: object): param is IRoadmapView {
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  public get roadmapId(): bigint {
+    return this._roadmapId;
+  }
+
+  public get full(): boolean {
+    return this._full;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  // Static method to check if an object is of type IRoadmapView
+  public static isRoadmapView(obj: unknown): obj is IRoadmapView {
     return (
-      param &&
-      'id' in param &&
-      'userId' in param &&
-      'full' in param &&
-      'roadmapId' in param &&
-      'createdAt' in param
+      typeof obj === 'object' &&
+      obj !== null &&
+      'userId' in obj &&
+      'roadmapId' in obj &&
+      'full' in obj &&
+      'createdAt' in obj
     );
   }
 }

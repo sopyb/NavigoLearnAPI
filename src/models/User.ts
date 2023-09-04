@@ -1,104 +1,117 @@
-// **** Variables **** //
-
-const INVALID_CONSTRUCTOR_PARAM =
-  'nameOrObj arg must a string or an object ' +
-  'with the appropriate user keys.';
-
-export enum UserRoles {
-  Standard,
-  Admin,
-}
-
-// **** Types **** //
-
+// Interface
 export interface IUser {
-  id: bigint;
-  name: string;
-  email: string;
-  pwdHash?: string;
-  role?: UserRoles;
-  googleId?: string | null;
-  githubId?: string | null;
+  readonly id?: bigint;
+  readonly avatar?: string | null;
+  readonly name: string;
+  readonly email: string;
+  readonly role?: number | null;
+  readonly pwdHash?: string | null;
+  readonly googleId?: string | null;
+  readonly githubId?: string | null;
+  readonly createdAt: Date;
 }
 
-export interface ISessionUser {
-  id: number;
-  email: string;
-  name: string;
-  role: IUser['role'];
-}
+// Class
+export class User implements IUser {
+  private _id?: bigint;
+  private _avatar?: string | null;
+  private _name: string;
+  private _email: string;
+  private _role?: number | null;
+  private _pwdHash?: string | null;
+  private _googleId?: string | null;
+  private _githubId?: string | null;
+  private _createdAt: Date;
 
-// **** User **** //
-
-class User implements IUser {
-  public id: bigint;
-  public name: string;
-  public email: string;
-  public role?: UserRoles;
-  public pwdHash?: string;
-  public googleId?: string | null;
-  public githubId?: string | null;
-
-  /**
-   * Constructor()
-   */
-  public constructor(
-    name?: string,
-    email?: string,
-    role?: UserRoles,
-    pwdHash?: string,
-    id?: bigint, // id last cause usually set by db
-    googleId?: string | null,
-    githubId?: string | null,
-  ) {
-    this.name = name ?? '';
-    this.email = email ?? '';
-    this.role = role ?? UserRoles.Standard;
-    this.pwdHash = pwdHash ?? '';
-    this.id = BigInt(id ?? -1);
-    this.googleId = googleId ?? null;
-    this.githubId = githubId ?? null;
+  public constructor({
+    id,
+    avatar = null,
+    name,
+    email,
+    role = null,
+    pwdHash = null,
+    googleId = null,
+    githubId = null,
+    createdAt,
+  }: IUser) {
+    this._id = id;
+    this._avatar = avatar;
+    this._name = name;
+    this._email = email;
+    this._role = role;
+    this._pwdHash = pwdHash;
+    this._googleId = googleId;
+    this._githubId = githubId;
+    this._createdAt = createdAt;
   }
 
-  /**
-   * Get userDisplay instance from object.
-   */
-  public static from(param: object): User {
-    // Check is userDisplay
-    if (!User.isUser(param)) {
-      throw new Error(INVALID_CONSTRUCTOR_PARAM);
-    }
-    // Get userDisplay instance
-    const p = param as IUser;
-    return new User(
-      p.name,
-      p.email,
-      p.role,
-      p.pwdHash,
-      p.id,
-      p.googleId,
-      p.githubId,
-    );
+  // Method to modify the properties
+  public set({
+    id,
+    avatar,
+    name,
+    email,
+    role,
+    pwdHash,
+    googleId,
+    githubId,
+    createdAt,
+  }: IUser): void {
+    if (id !== undefined) this._id = id;
+    if (avatar !== undefined) this._avatar = avatar;
+    if (name !== undefined) this._name = name;
+    if (email !== undefined) this._email = email;
+    if (role !== undefined) this._role = role;
+    if (pwdHash !== undefined) this._pwdHash = pwdHash;
+    if (googleId !== undefined) this._googleId = googleId;
+    if (githubId !== undefined) this._githubId = githubId;
+    if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
-  /**
-   * Is this an object which contains all the userDisplay keys.
-   */
-  public static isUser(this: void, arg: unknown): boolean {
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get avatar(): string | null | undefined {
+    return this._avatar;
+  }
+
+  public get name(): string {
+    return this._name;
+  }
+
+  public get email(): string {
+    return this._email;
+  }
+
+  public get role(): number | null | undefined {
+    return this._role;
+  }
+
+  public get pwdHash(): string | null | undefined {
+    return this._pwdHash;
+  }
+
+  public get googleId(): string | null | undefined {
+    return this._googleId;
+  }
+
+  public get githubId(): string | null | undefined {
+    return this._githubId;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  // Static method to check if an object is of type IUser
+  public static isUser(obj: unknown): obj is IUser {
     return (
-      !!arg &&
-      typeof arg === 'object' &&
-      'id' in arg &&
-      'email' in arg &&
-      'name' in arg &&
-      'role' in arg &&
-      'pwdHash' in arg &&
-      'googleId' in arg &&
-      'githubId' in arg
+      typeof obj === 'object' &&
+      obj !== null &&
+      'name' in obj &&
+      'email' in obj &&
+      'createdAt' in obj
     );
   }
 }
-
-// **** Export default **** //
-
-export default User;

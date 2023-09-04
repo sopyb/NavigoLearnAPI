@@ -1,111 +1,121 @@
-// variables
-export const INVALID_CONSTRUCTOR_PARAM = 'Invalid constructor parameter';
-
-// interface
+// Interface
 export interface IRoadmap {
-  id?: bigint;
-  ownerId: bigint;
-  name: string;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date;
-  isPublic: boolean;
-  data: string; // base64 encoded json
+  readonly id?: bigint;
+  readonly name: string;
+  readonly description: string;
+  readonly userId: bigint;
+  readonly isPublic: boolean;
+  readonly isDraft?: boolean;
+  readonly data: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 }
 
-export interface RoadmapMini {
-  id: bigint | string;
-  name: string;
-  description: string;
-  likes: bigint | string;
-  isLiked: boolean | number;
-  ownerName: string;
-  ownerId: bigint | string;
-}
-
-// class
+// Class
 export class Roadmap implements IRoadmap {
-  public id: bigint;
-  public ownerId: bigint;
-  public name: string;
-  public description: string;
-  public createdAt: Date;
-  public updatedAt: Date;
-  public isPublic: boolean;
-  public data: string; // base64 encoded json
+  private _id?: bigint;
+  private _name: string;
+  private _description: string;
+  private _userId: bigint;
+  private _isPublic: boolean;
+  private _isDraft?: boolean;
+  private _data: string;
+  private _createdAt: Date;
+  private _updatedAt: Date;
 
-  /**
-   * Constructor()
-   */
-  public constructor(
-    ownerId: bigint | string,
-    name: string,
-    description: string,
-    data: string,
-    createdAt: Date | string = new Date(),
-    updatedAt: Date | string = new Date(),
-    isPublic = true,
-    id: bigint | string | null = null,
-  ) {
-    this.id = BigInt(id ?? -1);
-    this.ownerId = BigInt(ownerId);
-    this.name = name;
-    this.description = description;
-    this.createdAt = createdAt instanceof Date ?
-      createdAt : new Date(createdAt);
-    this.updatedAt = updatedAt instanceof Date ?
-      updatedAt : new Date(updatedAt);
-    this.isPublic = isPublic;
-    this.data = data;
+  public constructor({
+    id,
+    name,
+    description,
+    userId,
+    isPublic,
+    isDraft = false,
+    data,
+    createdAt,
+    updatedAt,
+  }: IRoadmap) {
+    this._id = id;
+    this._name = name;
+    this._description = description;
+    this._userId = userId;
+    this._isPublic = isPublic;
+    this._isDraft = isDraft;
+    this._data = data;
+    this._createdAt = createdAt;
+    this._updatedAt = updatedAt;
   }
 
-  // Get roadmap instance from object.
-  public static from(param: object): Roadmap {
-    // Check is roadmap
-    if (!Roadmap.isRoadmap(param)) {
-      throw new Error(INVALID_CONSTRUCTOR_PARAM);
-    }
-
-    // Create instance
-    return new Roadmap(
-      param.ownerId,
-      param.name,
-      param.description,
-      param.data,
-      param.createdAt,
-      param.updatedAt,
-      param.isPublic,
-      param.id,
-    );
+  // Method to modify the properties
+  public set({
+    id,
+    name,
+    description,
+    userId,
+    isPublic,
+    isDraft,
+    data,
+    createdAt,
+    updatedAt,
+  }: IRoadmap): void {
+    if (id !== undefined) this._id = id;
+    if (name !== undefined) this._name = name;
+    if (description !== undefined) this._description = description;
+    if (userId !== undefined) this._userId = userId;
+    if (isPublic !== undefined) this._isPublic = isPublic;
+    if (isDraft !== undefined) this._isDraft = isDraft;
+    if (data !== undefined) this._data = data;
+    if (createdAt !== undefined) this._createdAt = createdAt;
+    if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
 
-  // Check if object is a roadmap.
-  public static isRoadmap(param: object): param is IRoadmap {
+  public get id(): bigint | undefined {
+    return this._id;
+  }
+
+  public get name(): string {
+    return this._name;
+  }
+
+  public get description(): string {
+    return this._description;
+  }
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  public get isPublic(): boolean {
+    return this._isPublic;
+  }
+
+  public get isDraft(): boolean | undefined {
+    return this._isDraft;
+  }
+
+  public get data(): string {
+    return this._data;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  // Static method to check if an object is of type IRoadmap
+  public static isRoadmap(obj: unknown): obj is IRoadmap {
     return (
-      param &&
-      'id' in param &&
-      'ownerId' in param &&
-      'name' in param &&
-      'description' in param &&
-      'createdAt' in param &&
-      'updatedAt' in param &&
-      'isPublic' in param &&
-      'data' in param
+      typeof obj === 'object' &&
+      obj !== null &&
+      'name' in obj &&
+      'description' in obj &&
+      'userId' in obj &&
+      'isPublic' in obj &&
+      'data' in obj &&
+      'createdAt' in obj &&
+      'updatedAt' in obj
     );
-  }
-
-  // toJSONSafe()
-  public toJSONSafe(): object {
-    return {
-      id: this.id.toString(),
-      ownerId: this.ownerId.toString(),
-      name: this.name,
-      description: this.description,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      isPublic: this.isPublic,
-      data: this.data,
-    };
   }
 }
-
