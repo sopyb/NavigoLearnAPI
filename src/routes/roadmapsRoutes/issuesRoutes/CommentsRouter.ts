@@ -9,7 +9,7 @@ import { Issue } from '@src/models/Issue';
 import User from '@src/models/User';
 import Database from '@src/util/DatabaseDriver';
 import { Comment } from '@src/models/Comment';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const CommentsRouter = Router({ mergeParams: true });
 

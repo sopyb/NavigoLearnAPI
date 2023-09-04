@@ -10,7 +10,7 @@ import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
 import User from '@src/models/User';
 import { UserInfo } from '@src/models/UserInfo';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const UsersUpdate = Router({ mergeParams: true });
 
@@ -89,8 +89,8 @@ UsersUpdate.post(
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId;
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     let bio: string = req.body?.bio;
 
     // send error json
@@ -138,8 +138,8 @@ UsersUpdate.post(
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId;
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     let quote: string = req.body?.quote;
 
     // send error json
@@ -225,8 +225,8 @@ UsersUpdate.post(
   async (req: RequestWithSession, res) => {
     // get userId from request
     const userId = req.session?.userId;
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     let blogUrl: string = req.body?.blogUrl;
 
     // send error json
@@ -273,8 +273,8 @@ UsersUpdate.post(
   Paths.Users.Update.WebsiteUrl,
   async (req: RequestWithSession, res) => {
     const userId = req.session?.userId;
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     let websiteUrl: string = req.body?.websiteUrl;
 
     // send error json
@@ -321,8 +321,8 @@ UsersUpdate.post(
   Paths.Users.Update.GithubUrl,
   async (req: RequestWithSession, res) => {
     const userId = req.session?.userId;
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     let githubUrl: string = req.body?.githubUrl;
 
     // send error json

@@ -7,7 +7,7 @@ import {
 } from '@src/middleware/session';
 import { Issue } from '@src/models/Issue';
 import { Roadmap } from '@src/models/Roadmap';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const IssuesUpdate = Router({ mergeParams: true });
 

@@ -13,7 +13,7 @@ import RoadmapIssues from '@src/routes/roadmapsRoutes/RoadmapIssues';
 import RoadmapTabsInfo from '@src/routes/roadmapsRoutes/RoadmapsTabsInfo';
 import envVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
-import validateSession from "@src/validators/validateSession";
+import validateSession from '@src/validators/validateSession';
 
 const RoadmapsRouter = Router();
 
