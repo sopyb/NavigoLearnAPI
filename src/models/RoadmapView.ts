@@ -16,6 +16,15 @@ interface IRoadmapViewConstructor {
   readonly createdAt?: Date;
 }
 
+// Interface for modifying a RoadmapView
+interface IRoadmapViewModifications {
+  readonly id?: bigint;
+  readonly userId?: bigint;
+  readonly roadmapId?: bigint;
+  readonly full?: boolean;
+  readonly createdAt?: Date;
+}
+
 // Class
 export class RoadmapView implements IRoadmapView {
   private _id: bigint;
@@ -39,7 +48,13 @@ export class RoadmapView implements IRoadmapView {
   }
 
   // Method to modify the properties
-  public set({ id, userId, roadmapId, full, createdAt }: IRoadmapView): void {
+  public set({
+    id,
+    userId,
+    roadmapId,
+    full,
+    createdAt,
+  }: IRoadmapViewModifications): void {
     if (id !== undefined) this._id = id;
     if (userId !== undefined) this._userId = userId;
     if (roadmapId !== undefined) this._roadmapId = roadmapId;
@@ -77,5 +92,16 @@ export class RoadmapView implements IRoadmapView {
       'full' in obj &&
       'createdAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IRoadmapView {
+    return {
+      id: this._id,
+      userId: this._userId,
+      roadmapId: this._roadmapId,
+      full: this._full,
+      createdAt: this._createdAt,
+    };
   }
 }

@@ -14,6 +14,14 @@ interface IFollowerConstructor {
   readonly createdAt?: Date;
 }
 
+// Interface for modifying a Follower
+interface IFollowerModifications {
+  readonly id?: bigint;
+  readonly followerId?: bigint;
+  readonly userId?: bigint;
+  readonly createdAt?: Date;
+}
+
 // Class
 export class Follower implements IFollower {
   private _id: bigint;
@@ -34,7 +42,12 @@ export class Follower implements IFollower {
   }
 
   // Method to modify the properties
-  public set({ id, followerId, userId, createdAt }: IFollower): void {
+  public set({
+    id,
+    followerId,
+    userId,
+    createdAt,
+  }: IFollowerModifications): void {
     if (id !== undefined) this._id = id;
     if (followerId !== undefined) this._followerId = followerId;
     if (userId !== undefined) this._userId = userId;
@@ -66,5 +79,15 @@ export class Follower implements IFollower {
       'userId' in obj &&
       'createdAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IFollower {
+    return {
+      id: this._id,
+      followerId: this._followerId,
+      userId: this._userId,
+      createdAt: this._createdAt,
+    };
   }
 }

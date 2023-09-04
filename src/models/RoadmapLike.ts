@@ -16,6 +16,15 @@ interface IRoadmapLikeConstructor {
   readonly createdAt?: Date;
 }
 
+// Interface for modifying a RoadmapLike
+interface IRoadmapLikeModifications {
+  readonly id?: bigint;
+  readonly roadmapId?: bigint;
+  readonly userId?: bigint;
+  readonly value?: number;
+  readonly createdAt?: Date;
+}
+
 // Class
 export class RoadmapLike implements IRoadmapLike {
   private _id: bigint;
@@ -39,7 +48,13 @@ export class RoadmapLike implements IRoadmapLike {
   }
 
   // Method to modify the properties
-  public set({ id, roadmapId, userId, value, createdAt }: IRoadmapLike): void {
+  public set({
+    id,
+    roadmapId,
+    userId,
+    value,
+    createdAt,
+  }: IRoadmapLikeModifications): void {
     if (id !== undefined) this._id = id;
     if (roadmapId !== undefined) this._roadmapId = roadmapId;
     if (userId !== undefined) this._userId = userId;
@@ -75,5 +90,16 @@ export class RoadmapLike implements IRoadmapLike {
       'roadmapId' in obj &&
       'userId' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IRoadmapLike {
+    return {
+      id: this._id,
+      roadmapId: this._roadmapId,
+      userId: this._userId,
+      value: this._value,
+      createdAt: this._createdAt,
+    };
   }
 }

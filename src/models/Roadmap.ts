@@ -23,6 +23,20 @@ interface IRoadmapConstructor {
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
+
+// Interface for modifying a Roadmap
+interface IRoadmapModifications {
+  readonly id?: bigint;
+  readonly name?: string;
+  readonly description?: string;
+  readonly userId?: bigint;
+  readonly isPublic?: boolean;
+  readonly isDraft?: boolean;
+  readonly data?: string;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
+
 // Class
 export class Roadmap implements IRoadmap {
   private _id: bigint;
@@ -68,7 +82,7 @@ export class Roadmap implements IRoadmap {
     data,
     createdAt,
     updatedAt,
-  }: IRoadmap): void {
+  }: IRoadmapModifications): void {
     if (id !== undefined) this._id = id;
     if (name !== undefined) this._name = name;
     if (description !== undefined) this._description = description;
@@ -129,5 +143,20 @@ export class Roadmap implements IRoadmap {
       'createdAt' in obj &&
       'updatedAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IRoadmap {
+    return {
+      id: this._id,
+      name: this._name,
+      description: this._description,
+      userId: this._userId,
+      isPublic: this._isPublic,
+      isDraft: this._isDraft,
+      data: this._data,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+    };
   }
 }

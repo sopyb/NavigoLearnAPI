@@ -14,6 +14,14 @@ interface ISessionConstructor {
   readonly expires: Date;
 }
 
+// Interface for modifying a Session
+interface ISessionModifications {
+  readonly id?: bigint;
+  readonly userId?: bigint;
+  readonly token?: string;
+  readonly expires?: Date;
+}
+
 // Class
 export class Session implements ISession {
   private _id: bigint;
@@ -34,7 +42,7 @@ export class Session implements ISession {
   }
 
   // Method to modify the properties
-  public set({ id, userId, token, expires }: ISession): void {
+  public set({ id, userId, token, expires }: ISessionModifications): void {
     if (id !== undefined) this._id = id;
     if (userId !== undefined) this._userId = userId;
     if (token !== undefined) this._token = token;
@@ -66,5 +74,15 @@ export class Session implements ISession {
       'token' in obj &&
       'expires' in obj
     );
+  }
+
+  // toObject method to convert the class instance to an object
+  public toObject(): ISession {
+    return {
+      id: this._id,
+      userId: this._userId,
+      token: this._token,
+      expires: this._expires,
+    };
   }
 }

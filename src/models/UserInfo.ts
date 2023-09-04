@@ -18,7 +18,17 @@ interface IUserInfoConstructor {
   readonly githubUrl?: string | null;
 }
 
-// TypeScript Class
+// Interface for modifying a UserInfo
+interface IUserInfoModifications {
+  readonly id?: bigint;
+  readonly userId?: bigint;
+  readonly bio?: string | null;
+  readonly quote?: string | null;
+  readonly websiteUrl?: string | null;
+  readonly githubUrl?: string | null;
+}
+
+// Class
 export class UserInfo implements IUserInfo {
   private _id: bigint;
   private _userId: bigint;
@@ -44,7 +54,14 @@ export class UserInfo implements IUserInfo {
   }
 
   // Method to modify the properties
-  public set({ id, userId, bio, quote, websiteUrl, githubUrl }: IUserInfo) {
+  public set({
+    id,
+    userId,
+    bio,
+    quote,
+    websiteUrl,
+    githubUrl,
+  }: IUserInfoModifications) {
     if (id !== undefined) this._id = id;
     if (userId !== undefined) this._userId = userId;
     if (bio !== undefined) this._bio = bio;
@@ -80,5 +97,17 @@ export class UserInfo implements IUserInfo {
   // Static method to check if an object is of type IUserInfo
   public static isUserInfo(obj: unknown): obj is IUserInfo {
     return typeof obj === 'object' && obj !== null && 'userId' in obj;
+  }
+
+  // toObject method
+  public toObject(): IUserInfo {
+    return {
+      id: this._id,
+      userId: this._userId,
+      bio: this._bio,
+      quote: this._quote,
+      websiteUrl: this._websiteUrl,
+      githubUrl: this._githubUrl,
+    };
   }
 }

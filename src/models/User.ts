@@ -24,6 +24,19 @@ interface IUserConstructor {
   readonly createdAt?: Date;
 }
 
+// Interface for modifying a User
+interface IUserModifications {
+  readonly id?: bigint;
+  readonly avatar?: string | null;
+  readonly name?: string;
+  readonly email?: string;
+  readonly role?: number | null;
+  readonly pwdHash?: string | null;
+  readonly googleId?: string | null;
+  readonly githubId?: string | null;
+  readonly createdAt?: Date;
+}
+
 // Class
 export class User implements IUser {
   private _id: bigint;
@@ -69,7 +82,7 @@ export class User implements IUser {
     googleId,
     githubId,
     createdAt,
-  }: IUserConstructor): void {
+  }: IUserModifications): void {
     if (id !== undefined) this._id = id;
     if (avatar !== undefined) this._avatar = avatar;
     if (name !== undefined) this._name = name;
@@ -126,5 +139,20 @@ export class User implements IUser {
       'email' in obj &&
       'createdAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IUser {
+    return {
+      id: this._id,
+      avatar: this._avatar,
+      name: this._name,
+      email: this._email,
+      role: this._role,
+      pwdHash: this._pwdHash,
+      googleId: this._googleId,
+      githubId: this._githubId,
+      createdAt: this._createdAt,
+    };
   }
 }

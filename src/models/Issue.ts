@@ -22,6 +22,18 @@ interface IIssueConstructor {
   readonly updatedAt?: Date;
 }
 
+// Interface for modifying an Issue
+interface IIssueModifications {
+  readonly id?: bigint;
+  readonly roadmapId?: bigint;
+  readonly userId?: bigint;
+  readonly open?: boolean;
+  readonly title?: string;
+  readonly content?: string | null;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
+
 // Class
 export class Issue implements IIssue {
   private _id: bigint;
@@ -63,7 +75,7 @@ export class Issue implements IIssue {
     content,
     createdAt,
     updatedAt,
-  }: IIssue): void {
+  }: IIssueModifications): void {
     if (id !== undefined) this._id = id;
     if (roadmapId !== undefined) this._roadmapId = roadmapId;
     if (userId !== undefined) this._userId = userId;
@@ -117,5 +129,19 @@ export class Issue implements IIssue {
       'title' in obj &&
       'updatedAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IIssue {
+    return {
+      id: this._id,
+      roadmapId: this._roadmapId,
+      userId: this._userId,
+      open: this._open,
+      title: this._title,
+      content: this._content,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+    };
   }
 }

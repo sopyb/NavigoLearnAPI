@@ -18,6 +18,16 @@ interface IIssueCommentConstructor {
   readonly updatedAt?: Date;
 }
 
+// Interface for modifying an IssueComment
+interface IIssueCommentModifications {
+  readonly id?: bigint;
+  readonly issueId?: bigint;
+  readonly userId?: bigint;
+  readonly content?: string;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
+
 // Class
 export class IssueComment implements IIssueComment {
   private _id: bigint;
@@ -51,7 +61,7 @@ export class IssueComment implements IIssueComment {
     content,
     createdAt,
     updatedAt,
-  }: IIssueComment): void {
+  }: IIssueCommentModifications): void {
     if (id !== undefined) this._id = id;
     if (issueId !== undefined) this._issueId = issueId;
     if (userId !== undefined) this._userId = userId;
@@ -95,5 +105,17 @@ export class IssueComment implements IIssueComment {
       'createdAt' in obj &&
       'updatedAt' in obj
     );
+  }
+
+  // toObject method
+  public toObject(): IIssueComment {
+    return {
+      id: this._id,
+      issueId: this._issueId,
+      userId: this._userId,
+      content: this._content,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+    };
   }
 }
