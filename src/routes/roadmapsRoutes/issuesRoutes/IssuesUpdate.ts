@@ -2,9 +2,7 @@ import { Response, Router } from 'express';
 import Paths from '@src/constants/Paths';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import { Issue } from '@src/models/Issue';
 import { Roadmap } from '@src/models/Roadmap';
 import validateSession from '@src/validators/validateSession';
@@ -72,7 +70,7 @@ async function checkArguments(
   // check if user is allowed to update issue
   if (
     issue.userId !== session.userId &&
-    (roadmapOwnerCanEdit ? roadmap?.ownerId !== session.userId : true)
+    (roadmapOwnerCanEdit ? roadmap.userId !== session.userId : true)
   ) {
     res
       .status(HttpStatusCodes.FORBIDDEN)
@@ -103,8 +101,10 @@ async function statusChangeIssue(
   const { issueId, issue, db } = args;
 
   // update issue
-  issue.open = open;
-  issue.updatedAt = new Date();
+  issue.set({
+    open,
+    updatedAt: new Date(),
+  });
 
   // save issue to database
   const success = await db.update('issues', issueId, issue);
@@ -169,8 +169,10 @@ IssuesUpdate.post(
     }
 
     // update issue
-    issue.title = title;
-    issue.updatedAt = new Date();
+    issue.set({
+      title,
+      updatedAt: new Date(),
+    });
 
     // save issue to database
     const success = await db.update('issues', issueId, issue);
@@ -236,8 +238,10 @@ IssuesUpdate.post(
     }
 
     // update issue
-    issue.content = content;
-    issue.updatedAt = new Date();
+    issue.set({
+      content,
+      updatedAt: new Date(),
+    });
 
     // save issue to database
     const success = await db.update('issues', issueId, issue);
@@ -258,10 +262,7 @@ IssuesUpdate.get(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
   statusChangeIssue(req, res, true),
 );
 
-IssuesUpdate.delete(
-  Paths.Roadmaps.Issues.Update.Status,
-  validateSession,
-);
+IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status, validateSession);
 IssuesUpdate.delete(Paths.Roadmaps.Issues.Update.Status, (req, res) =>
   statusChangeIssue(req, res, false),
 );

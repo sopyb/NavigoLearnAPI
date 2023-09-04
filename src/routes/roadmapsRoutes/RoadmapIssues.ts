@@ -1,9 +1,7 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
-import { IIssue, Issue } from '@src/models/Issue';
+import { RequestWithSession } from '@src/middleware/session';
+import { Issue } from '@src/models/Issue';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
@@ -18,28 +16,27 @@ RoadmapIssues.post(
   Paths.Roadmaps.Issues.Create,
   async (req: RequestWithSession, res) => {
     //get data from body and session
-    let issue;
+    let issue: Issue;
     const session = req.session;
 
     try {
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      const issueData = req.body?.issue as IIssue;
+      const issueData = req.body?.issue as Issue;
 
-      if (!issueData) {
+      if (!issueData || !Issue.isIssue(issueData)) {
         throw new Error('Issue is missing.');
       }
 
+      issue = new Issue(issueData);
+
       // set userId
-      issueData.userId = session?.userId || BigInt(-1);
-      issueData.id = BigInt(-1);
-      issueData.roadmapId = BigInt(issueData.roadmapId);
-
-      // update createdAt and updatedAt
-      issueData.createdAt = new Date(issueData.createdAt);
-      issueData.updatedAt = new Date(issueData.updatedAt);
-
-      issue = Issue.from(issueData);
+      issueData.set({
+        userId: session?.userId,
+        id: -1n,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     } catch (e) {
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
@@ -191,7 +188,7 @@ RoadmapIssues.delete(
         .json({ error: 'Roadmap not found.' });
 
     // check if userDisplay is owner
-    if (issue.userId !== session?.userId && roadmap.ownerId !== session?.userId)
+    if (issue.userId !== session?.userId && roadmap.userId !== session?.userId)
       return res
         .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'User is not owner of issue or roadmap.' });

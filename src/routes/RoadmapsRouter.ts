@@ -1,8 +1,6 @@
 import Paths from '@src/constants/Paths';
 import { Router } from 'express';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { IRoadmap, Roadmap } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
@@ -10,7 +8,6 @@ import GetRouter from '@src/routes/roadmapsRoutes/RoadmapsGet';
 import UpdateRouter from '@src/routes/roadmapsRoutes/RoadmapsUpdate';
 import * as console from 'console';
 import RoadmapIssues from '@src/routes/roadmapsRoutes/RoadmapIssues';
-import RoadmapTabsInfo from '@src/routes/roadmapsRoutes/RoadmapsTabsInfo';
 import envVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
 import validateSession from '@src/validators/validateSession';
@@ -29,31 +26,17 @@ RoadmapsRouter.post(
     try {
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      const roadmapData = req.body?.roadmap as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const roadmapData = req.body?.roadmap as IRoadmap;
 
-      let roadmapDataJson: IRoadmap;
-      if (typeof roadmapData !== 'string') roadmapDataJson = roadmapData;
-      else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        roadmapDataJson = JSON.parse(roadmapData);
-      }
+      roadmap = new Roadmap(roadmapData);
 
-      roadmapDataJson.ownerId = session?.userId || BigInt(-1);
-      roadmapDataJson.id = undefined;
-
-      // if Title is empty, edit it to be "Untitled Roadmap"
-      if (roadmapDataJson.name === '') {
-        roadmapDataJson.name = 'Untitled';
-      }
-
-      // convert date strings to date objects
-      roadmapDataJson.createdAt = new Date(roadmapDataJson.createdAt);
-      roadmapDataJson.updatedAt = new Date(roadmapDataJson.updatedAt);
-
-      // FIX to make this work without workaround
-
-      roadmap = Roadmap.from(roadmapDataJson);
+      roadmap.set({
+        id: undefined,
+        userId: session?.userId || -1n,
+        name: roadmapData.name,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     } catch (e) {
       if (envVars.NodeEnv !== NodeEnvs.Test) console.log(e);
       return res
@@ -119,7 +102,7 @@ RoadmapsRouter.delete(
         .json({ error: 'Roadmap does not exist.' });
 
     // check if the user is owner
-    if (roadmap.ownerId !== session?.userId)
+    if (roadmap.userId !== session?.userId)
       return res
         .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'User is not the owner of the roadmap.' });
@@ -139,7 +122,6 @@ RoadmapsRouter.delete(
 );
 
 RoadmapsRouter.use(Paths.Roadmaps.Issues.Base, RoadmapIssues);
-RoadmapsRouter.use(Paths.Roadmaps.TabsInfo.Base, RoadmapTabsInfo);
 
 /*
  ! like roadmaps

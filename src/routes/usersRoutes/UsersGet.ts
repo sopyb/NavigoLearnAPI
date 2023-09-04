@@ -3,8 +3,8 @@ import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
-import User from '@src/models/User';
-import { Roadmap, RoadmapMini } from '@src/models/Roadmap';
+import { User } from '@src/models/User';
+import { Roadmap } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
 import { Follower } from '@src/models/Follower';
 import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
@@ -69,13 +69,15 @@ UsersGet.get(
       return;
     }
 
-    const parsedRoadmaps: RoadmapMini[] = [];
+    const parsedRoadmaps: Roadmap[] = [];
 
     // convert roadmaps to RoadmapMini
     for (let i = 0; i < roadmaps.length; i++) {
       const roadmap = roadmaps[i];
-      addView(viewerId, roadmap.id, false);
+      await addView(viewerId, roadmap.id, false);
       parsedRoadmaps[i] = {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         id: roadmap.id.toString(),
         name: roadmap.name,
         description: roadmap.description || '',
@@ -90,7 +92,9 @@ UsersGet.get(
           roadmap.id,
         )),
         ownerName: user.name,
-        ownerId: roadmap.ownerId.toString(),
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        userId: roadmap.userId.toString(),
       };
     }
 
@@ -346,7 +350,7 @@ UsersGet.get(Paths.Users.Get.Follow, async (req: RequestWithSession, res) => {
       .json({ error: 'Already following' });
 
   // create a new follower
-  const follower = new Follower(followerId, userId);
+  const follower = new Follower({ followerId, userId });
 
   // insert the follower into the database
   const insert = await db.insert('followers', follower);

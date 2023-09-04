@@ -7,8 +7,7 @@ import { Roadmap } from '@src/models/Roadmap';
 import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
-import { Tag } from '@src/models/Tags';
-import User from '@src/models/User';
+import { IUser } from '@src/models/User';
 import { RoadmapView } from '@src/models/RoadmapView';
 
 const RoadmapsGet = Router({ mergeParams: true });
@@ -58,16 +57,13 @@ async function checkIfRoadmapExists(
     id,
   );
 
-
   let isLiked = false;
 
   if (req.session) {
-    const liked =
-      await new Database().getAllWhere<{ roadmapId: bigint; userId: bigint }>(
-        'roadmapLikes',
-        'userId',
-        req.session.userId,
-      );
+    const liked = await new Database().getAllWhere<{
+      roadmapId: bigint;
+      userId: bigint;
+    }>('roadmapLikes', 'userId', req.session.userId);
 
     if (liked) {
       if (liked.some((like) => like.roadmapId === BigInt(id))) {
@@ -88,13 +84,12 @@ export async function addView(
   const db = new Database();
 
   // get roadmap from database
-  const roadmap =
-    await db.get<Roadmap>('roadmaps', roadmapId);
+  const roadmap = await db.get<Roadmap>('roadmaps', roadmapId);
 
   // check if roadmap is valid
   if (!roadmap) return;
 
-  const view = new RoadmapView(userId, roadmapId, full);
+  const view = new RoadmapView({ userId, roadmapId, full });
 
   await db.insert('roadmapViews', view);
 }
@@ -117,7 +112,7 @@ RoadmapsGet.get(
       id: roadmap.id.toString(),
       name: roadmap.name,
       description: roadmap.description,
-      ownerId: roadmap.ownerId.toString(),
+      ownerId: roadmap.userId.toString(),
       issueCount: issueCount.toString(),
       likes: likes.toString(),
       isLiked,
@@ -137,9 +132,9 @@ RoadmapsGet.get(
 
     if (!data) return;
 
-    let user = await new Database().get<User>('users', data.roadmap.ownerId);
+    let user = await new Database().get<IUser>('users', data.roadmap.userId);
     if (!user) {
-      user = new User('Unknown User');
+      user = { id: -1n } as IUser;
     }
 
     const { roadmap, likes, isLiked } = data;
@@ -155,46 +150,8 @@ RoadmapsGet.get(
       likes: likes.toString(),
       isLiked,
       ownerName: user.name,
-      ownerId: roadmap.ownerId.toString(),
+      ownerId: roadmap.userId.toString(),
     });
-  },
-);
-
-RoadmapsGet.get(
-  Paths.Roadmaps.Get.Tags,
-  async (req: RequestWithSession, res) => {
-    //get data from params
-    const id = req.params.roadmapId;
-
-    if (!id)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'Roadmap id is missing.' });
-
-    // get database connection
-    const db = new Database();
-
-    // check if roadmap exists
-    const roadmap = await db.get<Roadmap>('roadmaps', BigInt(id));
-    if (!roadmap)
-      return res.status(HttpStatusCodes.NOT_FOUND).json({
-        error: 'Roadmap does not exist.',
-      });
-
-    // get tags from database
-    const tags = await db.getAllWhere<Tag>('roadmapTags', 'roadmapId', id);
-
-    // check if there are any tags
-    if (tags?.length === 0 || !tags) {
-      // return empty array
-      return res.status(HttpStatusCodes.OK).json({ tags: [] });
-    }
-
-    // map tags name to array
-    const tagNames = tags.map((tag) => tag.name);
-
-    // return tags
-    return res.status(HttpStatusCodes.OK).json({ tags: tagNames });
   },
 );
 
@@ -210,7 +167,7 @@ RoadmapsGet.get(
 
     // fetch /api/users/:id
     axios
-      .get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}`)
+      .get(`http://localhost:${EnvVars.Port}/api/users/${roadmap.userId}`)
       .then((response) => {
         res.status(response.status).json(response.data);
       })
@@ -233,7 +190,7 @@ RoadmapsGet.get(
 
     // fetch /api-wrapper/users/:id
     const user = await axios.get(
-      `http://localhost:${EnvVars.Port}/api/users/${roadmap.ownerId}/mini`,
+      `http://localhost:${EnvVars.Port}/api/users/${roadmap.userId}/mini`,
     );
 
     // ? might need to check if json needs to be parsed

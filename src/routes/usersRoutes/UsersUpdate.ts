@@ -1,14 +1,12 @@
 import Paths from '@src/constants/Paths';
 import { Router } from 'express';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import axios from 'axios';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import { UserInfo } from '@src/models/UserInfo';
 import validateSession from '@src/validators/validateSession';
 
@@ -144,9 +142,7 @@ UsersUpdate.post(
 
     // send error json
     if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user' });
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({ error: 'No user' });
 
     // check if quote was given
     if (quote.length > 255)
@@ -193,9 +189,7 @@ UsersUpdate.post(
 
     // send error json
     if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user' });
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({ error: 'No user' });
 
     // check if quote was given
     if (!name || name.length > 32)
@@ -231,9 +225,7 @@ UsersUpdate.post(
 
     // send error json
     if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user' });
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({ error: 'No user' });
 
     // check if quote was given
     if (blogUrl.length > 255)

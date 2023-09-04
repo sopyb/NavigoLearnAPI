@@ -1,14 +1,12 @@
 import { Request, Response, Router } from 'express';
 import Paths from '@src/constants/Paths';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import { Roadmap } from '@src/models/Roadmap';
 import { Issue } from '@src/models/Issue';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import Database from '@src/util/DatabaseDriver';
-import { Comment } from '@src/models/Comment';
+import { IssueComment } from '@src/models/IssueComment';
 import validateSession from '@src/validators/validateSession';
 
 const CommentsRouter = Router({ mergeParams: true });
@@ -106,10 +104,7 @@ async function checkUser(
   return { user, userId };
 }
 
-CommentsRouter.post(
-  Paths.Roadmaps.Issues.Comments.Create,
-  validateSession,
-);
+CommentsRouter.post(Paths.Roadmaps.Issues.Comments.Create, validateSession);
 CommentsRouter.post(
   Paths.Roadmaps.Issues.Comments.Create,
   async (req: RequestWithSession, res) => {
@@ -129,7 +124,7 @@ CommentsRouter.post(
         .json({ error: 'Comment can\'t be empty.' });
 
     // check if user is allowed to create a comment
-    if (!roadmap.isPublic && roadmap.ownerId !== userId) {
+    if (!roadmap.isPublic && roadmap.userId !== userId) {
       res
         .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'Only the owner can create comments.' });
@@ -142,7 +137,7 @@ CommentsRouter.post(
     // create comment
     const commentId = await db.insert(
       'issueComments',
-      new Comment(content, issueId, userId),
+      new IssueComment({ content, issueId, userId }),
     );
 
     if (commentId < 0)
@@ -164,7 +159,7 @@ CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get, async (req, res) => {
   const db = new Database();
 
   // get comments
-  const comments = await db.getAllWhere<Comment>(
+  const comments = await db.getAllWhere<IssueComment>(
     'issueComments',
     'issueId',
     issueId,
@@ -186,10 +181,7 @@ CommentsRouter.get(Paths.Roadmaps.Issues.Comments.Get, async (req, res) => {
   });
 });
 
-CommentsRouter.use(
-  Paths.Roadmaps.Issues.Comments.Update,
-  validateSession,
-);
+CommentsRouter.use(Paths.Roadmaps.Issues.Comments.Update, validateSession);
 CommentsRouter.post(
   Paths.Roadmaps.Issues.Comments.Update,
   async (req: RequestWithSession, res) => {
@@ -226,7 +218,7 @@ CommentsRouter.post(
     const db = new Database();
 
     // get comment
-    const comment = await db.get<Comment>('issueComments', commentId);
+    const comment = await db.get<IssueComment>('issueComments', commentId);
 
     if (!comment) {
       res
@@ -264,10 +256,7 @@ CommentsRouter.post(
   },
 );
 
-CommentsRouter.use(
-  Paths.Roadmaps.Issues.Comments.Delete,
-  validateSession,
-);
+CommentsRouter.use(Paths.Roadmaps.Issues.Comments.Delete, validateSession);
 CommentsRouter.delete(
   Paths.Roadmaps.Issues.Comments.Delete,
   async (req: RequestWithSession, res) => {
@@ -296,7 +285,7 @@ CommentsRouter.delete(
     const db = new Database();
 
     // get comment
-    const comment = await db.get<Comment>('issueComments', commentId);
+    const comment = await db.get<IssueComment>('issueComments', commentId);
 
     if (!comment) {
       res
@@ -312,7 +301,7 @@ CommentsRouter.delete(
         .json({ error: 'Comment does not belong to issue.' });
 
     // check if the userDisplay is allowed to delete comment
-    if (comment.userId !== userId || roadmap.ownerId !== userId) {
+    if (comment.userId !== userId || roadmap.userId !== userId) {
       res
         .status(HttpStatusCodes.FORBIDDEN)
         .json({ error: 'Only the comment owner can delete comments.' });

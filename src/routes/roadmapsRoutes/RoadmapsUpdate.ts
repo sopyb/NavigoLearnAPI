@@ -1,13 +1,10 @@
 import { Response, Router } from 'express';
 import Paths from '@src/constants/Paths';
-import {
-  RequestWithSession,
-} from '@src/middleware/session';
+import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/models/Roadmap';
-import { Tag } from '@src/models/Tags';
-import User from '@src/models/User';
+import { User } from '@src/models/User';
 import validateSession from '@src/validators/validateSession';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
@@ -80,8 +77,10 @@ RoadmapsUpdate.post(
     const db = new Database();
 
     // update roadmap
-    roadmap.name = title;
-    roadmap.updatedAt = new Date();
+    roadmap.set({
+      name: title,
+      updatedAt: new Date(),
+    });
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
     if (!success)
@@ -113,82 +112,13 @@ RoadmapsUpdate.post(
     const db = new Database();
 
     // update roadmap
-    roadmap.description = description;
-    roadmap.updatedAt = new Date();
+    roadmap.set({
+      description,
+      updatedAt: new Date(),
+    });
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
     if (!success)
-      return res
-        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Roadmap could not be updated.' });
-
-    return res.status(HttpStatusCodes.OK).json({ success: true });
-  },
-);
-
-RoadmapsUpdate.post(
-  Paths.Roadmaps.Update.Tags,
-  async (req: RequestWithSession, res) => {
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const tags: string[] = req?.body?.tags;
-    if (!tags)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'Roadmap tags are missing.' });
-
-    // check if the roadmap is valid
-    const data = await isRoadmapValid(req, res);
-    if (!data) return;
-    const { roadmap } = data;
-
-    // get database connection
-    const db = new Database();
-
-    // get all tags from database
-    const allTags = await db.getAllWhere<Tag>(
-      'roadmapTags',
-      'roadmapId',
-      roadmap.id,
-    );
-
-    const success: boolean[] = [];
-
-    if (allTags !== undefined && allTags.length > 0) {
-      // filter out tags that are not in the request
-      const tagsToDelete = allTags.filter((tag) => !tags.includes(tag.name));
-
-      // delete tags that are not in the request
-      for (const tag of tagsToDelete) {
-        success.push(await db.delete('roadmapTags', tag.id));
-      }
-
-      // filter out tags that are already in the database
-      const tagsNames = allTags.map((e) => e.name);
-      const tagsToCreate = tags.filter((tag) => !tagsNames.includes(tag));
-
-      // create tags that are not in the database
-      for (const tag of tagsToCreate) {
-        success.push(
-          (await db.insert('roadmapTags', {
-            tagName: tag,
-            roadmapId: roadmap.id,
-          })) >= 0,
-        );
-      }
-    } else {
-      for (const tag of tags) {
-        success.push(
-          (await db.insert('roadmapTags', {
-            tagName: tag,
-            roadmapId: roadmap.id,
-          })) >= 0,
-        );
-      }
-    }
-    roadmap.updatedAt = new Date();
-
-    if (success.includes(false))
       return res
         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: 'Roadmap could not be updated.' });
@@ -226,8 +156,10 @@ RoadmapsUpdate.post(
     const db = new Database();
 
     // update roadmap
-    roadmap.isPublic = visibility;
-    roadmap.updatedAt = new Date();
+    roadmap.set({
+      isPublic: visibility,
+      updatedAt: new Date(),
+    });
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
     if (!success)
@@ -266,8 +198,10 @@ RoadmapsUpdate.post(
         .json({ error: 'New owner does not exist.' });
 
     // update roadmap
-    roadmap.ownerId = BigInt(newOwnerId);
-    roadmap.updatedAt = new Date();
+    roadmap.set({
+      userId: newOwnerId,
+      updatedAt: new Date(),
+    });
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
     if (!success)
@@ -300,8 +234,10 @@ RoadmapsUpdate.post(
     const db = new Database();
 
     // update roadmap
-    roadmap.data = data;
-    roadmap.updatedAt = new Date();
+    roadmap.set({
+      data,
+      updatedAt: new Date(),
+    });
     const success = await db.update('roadmaps', roadmap.id, roadmap);
 
     if (!success)

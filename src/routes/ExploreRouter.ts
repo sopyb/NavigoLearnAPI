@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
 import { ExploreDB } from '@src/util/ExploreDB';
-import { RoadmapMini } from '@src/models/Roadmap';
+import { Roadmap } from '@src/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
 import { RequestWithSession } from '@src/middleware/session';
 import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
 
 const ExploreRouter = Router();
 
-ExploreRouter.get(Paths.Explore.Default,
+ExploreRouter.get(
+  Paths.Explore.Default,
   async (req: RequestWithSession, res) => {
     // get query, count, and page from url
     // eslint-disable-next-line max-len
@@ -33,7 +34,7 @@ ExploreRouter.get(Paths.Explore.Default,
 
     // get roadmaps from database
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const roadmaps = await ExploreDB.searchRoadmapsByLiked<RoadmapMini>(
+    const roadmaps = await ExploreDB.searchRoadmapsByLiked<Roadmap>(
       query,
       userId,
       countNum,
@@ -43,8 +44,11 @@ ExploreRouter.get(Paths.Explore.Default,
     const db = new Database();
 
     // get total roadmaps
-    const totalRoadmaps =
-      await db.countWhereLike('roadmaps', 'name', `%${query}%`);
+    const totalRoadmaps = await db.countWhereLike(
+      'roadmaps',
+      'name',
+      `%${query}%`,
+    );
 
     // page count
     const pageCount = Math.ceil(parseInt(totalRoadmaps.toString()) / countNum);
@@ -53,11 +57,10 @@ ExploreRouter.get(Paths.Explore.Default,
     roadmaps.forEach((roadmap) => {
       addView(userId, BigInt(roadmap.id), false);
 
-      roadmap.id = roadmap.id.toString();
-      roadmap.likes = roadmap.likes.toString();
-      roadmap.ownerId = roadmap.ownerId.toString();
-      roadmap.isLiked = Boolean(roadmap.isLiked);
-
+      // roadmap.id = roadmap.id.toString();
+      // roadmap.likes = roadmap.likes.toString();
+      // roadmap.ownerId = roadmap.ownerId.toString();
+      // roadmap.isLiked = Boolean(roadmap.isLiked);
     });
     // send roadmaps
     res.status(200).json({
@@ -65,6 +68,7 @@ ExploreRouter.get(Paths.Explore.Default,
       roadmaps,
       pageCount,
     });
-  });
+  },
+);
 
 export default ExploreRouter;
