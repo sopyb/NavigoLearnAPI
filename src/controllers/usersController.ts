@@ -81,10 +81,9 @@ export async function usersGetMiniProfile(
 
   // get user from database
   const user = await getUser(db, userId);
-  const userInfo = await getUserInfo(db, userId);
 
   // check if user exists
-  if (!user || !userInfo) return userNotFound(res);
+  if (!user) return userNotFound(res);
 
   // send user json
   return userMiniProfile(res, user);

@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { HttpStatusCode } from 'axios';
-import { User } from '@src/models/User';
-import { UserInfo } from '@src/models/UserInfo';
+import { User } from '@src/types/models/User';
+import { UserInfo } from '@src/types/models/UserInfo';
 import { UserStats } from '@src/helpers/databaseManagement';
 import JSONStringify from '@src/util/JSONStringify';
 
@@ -126,35 +126,36 @@ export function userProfile(
     .contentType('application/json')
     .send(
       JSONStringify({
-        name,
-        avatar,
-        userId: user.id,
-        bio,
-        quote,
-        websiteUrl,
-        githubUrl,
-        roadmapsCount,
-        issueCount,
-        followerCount,
-        followingCount,
-        isFollowing,
-        githubLink: !!githubId,
-        googleLink: !!googleId,
+        data: {
+          name,
+          avatar,
+          userId: user.id,
+          bio,
+          quote,
+          websiteUrl,
+          githubUrl,
+          roadmapsCount,
+          issueCount,
+          followerCount,
+          followingCount,
+          isFollowing,
+          githubLink: !!githubId,
+          googleLink: !!googleId,
+        },
+        message: 'User found',
         success: true,
       }),
     );
 }
 
 export function userMiniProfile(res: Response, user: User): void {
-  const { id, name, avatar } = user;
   res
     .status(HttpStatusCode.Ok)
     .contentType('application/json')
     .send(
       JSONStringify({
-        name,
-        avatar,
-        userId: id,
+        data: user.toObject(),
+        message: 'User found',
         success: true,
       }),
     );

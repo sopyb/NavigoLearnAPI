@@ -1,14 +1,14 @@
 import { RequestWithBody } from '@src/validators/validateBody';
 import { Response } from 'express';
 import DatabaseDriver from '@src/util/DatabaseDriver';
-import { User } from '@src/models/User';
+import { User } from '@src/types/models/User';
 import axios, { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
 import {
   createSaveSession,
   deleteClearSession,
 } from '@src/util/sessionManager';
-import { UserInfo } from '@src/models/UserInfo';
+import { UserInfo } from '@src/types/models/UserInfo';
 import { checkEmail } from '@src/util/EmailUtil';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';

@@ -1,6 +1,6 @@
 import DatabaseDriver from '@src/util/DatabaseDriver';
-import { UserInfo } from '@src/models/UserInfo';
-import { IUser, User } from '@src/models/User';
+import { IUserInfo, UserInfo } from '@src/types/models/UserInfo';
+import { IUser, User } from '@src/types/models/User';
 
 /*
  * Interfaces
@@ -55,7 +55,7 @@ export async function getUserInfo(
   db: DatabaseDriver,
   userId: bigint,
 ): Promise<UserInfo | null> {
-  const userInfo = await db.get<UserInfo>('userInfo', userId);
+  const userInfo = await db.getWhere<IUserInfo>('userInfo', 'userId', userId);
   if (!userInfo) return null;
   return new UserInfo(userInfo);
 }
@@ -64,7 +64,7 @@ export async function getUserStats(
   db: DatabaseDriver,
   userId: bigint,
 ): Promise<UserStats> {
-  const roadmapsCount = await db.countWhere('roadmaps', 'ownerId', userId);
+  const roadmapsCount = await db.countWhere('roadmaps', 'userId', userId);
   const issueCount = await db.countWhere('issues', 'userId', userId);
   const followerCount = await db.countWhere('followers', 'userId', userId);
   const followingCount = await db.countWhere('followers', 'followerId', userId);
