@@ -3,8 +3,8 @@ import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
-import { Roadmap } from '@src/models/Roadmap';
-import { User } from '@src/models/User';
+import { Roadmap } from '@src/types/models/Roadmap';
+import { User } from '@src/types/models/User';
 import validateSession from '@src/validators/validateSession';
 
 const RoadmapsUpdate = Router({ mergeParams: true });

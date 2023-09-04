@@ -6,8 +6,8 @@ import axios from 'axios';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
-import { User } from '@src/models/User';
-import { UserInfo } from '@src/models/UserInfo';
+import { User } from '@src/types/models/User';
+import { UserInfo } from '@src/types/models/UserInfo';
 import validateSession from '@src/validators/validateSession';
 
 const UsersUpdate = Router({ mergeParams: true });

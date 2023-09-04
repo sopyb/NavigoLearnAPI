@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
-import { Issue } from '@src/models/Issue';
+import { Issue } from '@src/types/models/Issue';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
-import { Roadmap } from '@src/models/Roadmap';
+import { Roadmap } from '@src/types/models/Roadmap';
 import IssuesUpdate from '@src/routes/roadmapsRoutes/issuesRoutes/IssuesUpdate';
 import Comments from '@src/routes/roadmapsRoutes/issuesRoutes/CommentsRouter';
 import validateSession from '@src/validators/validateSession';

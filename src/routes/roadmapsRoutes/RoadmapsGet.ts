@@ -3,12 +3,12 @@ import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
-import { Roadmap } from '@src/models/Roadmap';
+import { Roadmap } from '@src/types/models/Roadmap';
 import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
-import { IUser } from '@src/models/User';
-import { RoadmapView } from '@src/models/RoadmapView';
+import { IUser } from '@src/types/models/User';
+import { RoadmapView } from '@src/types/models/RoadmapView';
 
 const RoadmapsGet = Router({ mergeParams: true });
 

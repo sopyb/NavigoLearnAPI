@@ -3,8 +3,8 @@ import Paths from '@src/constants/Paths';
 import Database from '@src/util/DatabaseDriver';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { RequestWithSession } from '@src/middleware/session';
-import { Issue } from '@src/models/Issue';
-import { Roadmap } from '@src/models/Roadmap';
+import { Issue } from '@src/types/models/Issue';
+import { Roadmap } from '@src/types/models/Roadmap';
 import validateSession from '@src/validators/validateSession';
 
 const IssuesUpdate = Router({ mergeParams: true });

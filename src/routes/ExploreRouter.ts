@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
 import { ExploreDB } from '@src/util/ExploreDB';
-import { Roadmap } from '@src/models/Roadmap';
+import { Roadmap } from '@src/types/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
 import { RequestWithSession } from '@src/middleware/session';
 import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';

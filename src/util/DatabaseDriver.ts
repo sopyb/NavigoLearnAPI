@@ -3,7 +3,7 @@ import { createPool, Pool } from 'mariadb';
 import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
-import { User } from '@src/models/User';
+import { User } from '@src/types/models/User';
 
 // database credentials
 const { DBCred } = EnvVars;

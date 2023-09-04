@@ -2,11 +2,11 @@ import { Request, Response, Router } from 'express';
 import Paths from '@src/constants/Paths';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { RequestWithSession } from '@src/middleware/session';
-import { Roadmap } from '@src/models/Roadmap';
-import { Issue } from '@src/models/Issue';
-import { User } from '@src/models/User';
+import { Roadmap } from '@src/types/models/Roadmap';
+import { Issue } from '@src/types/models/Issue';
+import { User } from '@src/types/models/User';
 import Database from '@src/util/DatabaseDriver';
-import { IssueComment } from '@src/models/IssueComment';
+import { IssueComment } from '@src/types/models/IssueComment';
 import validateSession from '@src/validators/validateSession';
 
 const CommentsRouter = Router({ mergeParams: true });

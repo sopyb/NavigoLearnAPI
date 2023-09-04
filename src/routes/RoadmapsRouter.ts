@@ -2,7 +2,7 @@ import Paths from '@src/constants/Paths';
 import { Router } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import { IRoadmap, Roadmap } from '@src/models/Roadmap';
+import { IRoadmap, Roadmap } from '@src/types/models/Roadmap';
 import Database from '@src/util/DatabaseDriver';
 import GetRouter from '@src/routes/roadmapsRoutes/RoadmapsGet';
 import UpdateRouter from '@src/routes/roadmapsRoutes/RoadmapsUpdate';
