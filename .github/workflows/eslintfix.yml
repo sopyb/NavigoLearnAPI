@@ -1,0 +1,34 @@
+name: ESLint Fix on Push to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  eslint-fix:
+    name: Fix ESLint Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install ESLint
+        run: |
+          npm install --save-dev eslint@8.10.0
+          npm install --save-dev @microsoft/eslint-formatter-sarif@2.1.7
+
+      - name: Run ESLint with --fix
+        run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix || echo "ESLint fix failed"
+
+      - name: Commit files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "Fix ESLint issues" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@29f05e01bb17e6f28228b47437e03a7b69e1f9ef
+        with:
+          branch: ${{ github.ref_name }}
+          github_token: ${{ secrets.PAT }}
