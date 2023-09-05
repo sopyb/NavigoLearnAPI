@@ -1,6 +1,8 @@
 import { NextFunction, Response } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
-import { responseInvalidParameters } from '@src/helpers/apiResponses';
+import {
+  responseInvalidParameters,
+} from '@src/helpers/responses/generalResponses';
 
 export interface RequestWithTargetUserId extends RequestWithSession {
   targetUserId?: bigint;

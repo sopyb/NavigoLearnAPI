@@ -18,7 +18,6 @@ import EnvVars from '@src/constants/EnvVars';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
 import { NodeEnvs } from '@src/constants/misc';
-import { RouteError } from '@src/other/classes';
 
 // **** Variables **** //
 
@@ -71,12 +70,10 @@ app.use((_: Request, res: Response) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.err(err, true);
-  let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
-  if (err instanceof RouteError) {
-    status = err.status;
-  }
-
-  res.status(status).json({ success: false, message: err.message });
+  res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: err.message,
+  });
 });
 
 // ** Front-End Content ** //

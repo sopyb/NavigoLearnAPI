@@ -47,7 +47,6 @@ const EnvVars = {
   NodeEnv: process.env.NODE_ENV ?? '',
   Port: process.env.PORT ?? 0,
   CookieProps: {
-    Key: 'ExpressGeneratorTs',
     Secret: process.env.COOKIE_SECRET ?? '',
     // Casing to match express cookie options
     Options: {

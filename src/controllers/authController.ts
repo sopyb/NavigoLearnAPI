@@ -1,4 +1,4 @@
-import { RequestWithBody } from '@src/validators/validateBody';
+import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Response } from 'express';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { User } from '@src/types/models/User';
@@ -21,20 +21,22 @@ import {
   insertUserInfo,
   updateUser,
 } from '@src/helpers/databaseManagement';
+import { NodeEnvs } from '@src/constants/misc';
+import {
+  responseExternalBadGateway,
+  responseInvalidBody,
+  responseNotImplemented,
+  responseServerError,
+  responseUnauthorized,
+} from '@src/helpers/responses/generalResponses';
 import {
   responseAccountCreated,
   responseEmailConflict,
-  responseExternalBadGateway,
-  responseInvalidBody,
   responseInvalidLogin,
   responseLoginSuccessful,
   responseLogoutSuccessful,
-  responseNotImplemented,
   responsePasswordChanged,
-  responseServerError,
-  responseUnauthorized,
-} from '@src/helpers/apiResponses';
-import { NodeEnvs } from '@src/constants/misc';
+} from '@src/helpers/responses/authResponses';
 
 /*
  * Interfaces

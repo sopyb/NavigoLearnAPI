@@ -1,18 +1,5 @@
 import { Response } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
-import {
-  responseAlreadyFollowing,
-  responseCantFollowYourself,
-  responseServerError,
-  responseUserDeleted,
-  responseUserFollowed,
-  responseUserMiniProfile,
-  responseUserNoRoadmaps,
-  responseUserNotFound,
-  responseUserProfile,
-  responseUserRoadmaps,
-  responseUserUnfollowed,
-} from '@src/helpers/apiResponses';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import {
   deleteUser,
@@ -24,8 +11,25 @@ import {
   isUserFollowing,
   unfollowUser,
 } from '@src/helpers/databaseManagement';
-import { RequestWithTargetUserId } from '@src/validators/validateUser';
+import {
+  RequestWithTargetUserId,
+} from '@src/middleware/validators/validateUser';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
+import { responseServerError } from '@src/helpers/responses/generalResponses';
+import {
+  responseAlreadyFollowing,
+  responseCantFollowYourself,
+  responseUserDeleted,
+  responseUserFollowed,
+  responseUserMiniProfile,
+  responseUserNotFound,
+  responseUserProfile,
+  responseUserUnfollowed,
+} from '@src/helpers/responses/userResponses';
+import {
+  responseUserNoRoadmaps,
+  responseUserRoadmaps,
+} from '@src/helpers/responses/roadmapResponses';
 
 /*
  ! Main route controllers

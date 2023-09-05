@@ -5,7 +5,7 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { RequestWithSession } from '@src/middleware/session';
 import { Issue } from '@src/types/models/Issue';
 import { Roadmap } from '@src/types/models/Roadmap';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 
 const IssuesUpdate = Router({ mergeParams: true });
 

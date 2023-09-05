@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 import {
   authChangePassword,
   authForgotPassword,
@@ -12,7 +12,7 @@ import {
   authLogout,
   authRegister,
 } from '@src/controllers/authController';
-import validateBody from '@src/validators/validateBody';
+import validateBody from '@src/middleware/validators/validateBody';
 import { rateLimit } from 'express-rate-limit';
 import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';

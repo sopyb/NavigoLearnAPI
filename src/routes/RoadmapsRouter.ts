@@ -10,7 +10,7 @@ import * as console from 'console';
 import RoadmapIssues from '@src/routes/roadmapsRoutes/RoadmapIssues';
 import envVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 
 const RoadmapsRouter = Router();
 

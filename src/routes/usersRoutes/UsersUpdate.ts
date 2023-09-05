@@ -8,7 +8,7 @@ import { checkEmail } from '@src/util/EmailUtil';
 import { comparePassword } from '@src/util/LoginUtil';
 import { User } from '@src/types/models/User';
 import { UserInfo } from '@src/types/models/UserInfo';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 
 const UsersUpdate = Router({ mergeParams: true });
 

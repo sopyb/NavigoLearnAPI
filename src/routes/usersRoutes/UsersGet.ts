@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
-import validateUser from '@src/validators/validateUser';
+import validateUser from '@src/middleware/validators/validateUser';
 import {
   userFollow,
   userGetRoadmaps,

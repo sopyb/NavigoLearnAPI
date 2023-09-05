@@ -7,7 +7,7 @@ import { Issue } from '@src/types/models/Issue';
 import { User } from '@src/types/models/User';
 import Database from '@src/util/DatabaseDriver';
 import { IssueComment } from '@src/types/models/IssueComment';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 
 const CommentsRouter = Router({ mergeParams: true });
 
