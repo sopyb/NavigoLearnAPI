@@ -113,7 +113,10 @@ RoadmapIssues.get(Paths.Roadmaps.Issues.Get, async (req, res) => {
 
 RoadmapIssues.get(Paths.Roadmaps.Issues.GetAll, async (req, res) => {
   // get issue id  from params
-  const roadmapId = BigInt(req.params?.roadmapId || -1);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const roadmapId = BigInt(req?.params?.roadmapId || -1);
 
   const db = new Database();
 

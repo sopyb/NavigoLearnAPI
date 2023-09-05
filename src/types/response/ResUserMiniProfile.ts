@@ -27,7 +27,6 @@ export class ResUserMiniProfile implements IResUserMiniProfile {
       'id' in obj &&
       'avatar' in obj &&
       'name' in obj &&
-      'email' in obj &&
       'createdAt' in obj
     );
   }
