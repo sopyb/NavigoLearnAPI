@@ -40,6 +40,8 @@ interface IEnvVars {
   };
 }
 
+// Config environment variables
+/* eslint-disable no-process-env */
 const EnvVars = {
   NodeEnv: process.env.NODE_ENV ?? '',
   Port: process.env.PORT ?? 0,
@@ -74,6 +76,7 @@ const EnvVars = {
     RedirectUri: process.env.GITHUB_REDIRECT_URI ?? '',
   },
 } as Readonly<IEnvVars>;
+/* eslint-enable no-process-env */
 
 export default EnvVars;
 export { EnvVars };
