@@ -1,21 +1,27 @@
 import { Response } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
 import {
+  responseAlreadyFollowing,
+  responseCantFollowYourself,
   responseServerError,
   responseUserDeleted,
+  responseUserFollowed,
   responseUserMiniProfile,
   responseUserNotFound,
   responseUserProfile,
-  userRoadmaps,
+  responseUserRoadmaps,
+  responseUserUnfollowed,
 } from '@src/helpers/apiResponses';
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import {
   deleteUser,
+  followUser,
   getUser,
   getUserInfo,
   getUserRoadmaps,
   getUserStats,
   isUserFollowing,
+  unfollowUser,
 } from '@src/helpers/databaseManagement';
 import { RequestWithTargetUserId } from '@src/validators/validateUser';
 
@@ -109,7 +115,67 @@ export async function userGetRoadmaps(
   if (!user) return responseUserNotFound(res);
 
   // send user json
-  return userRoadmaps(res, user);
+  return responseUserRoadmaps(res, user);
+}
+
+export async function userFollow(
+  req: RequestWithTargetUserId,
+  res: Response,
+): Promise<unknown> {
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const issuerId = req.issuerUserId;
+  const targetId = req.targetUserId;
+  if (!targetId || !issuerId || targetId === issuerId)
+    return responseCantFollowYourself(res);
+
+  // get user from database
+  const user = await getUser(db, targetId);
+
+  // check if user exists
+  if (!user) return responseUserNotFound(res);
+
+  // check if user is already following
+  if (await isUserFollowing(db, issuerId, targetId))
+    return responseAlreadyFollowing(res);
+
+  // follow user
+  await followUser(db, issuerId, targetId);
+
+  // send user json
+  return responseUserFollowed(res);
+}
+
+export async function userUnfollow(
+  req: RequestWithTargetUserId,
+  res: Response,
+): Promise<unknown> {
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const issuerId = req.issuerUserId;
+  const targetId = req.targetUserId;
+  if (!targetId || !issuerId || targetId === issuerId)
+    return responseCantFollowYourself(res);
+
+  // get user from database
+  const user = await getUser(db, targetId);
+
+  // check if user exists
+  if (!user) return responseUserNotFound(res);
+
+  // check if user is already following
+  if (!(await isUserFollowing(db, issuerId, targetId)))
+    return responseAlreadyFollowing(res);
+
+  // follow user
+  await unfollowUser(db, issuerId, targetId);
+
+  // send user json
+  return responseUserUnfollowed(res);
 }
 
 /*

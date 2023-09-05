@@ -76,6 +76,27 @@ export function responseUnauthorized(res: Response): void {
   });
 }
 
+export function responseCantFollowYourself(res: Response): void {
+  res.status(HttpStatusCode.BadRequest).json({
+    message: 'You can\'t follow yourself',
+    success: false,
+  });
+}
+
+export function responseAlreadyFollowing(res: Response): void {
+  res.status(HttpStatusCode.BadRequest).json({
+    message: 'Already following',
+    success: false,
+  });
+}
+
+export function responseNotFollowing(res: Response): void {
+  res.status(HttpStatusCode.BadRequest).json({
+    message: 'Not following',
+    success: false,
+  });
+}
+
 /*
  ? Success responses
  */
@@ -146,7 +167,7 @@ export function responseUserMiniProfile(res: Response, user: User): void {
     );
 }
 
-export function userRoadmaps(res: Response, roadmaps: Roadmap[]): void {
+export function responseUserRoadmaps(res: Response, roadmaps: Roadmap[]): void {
   res
     .status(HttpStatusCode.Ok)
     .contentType('application/json')
@@ -157,4 +178,16 @@ export function userRoadmaps(res: Response, roadmaps: Roadmap[]): void {
         success: true,
       }),
     );
+}
+
+export function responseUserFollowed(res: Response): void {
+  res
+    .status(HttpStatusCode.Ok)
+    .json({ message: 'User followed', success: true });
+}
+
+export function responseUserUnfollowed(res: Response): void {
+  res
+    .status(HttpStatusCode.Ok)
+    .json({ message: 'User unfollowed', success: true });
 }

@@ -2,6 +2,7 @@ import DatabaseDriver from '@src/util/DatabaseDriver';
 import { IUserInfo, UserInfo } from '@src/types/models/UserInfo';
 import { IUser, User } from '@src/types/models/User';
 import { Roadmap } from '@src/types/models/Roadmap';
+import { Follower } from '@src/types/models/Follower';
 
 /*
  * Interfaces
@@ -106,6 +107,38 @@ export async function getUserRoadmaps(
   const roadmaps = await db.getAllWhere<Roadmap>('roadmaps', 'userId', userId);
   if (!roadmaps) return null;
   return roadmaps.map((roadmap) => new Roadmap(roadmap));
+}
+
+export async function followUser(
+  db: DatabaseDriver,
+  targetId: bigint,
+  authUserId: bigint,
+): Promise<boolean> {
+  if (targetId === authUserId) return false;
+  return (
+    (await db.insert(
+      'followers',
+      new Follower({
+        userId: targetId,
+        followerId: authUserId,
+      }),
+    )) >= 0
+  );
+}
+
+export async function unfollowUser(
+  db: DatabaseDriver,
+  targetId: bigint,
+  authUserId: bigint,
+): Promise<boolean> {
+  if (targetId === authUserId) return false;
+  return await db.deleteWhere(
+    'followers',
+    'userId',
+    targetId,
+    'followerId',
+    authUserId,
+  );
 }
 
 export async function isUserFollowing(
