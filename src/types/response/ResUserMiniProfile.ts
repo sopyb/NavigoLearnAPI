@@ -4,7 +4,6 @@ export interface IResUserMiniProfile {
   readonly id: bigint;
   readonly avatar: string | null;
   readonly name: string;
-  readonly email: string;
   readonly createdAt: Date;
 }
 
@@ -12,14 +11,12 @@ export class ResUserMiniProfile implements IResUserMiniProfile {
   public readonly id: bigint;
   public readonly avatar: string | null;
   public readonly name: string;
-  public readonly email: string;
   public readonly createdAt: Date;
 
-  public constructor({ id, avatar, name, email, createdAt }: IUser) {
+  public constructor({ id, avatar, name, createdAt }: IUser) {
     this.id = id;
     this.avatar = avatar;
     this.name = name;
-    this.email = email;
     this.createdAt = createdAt;
   }
 

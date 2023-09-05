@@ -7,7 +7,6 @@ export interface IResUserProfile {
   readonly id: bigint;
   readonly avatar: string | null;
   readonly name: string;
-  readonly email: string;
   readonly createdAt: Date;
 
   // from UserInfo
@@ -35,7 +34,6 @@ export class ResUserProfile implements IResUserProfile {
   public readonly id: bigint;
   public readonly avatar: string | null;
   public readonly name: string;
-  public readonly email: string;
   public readonly bio: string | null;
   public readonly quote: string | null;
   public readonly websiteUrl: string | null;
@@ -51,7 +49,7 @@ export class ResUserProfile implements IResUserProfile {
   public readonly isFollowing: boolean;
 
   public constructor(
-    { id, avatar, name, email, createdAt, githubId, googleId }: IUser,
+    { id, avatar, name, createdAt, githubId, googleId }: IUser,
     { bio, quote, websiteUrl, githubUrl }: IUserInfo,
     {
       roadmapsCount,
@@ -65,7 +63,6 @@ export class ResUserProfile implements IResUserProfile {
     this.id = id;
     this.avatar = avatar;
     this.name = name;
-    this.email = email;
     this.bio = bio;
     this.quote = quote;
     this.websiteUrl = websiteUrl;
@@ -89,7 +86,6 @@ export class ResUserProfile implements IResUserProfile {
       'id' in obj &&
       'avatar' in obj &&
       'name' in obj &&
-      'email' in obj &&
       'createdAt' in obj &&
       'bio' in obj &&
       'quote' in obj &&

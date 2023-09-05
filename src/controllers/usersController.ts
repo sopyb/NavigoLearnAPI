@@ -7,6 +7,7 @@ import {
   responseUserDeleted,
   responseUserFollowed,
   responseUserMiniProfile,
+  responseUserNoRoadmaps,
   responseUserNotFound,
   responseUserProfile,
   responseUserRoadmaps,
@@ -24,6 +25,7 @@ import {
   unfollowUser,
 } from '@src/helpers/databaseManagement';
 import { RequestWithTargetUserId } from '@src/validators/validateUser';
+import { ResRoadmap } from '@src/types/response/ResRoadmap';
 
 /*
  ! Main route controllers
@@ -108,14 +110,21 @@ export async function userGetRoadmaps(
   const userId = req.targetUserId;
   if (!userId) return responseServerError(res);
 
-  // get user from database
-  const user = await getUserRoadmaps(db, userId);
+  const user = await getUser(db, userId);
 
-  // check if user exists
   if (!user) return responseUserNotFound(res);
 
+  // get roadmaps from database
+  const roadmaps = await getUserRoadmaps(db, userId);
+
+  // check if user exists
+  if (!roadmaps) return responseUserNoRoadmaps(res);
+
   // send user json
-  return responseUserRoadmaps(res, user);
+  return responseUserRoadmaps(
+    res,
+    roadmaps.map((roadmap) => new ResRoadmap(roadmap, user)),
+  );
 }
 
 export async function userFollow(

@@ -4,7 +4,6 @@ import { User } from '@src/types/models/User';
 import { UserInfo } from '@src/types/models/UserInfo';
 import { UserStats } from '@src/helpers/databaseManagement';
 import JSONStringify from '@src/util/JSONStringify';
-import { Roadmap } from '@src/types/models/Roadmap';
 import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 import { ResUserProfile } from '@src/types/response/ResUserProfile';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
@@ -167,13 +166,29 @@ export function responseUserMiniProfile(res: Response, user: User): void {
     );
 }
 
-export function responseUserRoadmaps(res: Response, roadmaps: Roadmap[]): void {
+export function responseUserNoRoadmaps(res: Response): void {
   res
     .status(HttpStatusCode.Ok)
     .contentType('application/json')
     .send(
       JSONStringify({
-        data: roadmaps.map((roadmap) => new ResRoadmap(roadmap)),
+        data: [],
+        message: 'User has no roadmaps',
+        success: true,
+      }),
+    );
+}
+
+export function responseUserRoadmaps(
+  res: Response,
+  roadmaps: ResRoadmap[],
+): void {
+  res
+    .status(HttpStatusCode.Ok)
+    .contentType('application/json')
+    .send(
+      JSONStringify({
+        data: roadmaps,
         message: 'Roadmaps found',
         success: true,
       }),
