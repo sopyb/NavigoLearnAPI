@@ -4,48 +4,67 @@ import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
 import { User } from '@src/types/models/User';
+import { GenericModelClass } from '@src/types/models/GenericModelClass';
 
 // database credentials
 const { DBCred } = EnvVars;
 
 const trustedColumns = [
+  // id columns
+  'id',
+  'roadmapId',
+  'userId',
+  'issueId',
+  // followers
+  'followerId',
+
+  // generic
   'name',
+  'data',
+
+  // time
+  'createdAt',
+  'updatedAt',
+
+  // user
+  'avatar',
   'email',
   'role',
   'pwdHash',
   'googleId',
   'githubId',
-  'description',
-  'profilePictureUrl',
+
+  // userInfo
   'bio',
-  'email',
   'quote',
-  'blogUrl',
   'websiteUrl',
   'githubUrl',
-  'ownerId',
+
+  // roadmap
+  'description',
   'isPublic',
-  'content',
-  'title',
-  'open',
-  'tagName',
-  'id',
-  'followerId',
-  'issueId',
-  'roadmapId',
-  'userId',
-  'token',
-  'createdAt',
-  'updatedAt',
-  'expiresAt',
-  'stringId',
+  'isDraft',
+
+  // roadmapLikes
+  'value',
+
+  // roadmapViews
   'full',
+
+  // roadmapIssues & comments
+  'open',
+  'title',
+  'content',
+
+  // session
+  'token',
+  'expires',
 ];
 
 // data interface
 interface Data {
   keys: string[];
-  values: never[];
+  values: unknown[];
 }
 
 type DataType = bigint | string | number | Date | null;
@@ -80,9 +99,21 @@ function processData(
   data: object | Record<string, DataType>,
   discardId = true,
 ): Data {
+  const dataObj = data as GenericModelClass;
+
+  // check if data is a GenericModelClass
+  if (
+    typeof dataObj === 'object' &&
+    dataObj !== null &&
+    'toObject' in dataObj &&
+    typeof dataObj.toObject === 'function'
+  ) {
+    data = dataObj.toObject();
+  }
+
   // get keys and values
   const keys = Object.keys(data);
-  const values = Object.values(data) as never[];
+  const values = Object.values(data) as unknown[];
 
   // remove id from keys and values
   const idIndex = keys.indexOf('id');
@@ -90,6 +121,10 @@ function processData(
     keys.splice(idIndex, 1);
     values.splice(idIndex, 1);
   }
+
+  // check if values are trusted
+  if (keys.every((key) => !trustedColumns.includes(key)))
+    throw new Error('Untrusted data: ' + keys.join(', '));
 
   return { keys, values };
 }
@@ -139,9 +174,6 @@ class Database {
   ): Promise<bigint> {
     const { keys, values } = processData(data, discardId);
 
-    // check if keys are trusted
-    if (keys.every((key) => !trustedColumns.includes(key))) return BigInt(-1);
-
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
@@ -164,9 +196,6 @@ class Database {
     discardId = true,
   ): Promise<boolean> {
     const { keys, values } = processData(data, discardId);
-
-    // check if keys are trusted
-    if (keys.every((key) => !trustedColumns.includes(key))) return false;
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params
@@ -210,9 +239,7 @@ class Database {
     let params: unknown[] = [];
 
     for (let i = 0; i < values.length - 1; i += 2) {
-      const key = values[i];
-
-      if (typeof key !== 'string' || !trustedColumns.includes(key)) return null;
+      const key = values[i] as string;
 
       if (i > 0) keyString += ' AND ';
       keyString += `${key} ${like ? 'LIKE' : '='} ?`;

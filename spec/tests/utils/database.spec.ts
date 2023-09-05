@@ -103,7 +103,7 @@ describe('Database', () => {
 
     expect(users2).not.toBe(null);
     if (!users2) return;
-    expect(users2.length).toEqual(users.length);
+    expect(users2.length).toEqual(users.length + 1);
   });
 
   // test for getting all users where key (pwdHash) is value (password)
@@ -145,7 +145,7 @@ describe('Database', () => {
     // get count
     const count = await db.count('users');
 
-    expect(count).toEqual(BigInt(users.length));
+    expect(count).toEqual(BigInt(users.length + 1));
   });
 
   // test for counting users where key (pwdHash) is value (password)

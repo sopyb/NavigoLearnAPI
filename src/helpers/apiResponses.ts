@@ -154,7 +154,7 @@ export function userMiniProfile(res: Response, user: User): void {
     .contentType('application/json')
     .send(
       JSONStringify({
-        data: user.toObject(),
+        data: user,
         message: 'User found',
         success: true,
       }),

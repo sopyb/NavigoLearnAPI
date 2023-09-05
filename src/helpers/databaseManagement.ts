@@ -99,7 +99,7 @@ export async function insertUser(
   user: User,
   userInfo?: UserInfo,
 ): Promise<bigint> {
-  user.set({ id: await db.insert('users', user.toObject()) });
+  user.set({ id: await db.insert('users', user) });
 
   if (await insertUserInfo(db, user.id, userInfo)) {
     return user.id;
@@ -115,7 +115,7 @@ export async function insertUserInfo(
 ): Promise<boolean> {
   if (!userInfo) userInfo = new UserInfo({ userId });
   userInfo.set({ userId });
-  return (await db.insert('userInfo', userInfo.toObject())) >= 0;
+  return (await db.insert('userInfo', userInfo)) >= 0;
 }
 
 export async function updateUser(
@@ -126,7 +126,7 @@ export async function updateUser(
 ): Promise<boolean> {
   if (userInfo) if (!(await updateUserInfo(db, userId, userInfo))) return false;
 
-  return await db.update('users', userId, user.toObject());
+  return await db.update('users', userId, user);
 }
 
 export async function updateUserInfo(
@@ -134,5 +134,5 @@ export async function updateUserInfo(
   userId: bigint,
   userInfo: UserInfo,
 ): Promise<boolean> {
-  return await db.update('userInfo', userId, userInfo.toObject());
+  return await db.update('userInfo', userId, userInfo);
 }
