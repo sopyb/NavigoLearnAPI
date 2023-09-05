@@ -22,17 +22,17 @@ import {
   updateUser,
 } from '@src/helpers/databaseManagement';
 import {
-  accountCreated,
-  emailConflict,
-  externalBadGateway,
-  invalidBody,
-  invalidLogin,
-  loginSuccessful,
-  logoutSuccessful,
-  notImplemented,
-  passwordChanged,
-  serverError,
-  unauthorized,
+  responseAccountCreated,
+  responseEmailConflict,
+  responseExternalBadGateway,
+  responseInvalidBody,
+  responseInvalidLogin,
+  responseLoginSuccessful,
+  responseLogoutSuccessful,
+  responseNotImplemented,
+  responsePasswordChanged,
+  responseServerError,
+  responseUnauthorized,
 } from '@src/helpers/apiResponses';
 import { NodeEnvs } from '@src/constants/misc';
 
@@ -63,12 +63,12 @@ export function _handleNotOkay(res: Response, error: number): unknown {
   if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error, true);
 
   if (error >= (HttpStatusCode.InternalServerError as number))
-    return externalBadGateway(res);
+    return responseExternalBadGateway(res);
 
   if (error === (HttpStatusCode.Unauthorized as number))
-    return unauthorized(res);
+    return responseUnauthorized(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 /*
@@ -81,29 +81,30 @@ export async function authLogin(
   const { email, password } = req.body;
 
   if (typeof email !== 'string' || typeof password !== 'string')
-    return invalidLogin(res);
+    return responseInvalidLogin(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!user) return invalidLogin(res);
+  if (!user) return responseInvalidLogin(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return invalidLogin(res);
+  if (!isCorrect) return responseInvalidLogin(res);
 
   // check userInfo table for user
   const userInfo = await getUserInfo(db, user.id);
   if (!userInfo)
     if (!(await insertUserInfo(db, user.id, new UserInfo({ userId: user.id }))))
-      return serverError(res);
+      return responseServerError(res);
 
   // create session and save it
-  if (await createSaveSession(res, user.id)) return loginSuccessful(res);
+  if (await createSaveSession(res, user.id))
+    return responseLoginSuccessful(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 export async function authRegister(
@@ -113,16 +114,17 @@ export async function authRegister(
   const { email, password } = req.body;
 
   if (typeof password !== 'string' || typeof email !== 'string')
-    return invalidBody(res);
+    return responseInvalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!!user) return emailConflict(res);
+  if (!!user) return responseEmailConflict(res);
 
-  if (!checkEmail(email) || password.length < 8) return invalidBody(res);
+  if (!checkEmail(email) || password.length < 8)
+    return responseInvalidBody(res);
 
   // create user
   const userId = await insertUser(
@@ -133,12 +135,13 @@ export async function authRegister(
       pwdHash: saltPassword(password),
     }),
   );
-  if (userId === -1n) return serverError(res);
+  if (userId === -1n) return responseServerError(res);
 
   // create session and save it
-  if (await createSaveSession(res, BigInt(userId))) return accountCreated(res);
+  if (await createSaveSession(res, BigInt(userId)))
+    return responseAccountCreated(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 export async function authChangePassword(
@@ -148,35 +151,35 @@ export async function authChangePassword(
   const { password, newPassword } = req.body;
 
   if (typeof password !== 'string' || typeof newPassword !== 'string')
-    return invalidBody(res);
+    return responseInvalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user is logged in
-  if (!req.session?.userId) return serverError(res);
+  if (!req.session?.userId) return responseServerError(res);
   const userId = req.session.userId;
 
   // check if user exists
   const user = await getUser(db, userId);
-  if (!user) return serverError(res);
+  if (!user) return responseServerError(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return invalidLogin(res);
+  if (!isCorrect) return responseInvalidLogin(res);
 
   user.set({ pwdHash: saltPassword(newPassword) });
 
   // update password in ussr
   const result = await updateUser(db, userId, user);
 
-  if (result) return passwordChanged(res);
-  else return serverError(res);
+  if (result) return responsePasswordChanged(res);
+  else return responseServerError(res);
 }
 
 export function authForgotPassword(_: unknown, res: Response): unknown {
   // TODO: implement after SMTP server is set up
-  return notImplemented(res);
+  return responseNotImplemented(res);
 }
 
 export function authGoogle(_: unknown, res: Response): unknown {
@@ -195,7 +198,7 @@ export async function authGoogleCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return invalidBody(res);
+  if (typeof code !== 'string') return responseInvalidBody(res);
 
   try {
     // get access token
@@ -209,12 +212,12 @@ export async function authGoogleCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return serverError(res);
+    if (!accessToken) return responseServerError(res);
 
     // get user info
     response = await axios.get(
@@ -226,7 +229,7 @@ export async function authGoogleCallback(
       },
     );
     const userData = response?.data as GoogleUserData;
-    if (!userData) return serverError(res);
+    if (!userData) return responseServerError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -248,7 +251,8 @@ export async function authGoogleCallback(
       user.set({ googleId: userData.id });
 
       // update user
-      if (!(await updateUser(db, user.id, user))) return serverError(res);
+      if (!(await updateUser(db, user.id, user)))
+        return responseServerError(res);
 
       // check userInfo table for user
       const userInfo = await getUserInfo(db, user.id);
@@ -260,19 +264,19 @@ export async function authGoogleCallback(
             new UserInfo({ userId: user.id }),
           ))
         )
-          return serverError(res);
+          return responseServerError(res);
     }
     // check if user was created
-    if (user.id === -1n) return serverError(res);
+    if (user.id === -1n) return responseServerError(res);
 
     // create session and save it
     if (await createSaveSession(res, BigInt(user.id)))
-      return loginSuccessful(res);
+      return responseLoginSuccessful(res);
 
-    return serverError(res);
+    return responseServerError(res);
   } catch (e) {
     if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
-    return serverError(res);
+    return responseServerError(res);
   }
 }
 
@@ -292,7 +296,7 @@ export async function authGitHubCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return invalidBody(res);
+  if (typeof code !== 'string') return responseInvalidBody(res);
 
   try {
     // get access token
@@ -313,12 +317,12 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return serverError(res);
+    if (!accessToken) return responseServerError(res);
 
     // get user info from GitHub
     response = await axios.get('https://api.github.com/user', {
@@ -330,11 +334,11 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get user data
     const userData = response.data as GitHubUserData;
-    if (!userData) return serverError(res);
+    if (!userData) return responseServerError(res);
 
     // get email from github
     response = await axios.get('https://api.github.com/user/emails', {
@@ -359,7 +363,7 @@ export async function authGitHubCallback(
     userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
 
     // check if email is valid
-    if (userData.email == '') return serverError(res);
+    if (userData.email == '') return responseServerError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -408,7 +412,7 @@ export async function authGitHubCallback(
             }),
           ))
         )
-          return serverError(res);
+          return responseServerError(res);
       } else {
         // update user info
         user.set({
@@ -424,15 +428,16 @@ export async function authGitHubCallback(
 
         // update user info
         if (!(await updateUser(db, user.id, user, userInfo)))
-          return serverError(res);
+          return responseServerError(res);
       }
     }
 
     // create session and save it
-    if (await createSaveSession(res, user.id)) return loginSuccessful(res);
+    if (await createSaveSession(res, user.id))
+      return responseLoginSuccessful(res);
   } catch (e) {
     if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
-    return serverError(res);
+    return responseServerError(res);
   }
 }
 
@@ -440,12 +445,12 @@ export async function authLogout(
   req: RequestWithSession,
   res: Response,
 ): Promise<unknown> {
-  if (!req.session) return serverError(res);
+  if (!req.session) return responseServerError(res);
 
   // delete session and set cookie to expire
   if (!(await deleteClearSession(res, req.session.token)))
-    return serverError(res);
+    return responseServerError(res);
 
   // return success
-  return logoutSuccessful(res);
+  return responseLogoutSuccessful(res);
 }

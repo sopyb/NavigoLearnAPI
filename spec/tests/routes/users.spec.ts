@@ -4,6 +4,8 @@ import app from '@src/server';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
 import { CreatedUser } from '@spec/types/tests/CreatedUser';
 import JSONStringify from '@src/util/JSONStringify';
+import { ResUserProfile } from '@src/types/response/ResUserProfile';
+import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 
 // ! Get User Tests
 describe('Get User Tests', () => {
@@ -24,7 +26,7 @@ describe('Get User Tests', () => {
       .expect(({ body }) => {
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
-        // TODO: check for type to be right
+        expect(ResUserProfile.isProfile(body.data)).toBe(true);
       });
   });
 
@@ -36,7 +38,7 @@ describe('Get User Tests', () => {
       .expect(({ body }) => {
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
-        // TODO: check for type to be right
+        expect(ResUserProfile.isProfile(body.data)).toBe(true);
       });
   });
 
@@ -46,8 +48,11 @@ describe('Get User Tests', () => {
       .expect(httpStatusCodes.OK)
       .expect(({ body }) => {
         expect(body.success).toBe(true);
+        expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
         expect(body.data).toEqual(
-          JSON.parse(JSONStringify(user.user.toObject())),
+          JSON.parse(
+            JSONStringify(new ResUserMiniProfile(user.user.toObject())),
+          ),
         );
       });
   });
@@ -60,8 +65,11 @@ describe('Get User Tests', () => {
       .expect(({ body }) => {
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
+        expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
         expect(body.data).toEqual(
-          JSON.parse(JSONStringify(user.user.toObject())),
+          JSON.parse(
+            JSONStringify(new ResUserMiniProfile(user.user.toObject())),
+          ),
         );
       });
   });

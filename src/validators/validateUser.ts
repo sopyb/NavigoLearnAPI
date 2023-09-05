@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
-import { invalidParameters } from '@src/helpers/apiResponses';
+import { responseInvalidParameters } from '@src/helpers/apiResponses';
 
 export interface RequestWithTargetUserId extends RequestWithSession {
   targetUserId?: bigint;
@@ -24,7 +24,7 @@ export default function validateUser(
     req.issuerUserId = BigInt(req.session?.userId ?? -1n);
 
     // if userId is -1n, return error
-    if (req.targetUserId === -1n) return invalidParameters(res);
+    if (req.targetUserId === -1n) return responseInvalidParameters(res);
 
     // if ownUserOnly is true, set targetUserId to issuerUserId
     if (req.issuerUserId !== req.targetUserId && ownUserOnly)

@@ -1,13 +1,15 @@
 import DatabaseDriver from '@src/util/DatabaseDriver';
 import { IUserInfo, UserInfo } from '@src/types/models/UserInfo';
 import { IUser, User } from '@src/types/models/User';
+import { Roadmap } from '@src/types/models/Roadmap';
 
 /*
  * Interfaces
  */
 export interface UserStats {
   roadmapsCount: bigint;
-  issueCount: bigint;
+  roadmapsViews: bigint;
+  roadmapsLikes: bigint;
   followerCount: bigint;
   followingCount: bigint;
 }
@@ -65,16 +67,45 @@ export async function getUserStats(
   userId: bigint,
 ): Promise<UserStats> {
   const roadmapsCount = await db.countWhere('roadmaps', 'userId', userId);
-  const issueCount = await db.countWhere('issues', 'userId', userId);
+  const roadmapsViews = await db.countQuery(
+    `
+        SELECT SUM(rl.value) AS 'result'
+        FROM users u
+                 LEFT JOIN roadmaps r ON u.id = r.userId
+                 LEFT JOIN roadmapLikes rl ON r.id = rl.roadmapId
+        WHERE u.id = ?;
+    `,
+    [userId],
+  );
+  const roadmapsLikes = await db.countQuery(
+    `
+        SELECT COUNT(rv.userId) AS 'result'
+        FROM roadmaps r
+                 JOIN roadmapViews rv ON r.id = rv.roadmapId
+        WHERE rv.full = 1
+          AND r.userId = ?;
+    `,
+    [userId],
+  );
   const followerCount = await db.countWhere('followers', 'userId', userId);
   const followingCount = await db.countWhere('followers', 'followerId', userId);
 
   return {
     roadmapsCount,
-    issueCount,
+    roadmapsViews,
+    roadmapsLikes,
     followerCount,
     followingCount,
   };
+}
+
+export async function getUserRoadmaps(
+  db: DatabaseDriver,
+  userId: bigint,
+): Promise<Roadmap[] | null> {
+  const roadmaps = await db.getAllWhere<Roadmap>('roadmaps', 'userId', userId);
+  if (!roadmaps) return null;
+  return roadmaps.map((roadmap) => new Roadmap(roadmap));
 }
 
 export async function isUserFollowing(

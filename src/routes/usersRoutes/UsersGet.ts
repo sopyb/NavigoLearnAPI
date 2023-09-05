@@ -3,14 +3,11 @@ import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import DatabaseDriver from '@src/util/DatabaseDriver';
-import { User } from '@src/types/models/User';
-import { Roadmap } from '@src/types/models/Roadmap';
-import { Issue } from '@src/types/models/Issue';
 import { Follower } from '@src/types/models/Follower';
-import { addView } from '@src/routes/roadmapsRoutes/RoadmapsGet';
 import validateSession from '@src/validators/validateSession';
 import validateUser from '@src/validators/validateUser';
 import {
+  userGetRoadmaps,
   usersGetMiniProfile,
   usersGetProfile,
 } from '@src/controllers/usersController';
@@ -37,107 +34,7 @@ UsersGet.get(Paths.Users.Get.Profile, validateUser(), usersGetProfile);
 
 UsersGet.get(Paths.Users.Get.MiniProfile, validateUser(), usersGetMiniProfile);
 
-UsersGet.get(
-  Paths.Users.Get.UserRoadmaps,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-    const viewerId = req.session?.userId || BigInt(-1);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-
-    const db = new DatabaseDriver();
-
-    const roadmaps = await db.getAllWhere<Roadmap>(
-      'roadmaps',
-      'ownerId',
-      userId,
-    );
-
-    if (!roadmaps) {
-      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-      return;
-    }
-
-    // get user
-    const user = await db.get<User>('users', userId);
-
-    if (!user) {
-      res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'User not found' });
-      return;
-    }
-
-    const parsedRoadmaps: Roadmap[] = [];
-
-    // convert roadmaps to RoadmapMini
-    for (let i = 0; i < roadmaps.length; i++) {
-      const roadmap = roadmaps[i];
-      await addView(viewerId, roadmap.id, false);
-      parsedRoadmaps[i] = {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        id: roadmap.id.toString(),
-        name: roadmap.name,
-        description: roadmap.description || '',
-        likes: (
-          await db.countWhere('roadmapLikes', 'roadmapId', roadmap.id)
-        ).toString(),
-        isLiked: !!(await db.getWhere(
-          'roadmapLikes',
-          'userId',
-          viewerId,
-          'roadmapId',
-          roadmap.id,
-        )),
-        ownerName: user.name,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        userId: roadmap.userId.toString(),
-      };
-    }
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'roadmaps',
-      userId: userId.toString(),
-      roadmaps: parsedRoadmaps,
-    });
-  },
-);
-
-UsersGet.get(
-  Paths.Users.Get.UserIssues,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-
-    const db = new DatabaseDriver();
-
-    const issues = await db.getAllWhere<Issue>('issues', 'userId', userId);
-
-    res.status(HttpStatusCodes.OK).json(
-      JSON.stringify(
-        {
-          type: 'issues',
-          userId: userId.toString(),
-          issues: issues,
-        },
-        (_, value) => {
-          if (typeof value === 'bigint') {
-            return value.toString();
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return value;
-        },
-      ),
-    );
-  },
-);
+UsersGet.get(Paths.Users.Get.UserRoadmaps, validateUser(), userGetRoadmaps);
 
 UsersGet.get(
   Paths.Users.Get.UserFollowers,
@@ -210,106 +107,6 @@ UsersGet.get(
         },
       ),
     );
-  },
-);
-
-UsersGet.get(
-  Paths.Users.Get.RoadmapCount,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-
-    // get database
-    const db = new DatabaseDriver();
-
-    // get roadmap count
-    const roadmapCount = await db.countWhere('roadmaps', 'ownerId', userId);
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'roadmapCount',
-      userId: userId.toString(),
-      roadmapCount: roadmapCount.toString(),
-    });
-  },
-);
-
-UsersGet.get(
-  Paths.Users.Get.IssueCount,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No user specified' });
-
-    // get database
-    const db = new DatabaseDriver();
-
-    // get issue count
-    const issueCount = await db.countWhere('issues', 'userId', userId);
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'issueCount',
-      userId: userId.toString(),
-      issueCount: issueCount.toString(),
-    });
-  },
-);
-
-UsersGet.get(
-  Paths.Users.Get.FollowerCount,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
-
-    // get database
-    const db = new DatabaseDriver();
-
-    // get follower count
-    const followerCount = await db.countWhere('followers', 'userId', userId);
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'followerCount',
-      userId: userId.toString(),
-      followerCount: followerCount.toString(),
-    });
-  },
-);
-
-UsersGet.get(
-  Paths.Users.Get.FollowingCount,
-  async (req: RequestWithSession, res) => {
-    const userId = getUserId(req);
-
-    if (userId === undefined)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'No userDisplay specified' });
-
-    // get database
-    const db = new DatabaseDriver();
-
-    // get the following count
-    const followingCount = await db.countWhere(
-      'followers',
-      'followerId',
-      userId,
-    );
-
-    res.status(HttpStatusCodes.OK).json({
-      type: 'followingCount',
-      userId: userId.toString(),
-      followingCount: followingCount.toString(),
-    });
   },
 );
 

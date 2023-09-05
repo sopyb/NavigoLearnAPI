@@ -86,6 +86,10 @@ interface CountDataPacket extends RowDataPacket {
   'COUNT(*)': bigint;
 }
 
+interface CountQueryPacket extends RowDataPacket {
+  result: bigint;
+}
+
 interface ResultSetHeader {
   fieldCount: number;
   affectedRows: number;
@@ -336,6 +340,11 @@ class Database {
     return parseResult(result) as T[] | null;
   }
 
+  public async countQuery(sql: string, params?: unknown[]): Promise<bigint> {
+    const result = await this._query(sql, params);
+    return (result as CountQueryPacket[])[0]['result'] || 0n;
+  }
+
   public async count(table: string): Promise<bigint> {
     // create sql query - select count(*) from table
     const sql = `SELECT COUNT(*)
@@ -368,7 +377,7 @@ class Database {
     ...values: unknown[]
   ): Promise<bigint> {
     const queryBuilderResult = this._buildWhereQuery(like, ...values);
-    if (!queryBuilderResult) return BigInt(0);
+    if (!queryBuilderResult) return 0n;
 
     const sql = `SELECT COUNT(*)
                  FROM ${table}
