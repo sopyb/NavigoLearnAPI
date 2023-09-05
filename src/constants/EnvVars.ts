@@ -42,6 +42,7 @@ interface IEnvVars {
 
 // Config environment variables
 /* eslint-disable no-process-env */
+/* eslint-disable node/no-process-env */
 const EnvVars = {
   NodeEnv: process.env.NODE_ENV ?? '',
   Port: process.env.PORT ?? 0,
@@ -77,6 +78,7 @@ const EnvVars = {
   },
 } as Readonly<IEnvVars>;
 /* eslint-enable no-process-env */
+/* eslint-enable node/no-process-env */
 
 export default EnvVars;
 export { EnvVars };

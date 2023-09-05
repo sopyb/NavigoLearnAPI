@@ -38,6 +38,7 @@
       "warn",
       "single"
     ],
+    "no-process-env": "error",
     "node/no-process-env": "error",
     "node/no-unsupported-features/es-syntax": [
       "error",
