@@ -1,11 +1,12 @@
 import { IRoadmap, RoadmapTopic } from '@src/types/models/Roadmap';
 import { IUser } from '@src/types/models/User';
 
-export interface IResRoadmap {
+export interface IResFullRoadmap {
   readonly id: bigint;
   readonly name: string;
   readonly description: string;
   readonly topic: RoadmapTopic;
+  readonly data: string;
   readonly isPublic: boolean;
   readonly isDraft: boolean;
   readonly createdAt: Date;
@@ -24,11 +25,12 @@ export interface IResRoadmap {
   readonly isLiked: bigint;
 }
 
-export class ResRoadmap implements IResRoadmap {
+export class ResFullRoadmap implements IResFullRoadmap {
   public readonly id: bigint;
   public readonly name: string;
   public readonly description: string;
   public readonly topic: RoadmapTopic;
+  public readonly data: string;
   public readonly isFeatured: boolean;
   public readonly isPublic: boolean;
   public readonly isDraft: boolean;
@@ -50,6 +52,7 @@ export class ResRoadmap implements IResRoadmap {
       name,
       description,
       topic,
+      data,
       userId,
       isFeatured,
       isPublic,
@@ -66,6 +69,7 @@ export class ResRoadmap implements IResRoadmap {
     this.name = name;
     this.description = description;
     this.topic = topic;
+    this.data = data;
     this.isFeatured = isFeatured;
     this.isPublic = isPublic;
     this.isDraft = isDraft;
@@ -81,7 +85,7 @@ export class ResRoadmap implements IResRoadmap {
     this.isLiked = isLiked;
   }
 
-  public static isRoadmap(obj: unknown): obj is IResRoadmap {
+  public static isRoadmap(obj: unknown): obj is IResFullRoadmap {
     return (
       typeof obj === 'object' &&
       obj !== null &&
@@ -89,6 +93,7 @@ export class ResRoadmap implements IResRoadmap {
       'name' in obj &&
       'description' in obj &&
       'topic' in obj &&
+        'data' in obj &&
       'isFeatured' in obj &&
       'isPublic' in obj &&
       'isDraft' in obj &&

@@ -371,6 +371,52 @@ class Database {
     return parseResult(result) as T[] | null;
   }
 
+  public async sum(table: string, column: string): Promise<bigint> {
+    const sql = `SELECT SUM(${column})
+                 FROM ${table}`;
+    const result = await this._query(sql);
+
+    return (result as CountDataPacket[])[0][`SUM(${column})`] as bigint || 0n;
+  }
+
+  public async sumQuery(sql: string, params?: unknown[]): Promise<bigint> {
+    const result = await this._query(sql, params);
+    return (result as CountQueryPacket[])[0]['result'] || 0n;
+  }
+
+  public async sumWhere(
+    table: string,
+    column: string,
+    ...values: unknown[]
+  ): Promise<bigint> {
+    return await this._sumWhere(table, column, false, ...values);
+  }
+
+  public async sumWhereLike(
+    table: string,
+    column: string,
+    ...values: unknown[]
+  ): Promise<bigint> {
+    return await this._sumWhere(table, column, true, ...values);
+  }
+
+  protected async _sumWhere(
+    table: string,
+    column: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<bigint> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return 0n;
+
+    const sql = `SELECT SUM(${column})
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
+
+    return (result as CountDataPacket[])[0][`SUM(${column})`] as bigint || 0n;
+  }
+
   public async countQuery(sql: string, params?: unknown[]): Promise<bigint> {
     const result = await this._query(sql, params);
     return (result as CountQueryPacket[])[0]['result'] || 0n;

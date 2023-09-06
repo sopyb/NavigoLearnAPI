@@ -5,6 +5,7 @@ import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
   responseNotAllowed,
+  responseRoadmap,
   responseRoadmapAlreadyLiked,
   responseRoadmapCreated,
   responseRoadmapDeleted,
@@ -13,13 +14,18 @@ import {
   responseRoadmapRated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
-  getRoadmap,
-  getRoadmapLike, insertRoadmap,
+  getRoadmapData,
+  getRoadmapLike,
+  insertRoadmap,
   insertRoadmapLike,
   updateRoadmapLike,
 } from '@src/helpers/databaseManagement';
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Roadmap, RoadmapTopic } from '@src/types/models/Roadmap';
+import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
+import { IUser } from '@src/types/models/User';
+import { addRoadmapView } from '@src/util/Views';
+import logger from 'jet-logger';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
@@ -49,7 +55,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic | undefined,
     userId,
     isPublic: isPublic as boolean,
-    isDraft: isDraft as boolean ,
+    isDraft: isDraft as boolean,
     data: data as string,
   });
 
@@ -58,6 +64,48 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (id !== -1n) return responseRoadmapCreated(res, id);
 
   return responseServerError(res);
+}
+
+export async function getRoadmap(req: RequestWithSession, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+  if (!roadmap) return responseRoadmapNotFound(res);
+
+  const user = await db.get<IUser>('users', roadmap.userId);
+  if (!user) return responseServerError(res);
+  const likeCount = await db.countWhere(
+    'roadmapLikes',
+    'roadmapId',
+    roadmap.id,
+  );
+  const viewCount = await db.countWhere(
+    'roadmapViews',
+    'roadmapId',
+    roadmap.id,
+  );
+  const isLiked = await db.sumWhere(
+    'roadmapLikes',
+    'roadmapId',
+    roadmap.id,
+    'userId',
+    userId,
+  );
+
+  if (!roadmap.isPublic && roadmap.userId !== userId)
+    return responseNotAllowed(res);
+
+  addRoadmapView(db, roadmap.id, userId).catch((e) => logger.err(e));
+
+  return responseRoadmap(
+    res,
+    new ResFullRoadmap(roadmap, user, likeCount, viewCount, isLiked),
+  );
 }
 
 export async function deleteRoadmap(req: RequestWithSession, res: Response) {
@@ -69,7 +117,7 @@ export async function deleteRoadmap(req: RequestWithSession, res: Response) {
 
   const db = new Database();
 
-  const roadmap = await getRoadmap(db, BigInt(roadmapId));
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
 
   if (!roadmap) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);

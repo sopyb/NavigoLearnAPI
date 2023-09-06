@@ -202,7 +202,7 @@ export async function updateUserInfo(
   return await db.update('userInfo', userId, userInfo);
 }
 
-export async function getRoadmap(
+export async function getRoadmapData(
   db: DatabaseDriver,
   roadmapId: bigint,
 ): Promise<Roadmap | null> {

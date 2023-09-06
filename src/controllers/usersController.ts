@@ -131,20 +131,19 @@ export async function userGetRoadmaps(
 
   const likes: bigint[] = [];
   const views: bigint[] = [];
-  const isLiked: boolean[] = [];
+  const isLiked: bigint[] = [];
 
   for (const roadmap of roadmaps) {
     likes.push(await db.countWhere('roadmapLikes', 'roadmapId', roadmap.id));
     views.push(await db.countWhere('roadmapViews', 'roadmapId', roadmap.id));
     isLiked.push(
-      !!(
-        await db.countWhere(
-          'roadmapLikes',
-          'roadmapId',
-          roadmap.id,
-          'userId',
-          req.issuerUserId,
-        )
+      await db.sumWhere(
+        'roadmapLikes',
+        'value',
+        'roadmapId',
+        roadmap.id,
+        'userId',
+        req.issuerUserId,
       ),
     );
   }
