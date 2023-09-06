@@ -4,7 +4,6 @@ import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import Database from '@src/util/DatabaseDriver';
 import { Roadmap } from '@src/types/models/Roadmap';
-import { User } from '@src/types/models/User';
 import validateSession from '@src/middleware/validators/validateSession';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
@@ -58,7 +57,7 @@ async function isRoadmapValid(
 RoadmapsUpdate.post('*', validateSession);
 
 RoadmapsUpdate.post(
-  Paths.Roadmaps.Update.Title,
+  Paths.Roadmaps.Update.Name,
   async (req: RequestWithSession, res) => {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -171,47 +170,47 @@ RoadmapsUpdate.post(
   },
 );
 
-RoadmapsUpdate.post(
-  Paths.Roadmaps.Update.Owner,
-  async (req: RequestWithSession, res) => {
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
-    const newOwnerId = BigInt(req?.body?.newOwnerId || -1);
-    if (newOwnerId < 0)
-      return res
-        .status(HttpStatusCodes.BAD_REQUEST)
-        .json({ error: 'Roadmap new owner id is missing.' });
-
-    // check if the roadmap is valid
-    const data = await isRoadmapValid(req, res);
-    if (!data) return;
-    const { roadmap } = data;
-
-    // get database connection
-    const db = new Database();
-
-    // check if the new owner exists
-    const newOwner = await db.get<User>('users', BigInt(newOwnerId));
-    if (!newOwner)
-      return res
-        .status(HttpStatusCodes.NOT_FOUND)
-        .json({ error: 'New owner does not exist.' });
-
-    // update roadmap
-    roadmap.set({
-      userId: newOwnerId,
-      updatedAt: new Date(),
-    });
-    const success = await db.update('roadmaps', roadmap.id, roadmap);
-
-    if (!success)
-      return res
-        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Roadmap could not be updated.' });
-
-    return res.status(HttpStatusCodes.OK).json({ success: true });
-  },
-);
+// RoadmapsUpdate.post(
+//   Paths.Roadmaps.Update.Owner,
+//   async (req: RequestWithSession, res) => {
+// eslint-disable-next-line max-len
+//     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
+//     const newOwnerId = BigInt(req?.body?.newOwnerId || -1);
+//     if (newOwnerId < 0)
+//       return res
+//         .status(HttpStatusCodes.BAD_REQUEST)
+//         .json({ error: 'Roadmap new owner id is missing.' });
+//
+//     // check if the roadmap is valid
+//     const data = await isRoadmapValid(req, res);
+//     if (!data) return;
+//     const { roadmap } = data;
+//
+//     // get database connection
+//     const db = new Database();
+//
+//     // check if the new owner exists
+//     const newOwner = await db.get<User>('users', BigInt(newOwnerId));
+//     if (!newOwner)
+//       return res
+//         .status(HttpStatusCodes.NOT_FOUND)
+//         .json({ error: 'New owner does not exist.' });
+//
+//     // update roadmap
+//     roadmap.set({
+//       userId: newOwnerId,
+//       updatedAt: new Date(),
+//     });
+//     const success = await db.update('roadmaps', roadmap.id, roadmap);
+//
+//     if (!success)
+//       return res
+//         .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+//         .json({ error: 'Roadmap could not be updated.' });
+//
+//     return res.status(HttpStatusCodes.OK).json({ success: true });
+//   },
+// );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Data,
