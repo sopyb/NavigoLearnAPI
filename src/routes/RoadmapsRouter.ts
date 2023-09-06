@@ -2,7 +2,6 @@ import Paths from '@src/constants/Paths';
 import { Router } from 'express';
 import GetRouter from '@src/routes/roadmapsRoutes/RoadmapsGet';
 import UpdateRouter from '@src/routes/roadmapsRoutes/RoadmapsUpdate';
-import RoadmapIssues from '@src/routes/roadmapsRoutes/RoadmapIssues';
 import validateSession from '@src/middleware/validators/validateSession';
 import {
   createRoadmap,
@@ -24,7 +23,6 @@ RoadmapsRouter.post(
 
 RoadmapsRouter.use(Paths.Roadmaps.Get.Base, GetRouter);
 RoadmapsRouter.use(Paths.Roadmaps.Update.Base, UpdateRouter);
-RoadmapsRouter.use(Paths.Roadmaps.Issues.Base, RoadmapIssues);
 
 RoadmapsRouter.delete(Paths.Roadmaps.Delete, validateSession, deleteRoadmap);
 

@@ -52,57 +52,6 @@ create table if not exists roadmaps
             on delete cascade
 );
 
-create table if not exists issues
-(
-    id        bigint auto_increment
-        primary key,
-    roadmapId bigint                                 not null,
-    userId    bigint                                 not null,
-    open      tinyint(1) default 1                   not null,
-    title     varchar(255)                           not null,
-    content   text                                   null,
-    createdAt timestamp  default current_timestamp() null,
-    updatedAt timestamp  default current_timestamp() null on update current_timestamp(),
-    constraint issues_roadmapId_fk
-        foreign key (roadmapId) references roadmaps (id)
-            on delete cascade,
-    constraint issues_userId_fk
-        foreign key (userId) references users (id)
-            on delete cascade
-);
-
-create table if not exists issueComments
-(
-    id        bigint auto_increment
-        primary key,
-    issueId   bigint                                not null,
-    userId    bigint                                not null,
-    content   text                                  not null,
-    createdAt timestamp default current_timestamp() not null,
-    updatedAt timestamp default current_timestamp() not null on update current_timestamp(),
-    constraint issueComments_issuesId_fk
-        foreign key (issueId) references issues (id)
-            on delete cascade,
-    constraint issueComments_usersId_fk
-        foreign key (userId) references users (id)
-            on delete cascade
-);
-
-create index if not exists issueComments_issueId_createdAt_index
-    on issueComments (issueId, createdAt);
-
-create index if not exists issueComments_userid_index
-    on issueComments (userId);
-
-create index if not exists issues_roadmapId_createdAt_index
-    on issues (roadmapId asc, createdAt desc);
-
-create index if not exists issues_title_index
-    on issues (title);
-
-create index if not exists issues_userId_index
-    on issues (userId);
-
 create table if not exists roadmapLikes
 (
     id        bigint auto_increment
