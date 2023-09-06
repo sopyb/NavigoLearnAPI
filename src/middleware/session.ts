@@ -13,6 +13,12 @@ export interface ISession {
   expires: Date;
 }
 
+interface RequestWithCookies extends RequestWithSession {
+    cookies: {
+        [COOKIE_NAME: string]: string | undefined;
+    }
+}
+
 export interface RequestWithSession extends Request {
   session?: ISession;
 }
@@ -45,13 +51,12 @@ async function extendSession(
 }
 
 export async function sessionMiddleware(
-  req: RequestWithSession,
+  req: RequestWithCookies,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   // get token cookie
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const token = req?.cookies?.[COOKIE_NAME] as string;
+  const token = req.cookies?.[COOKIE_NAME] ?? '';
 
   if (!token) {
     req.session = undefined;
