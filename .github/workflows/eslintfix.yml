@@ -19,16 +19,20 @@ jobs:
           npm install --save-dev @microsoft/eslint-formatter-sarif@2.1.7
 
       - name: Run ESLint with --fix
-        run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix || echo "ESLint fix failed"
+        run: npx eslint . --config .eslintrc.json --ext .js,.jsx,.ts,.tsx --fix
+        continue-on-error: true
 
       - name: Commit files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "Fix ESLint issues" || echo "No changes to commit"
+          git commit -a -m "Fix ESLint issues"
+        continue-on-error: true
 
       - name: Push changes
         uses: ad-m/github-push-action@29f05e01bb17e6f28228b47437e03a7b69e1f9ef
         with:
           branch: ${{ github.ref_name }}
           github_token: ${{ secrets.PAT }}
+        continue-on-error: true
+
