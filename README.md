@@ -4,7 +4,6 @@
 |:------------:|:--------------------------------------------------------------------------------------------------------:|
 |  Production  |   ![Build Status](https://github.com/navigolearn/api/actions/workflows/test.yml/badge.svg?branch=prod)   |
 |    Master    |  ![Build Status](https://github.com/navigolearn/api/actions/workflows/test.yml/badge.svg?branch=master)  |
-|   Refactor   | ![Build Status](https://github.com/navigolearn/api/actions/workflows/test.yml/badge.svg?branch=Refactor) |
 
 ## ! This is a work in progress !
 
