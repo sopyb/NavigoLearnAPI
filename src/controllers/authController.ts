@@ -1,14 +1,14 @@
-import { RequestWithBody } from '@src/validators/validateBody';
+import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Response } from 'express';
-import DatabaseDriver from '@src/util/DatabaseDriver';
-import User from '@src/models/User';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
+import { User } from '@src/types/models/User';
 import axios, { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';
 import {
   createSaveSession,
   deleteClearSession,
 } from '@src/util/sessionManager';
-import { UserInfo } from '@src/models/UserInfo';
+import { UserInfo } from '@src/types/models/UserInfo';
 import { checkEmail } from '@src/util/EmailUtil';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
@@ -20,21 +20,23 @@ import {
   insertUser,
   insertUserInfo,
   updateUser,
-  updateUserInfo,
 } from '@src/helpers/databaseManagement';
+import { NodeEnvs } from '@src/constants/misc';
 import {
-  accountCreated,
-  emailConflict,
-  externalBadGateway,
-  invalidBody,
-  invalidLogin,
-  loginSuccessful,
-  logoutSuccessful,
-  notImplemented,
-  passwordChanged,
-  serverError,
-  unauthorized,
-} from '@src/helpers/apiResponses';
+  responseExternalBadGateway,
+  responseInvalidBody,
+  responseNotImplemented,
+  responseServerError,
+  responseUnauthorized,
+} from '@src/helpers/responses/generalResponses';
+import {
+  responseAccountCreated,
+  responseEmailConflict,
+  responseInvalidLogin,
+  responseLoginSuccessful,
+  responseLogoutSuccessful,
+  responsePasswordChanged,
+} from '@src/helpers/responses/authResponses';
 
 /*
  * Interfaces
@@ -60,15 +62,15 @@ interface GitHubUserData {
  * Helpers
  */
 export function _handleNotOkay(res: Response, error: number): unknown {
-  if (EnvVars.NodeEnv !== 'test') logger.err(error, true);
+  if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(error, true);
 
   if (error >= (HttpStatusCode.InternalServerError as number))
-    return externalBadGateway(res);
+    return responseExternalBadGateway(res);
 
   if (error === (HttpStatusCode.Unauthorized as number))
-    return unauthorized(res);
+    return responseUnauthorized(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 /*
@@ -81,29 +83,30 @@ export async function authLogin(
   const { email, password } = req.body;
 
   if (typeof email !== 'string' || typeof password !== 'string')
-    return invalidLogin(res);
+    return responseInvalidLogin(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!user) return invalidLogin(res);
+  if (!user) return responseInvalidLogin(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return invalidLogin(res);
+  if (!isCorrect) return responseInvalidLogin(res);
 
   // check userInfo table for user
   const userInfo = await getUserInfo(db, user.id);
   if (!userInfo)
-    if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
-      return serverError(res);
+    if (!(await insertUserInfo(db, user.id, new UserInfo({ userId: user.id }))))
+      return responseServerError(res);
 
   // create session and save it
-  if (await createSaveSession(res, user.id)) return loginSuccessful(res);
+  if (await createSaveSession(res, user.id))
+    return responseLoginSuccessful(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 export async function authRegister(
@@ -113,30 +116,34 @@ export async function authRegister(
   const { email, password } = req.body;
 
   if (typeof password !== 'string' || typeof email !== 'string')
-    return invalidBody(res);
+    return responseInvalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user exists
   const user = await getUserByEmail(db, email);
-  if (!!user) return emailConflict(res);
+  if (!!user) return responseEmailConflict(res);
 
-  if (!checkEmail(email) || password.length < 8) return invalidBody(res);
+  if (!checkEmail(email) || password.length < 8)
+    return responseInvalidBody(res);
 
   // create user
   const userId = await insertUser(
     db,
-    email,
-    email.split('@')[0],
-    saltPassword(password),
+    new User({
+      email,
+      name: email.split('@')[0],
+      pwdHash: saltPassword(password),
+    }),
   );
-  if (userId === -1n) return serverError(res);
+  if (userId === -1n) return responseServerError(res);
 
   // create session and save it
-  if (await createSaveSession(res, BigInt(userId))) return accountCreated(res);
+  if (await createSaveSession(res, BigInt(userId)))
+    return responseAccountCreated(res);
 
-  return serverError(res);
+  return responseServerError(res);
 }
 
 export async function authChangePassword(
@@ -146,39 +153,35 @@ export async function authChangePassword(
   const { password, newPassword } = req.body;
 
   if (typeof password !== 'string' || typeof newPassword !== 'string')
-    return invalidBody(res);
+    return responseInvalidBody(res);
 
   // get database
   const db = new DatabaseDriver();
 
   // check if user is logged in
-  if (!req.session?.userId) return serverError(res);
+  if (!req.session?.userId) return responseServerError(res);
   const userId = req.session.userId;
 
   // check if user exists
   const user = await getUser(db, userId);
-  if (!user) return serverError(res);
+  if (!user) return responseServerError(res);
 
   // check if password is correct
   const isCorrect = comparePassword(password, user.pwdHash || '');
-  if (!isCorrect) return invalidLogin(res);
+  if (!isCorrect) return responseInvalidLogin(res);
 
-  user.pwdHash = saltPassword(newPassword);
+  user.set({ pwdHash: saltPassword(newPassword) });
 
   // update password in ussr
   const result = await updateUser(db, userId, user);
 
-  if (result) return passwordChanged(res);
-  else return serverError(res);
+  if (result) return responsePasswordChanged(res);
+  else return responseServerError(res);
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export async function authForgotPassword(
-  _: unknown,
-  res: Response,
-): Promise<unknown> {
+export function authForgotPassword(_: unknown, res: Response): unknown {
   // TODO: implement after SMTP server is set up
-  return notImplemented(res);
+  return responseNotImplemented(res);
 }
 
 export function authGoogle(_: unknown, res: Response): unknown {
@@ -197,7 +200,7 @@ export async function authGoogleCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return invalidBody(res);
+  if (typeof code !== 'string') return responseInvalidBody(res);
 
   try {
     // get access token
@@ -211,12 +214,12 @@ export async function authGoogleCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return serverError(res);
+    if (!accessToken) return responseServerError(res);
 
     // get user info
     response = await axios.get(
@@ -228,7 +231,7 @@ export async function authGoogleCallback(
       },
     );
     const userData = response?.data as GoogleUserData;
-    if (!userData) return serverError(res);
+    if (!userData) return responseServerError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -238,32 +241,44 @@ export async function authGoogleCallback(
 
     if (!user) {
       // create user
-      user = new User(userData.name, userData.email, 0, '');
-      user.googleId = userData.id;
-      user.id = await insertUser(db, userData.email, userData.name, '');
+      user = new User({
+        name: userData.name,
+        email: userData.email,
+        googleId: userData.id,
+      });
+      user.set({
+        id: await insertUser(db, user),
+      });
     } else {
-      user.googleId = userData.id;
+      user.set({ googleId: userData.id });
 
       // update user
-      if (!(await updateUser(db, user.id, user))) return serverError(res);
+      if (!(await updateUser(db, user.id, user)))
+        return responseServerError(res);
 
       // check userInfo table for user
       const userInfo = await getUserInfo(db, user.id);
       if (!userInfo)
-        if (!(await insertUserInfo(db, user.id, new UserInfo(user.id))))
-          return serverError(res);
+        if (
+          !(await insertUserInfo(
+            db,
+            user.id,
+            new UserInfo({ userId: user.id }),
+          ))
+        )
+          return responseServerError(res);
     }
     // check if user was created
-    if (user.id === -1n) return serverError(res);
+    if (user.id === -1n) return responseServerError(res);
 
     // create session and save it
     if (await createSaveSession(res, BigInt(user.id)))
-      return loginSuccessful(res);
+      return responseLoginSuccessful(res);
 
-    return serverError(res);
+    return responseServerError(res);
   } catch (e) {
-    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
-    return serverError(res);
+    if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
+    return responseServerError(res);
   }
 }
 
@@ -283,7 +298,7 @@ export async function authGitHubCallback(
 ): Promise<unknown> {
   const code = req.query.code;
 
-  if (typeof code !== 'string') return invalidBody(res);
+  if (typeof code !== 'string') return responseInvalidBody(res);
 
   try {
     // get access token
@@ -304,14 +319,14 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
     const accessToken = data.access_token;
-    if (!accessToken) return serverError(res);
+    if (!accessToken) return responseServerError(res);
 
-    // get user info from github
+    // get user info from GitHub
     response = await axios.get('https://api.github.com/user', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -321,11 +336,11 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (!response.data) return serverError(res);
+    if (!response.data) return responseServerError(res);
 
     // get user data
     const userData = response.data as GitHubUserData;
-    if (!userData) return serverError(res);
+    if (!userData) return responseServerError(res);
 
     // get email from github
     response = await axios.get('https://api.github.com/user/emails', {
@@ -350,7 +365,7 @@ export async function authGitHubCallback(
     userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
 
     // check if email is valid
-    if (userData.email == '') return serverError(res);
+    if (userData.email == '') return responseServerError(res);
 
     // get database
     const db = new DatabaseDriver();
@@ -360,25 +375,27 @@ export async function authGitHubCallback(
 
     if (!user) {
       // create user
-      user = new User(userData.login, userData.email, 0, '');
-      user.githubId = userData.id.toString();
-      user.id = await insertUser(
-        db,
-        userData.email,
-        userData.name || userData.login,
-        '',
-        new UserInfo(
-          -1n,
-          userData.avatar_url,
-          userData.bio,
-          '',
-          userData.blog,
-          '',
-          `https://github.com/${userData.login}`,
+      user = new User({
+        name: userData.name || userData.login,
+        avatar: userData.avatar_url,
+        email: userData.email,
+        githubId: userData.id.toString(),
+      });
+
+      user.set({
+        id: await insertUser(
+          db,
+          user,
+          new UserInfo({
+            userId: user.id,
+            bio: userData.bio,
+            websiteUrl: userData.blog,
+            githubUrl: `https://github.com/${userData.login}`,
+          }),
         ),
-      );
+      });
     } else {
-      user.githubId = userData.id.toString();
+      user.set({ githubId: userData.id.toString() });
       await updateUser(db, user.id, user);
 
       // get user info
@@ -389,36 +406,40 @@ export async function authGitHubCallback(
           !(await insertUserInfo(
             db,
             user.id,
-            new UserInfo(
-              user.id,
-              userData.avatar_url,
-              userData.bio,
-              '',
-              userData.blog,
-              '',
-              `https://github.com/${userData.login}`,
-            ),
+            new UserInfo({
+              userId: user.id,
+              bio: userData.bio,
+              websiteUrl: userData.blog,
+              githubUrl: `https://github.com/${userData.login}`,
+            }),
           ))
-        ) return serverError(res);
+        )
+          return responseServerError(res);
       } else {
-        if (userInfo.bio == '') userInfo.bio = userData.bio;
-        if (userInfo.profilePictureUrl == '')
-          userInfo.profilePictureUrl = userData.avatar_url;
-        if (userInfo.blogUrl == '') userInfo.blogUrl = userData.blog;
-        if (userInfo.githubUrl == '')
-          userInfo.githubUrl = `https://github.com/${userData.login}`;
+        // update user info
+        user.set({
+          avatar: user.avatar || userData.avatar_url,
+        });
+
+        userInfo.set({
+          bio: userInfo.bio || userData.bio,
+          websiteUrl: userInfo.websiteUrl || userData.blog,
+          githubUrl:
+            userInfo.githubUrl || `https://github.com/${userData.login}`,
+        });
 
         // update user info
-        if (!(await updateUserInfo(db, userInfo.id, userInfo)))
-          return serverError(res);
+        if (!(await updateUser(db, user.id, user, userInfo)))
+          return responseServerError(res);
       }
     }
 
     // create session and save it
-    if (await createSaveSession(res, user.id)) return loginSuccessful(res);
+    if (await createSaveSession(res, user.id))
+      return responseLoginSuccessful(res);
   } catch (e) {
-    if (EnvVars.NodeEnv !== 'test') logger.err(e, true);
-    return serverError(res);
+    if (EnvVars.NodeEnv !== NodeEnvs.Test) logger.err(e, true);
+    return responseServerError(res);
   }
 }
 
@@ -426,12 +447,12 @@ export async function authLogout(
   req: RequestWithSession,
   res: Response,
 ): Promise<unknown> {
-  if (!req.session) return serverError(res);
+  if (!req.session) return responseServerError(res);
 
   // delete session and set cookie to expire
   if (!(await deleteClearSession(res, req.session.token)))
-    return serverError(res);
+    return responseServerError(res);
 
   // return success
-  return logoutSuccessful(res);
+  return responseLogoutSuccessful(res);
 }

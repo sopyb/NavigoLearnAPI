@@ -4,9 +4,8 @@
 
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import path from 'path';
 import helmet from 'helmet';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import logger from 'jet-logger';
 import { sessionMiddleware } from '@src/middleware/session';
 
@@ -19,7 +18,6 @@ import EnvVars from '@src/constants/EnvVars';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
 import { NodeEnvs } from '@src/constants/misc';
-import { RouteError } from '@src/other/classes';
 
 // **** Variables **** //
 
@@ -63,28 +61,30 @@ app.use(Paths.Base, BaseRouter);
 
 // if no response is sent, send 404
 app.use((_: Request, res: Response) => {
-  res.status(HttpStatusCodes.NOT_FOUND).json({ error: 'Route not Found' });
+  res
+    .status(HttpStatusCodes.NOT_FOUND)
+    .json({ success: false, message: 'Route not Found' });
 });
 
 // Add error handler
-app.use((err: Error, _: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.err(err, true);
-  let status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
-  if (err instanceof RouteError) {
-    status = err.status;
-  }
-  return res.status(status).json({ error: err.message });
+  res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: err.message,
+  });
 });
 
 // ** Front-End Content ** //
 
 // Set views directory (html)
-const viewsDir = path.join(__dirname, 'views');
-app.set('views', viewsDir);
-
+// const viewsDir = path.join(__dirname, 'views');
+// app.set('views', viewsDir);
+//
 // Set static directory (js and css).
-const staticDir = path.join(__dirname, 'public');
-app.use(express.static(staticDir));
+// const staticDir = path.join(__dirname, 'public');
+// app.use(express.static(staticDir));
 
 // **** Export default **** //
 

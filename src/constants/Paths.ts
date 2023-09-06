@@ -2,8 +2,6 @@
  * Express router paths go here.
  */
 
-import { Immutable } from '@src/other/types';
-
 const Paths = {
   Base: '/api',
   Auth: {
@@ -20,13 +18,8 @@ const Paths = {
   },
   Explore: {
     Base: '/explore',
-    Default: '/',
-    New: '/new',
-    Popular: '/popular',
-    Trending: '/trending',
     Search: {
       Base: '/search',
-      Users: '/users',
       Roadmaps: '/roadmaps',
     },
   },
@@ -37,26 +30,22 @@ const Paths = {
       Base: '/:roadmapId([0-9]+)?',
       Roadmap: '/',
       MiniRoadmap: '/mini',
-      Tags: '/tags',
       Owner: '/owner',
       OwnerMini: '/owner/mini',
     },
     Update: {
       Base: '/:roadmapId([0-9]+)',
-      Title: '/title',
+      All: '/',
+      Name: '/title',
       Description: '/description',
-      Tags: '/tags',
+      Topic: '/topic',
       Visibility: '/visibility',
-      Owner: '/owner',
+      Draft: '/draft',
       Data: '/data',
     },
     Delete: '/:roadmapId([0-9]+)',
     Like: '/:roadmapId([0-9]+)/like',
-    Progress: {
-      Base: '/:roadmapId/progress',
-      Get: '/:userId?',
-      Update: '/',
-    },
+    Dislike: '/:roadmapId([0-9]+)/dislike',
     Issues: {
       Base: '/:roadmapId([0-9]+)/issues',
       Create: '/create',
@@ -64,6 +53,7 @@ const Paths = {
       GetAll: '/',
       Update: {
         Base: '/:issueId([0-9]+)',
+        All: '/',
         Title: '/title',
         Content: '/content',
         Status: '/status',
@@ -77,14 +67,6 @@ const Paths = {
         Delete: '/:commentId',
       },
     },
-
-    TabsInfo: {
-      Base: '/:roadmapId([0-9]+)/tabsInfo',
-      Create: '/create',
-      Get: '/:tabInfoId?',
-      Update: '/:tabInfoId?',
-      Delete: '/:tabInfoId',
-    },
   },
   Users: {
     Base: '/users',
@@ -93,31 +75,20 @@ const Paths = {
       Profile: '/',
       MiniProfile: '/mini',
       UserRoadmaps: '/roadmaps',
-      UserIssues: '/issues',
-      UserFollowers: '/followers',
-      UserFollowing: '/following',
-      RoadmapCount: '/roadmap-count',
-      IssueCount: '/issue-count',
-      FollowerCount: '/follower-count',
-      FollowingCount: '/following-count',
       Follow: '/follow',
     },
     Update: {
-      Base: '/:userId([0-9]+)?',
+      Base: '/',
       ProfilePicture: '/profile-picture',
       Bio: '/bio',
       Quote: '/quote',
       Name: '/name',
-      BlogUrl: '/blog-url',
       WebsiteUrl: '/website-url',
       GithubUrl: '/github-url',
-      Email: '/email',
     },
     Delete: '/:userId([0-9]+)?',
   },
-};
+} as const;
 
 // **** Export **** //
-
-export type TPaths = Immutable<typeof Paths>;
-export default Paths as TPaths;
+export default Paths;

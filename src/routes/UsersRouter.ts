@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Paths from '@src/constants/Paths';
-import validateSession from '@src/validators/validateSession';
+import validateSession from '@src/middleware/validators/validateSession';
 import UsersGet from '@src/routes/usersRoutes/UsersGet';
 import UsersUpdate from '@src/routes/usersRoutes/UsersUpdate';
 import { usersDelete } from '@src/controllers/usersController';

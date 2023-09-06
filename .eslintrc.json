@@ -1,7 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "node"
   ],
   "extends": [
     "eslint:recommended",
@@ -31,13 +32,15 @@
     "semi": 1,
     "indent": [
       "warn",
-      2
+      2,
+      { "SwitchCase": 1 }
     ],
     "quotes": [
       "warn",
       "single"
     ],
-    "node/no-process-env": 1,
+    "no-process-env": "error",
+    "node/no-process-env": "error",
     "node/no-unsupported-features/es-syntax": [
       "error",
       {
@@ -51,9 +54,12 @@
     ],
     "node/no-missing-import": 0,
     "node/no-unpublished-import": 0,
-    "@typescript-eslint/unbound-method": ["error", {
-      "ignoreStatic": true
-    }]
+    "@typescript-eslint/unbound-method": [
+      "error",
+      {
+        "ignoreStatic": true
+      }
+    ]
   },
   "settings": {
     "node": {
