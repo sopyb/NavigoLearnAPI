@@ -202,6 +202,37 @@ export async function updateUserInfo(
   return await db.update('userInfo', userId, userInfo);
 }
 
+export async function getRoadmap(
+  db: DatabaseDriver,
+  roadmapId: bigint,
+): Promise<Roadmap | null> {
+  const roadmap = await db.get<Roadmap>('roadmaps', roadmapId);
+  if (!roadmap) return null;
+  return new Roadmap(roadmap);
+}
+
+export async function insertRoadmap(
+  db: DatabaseDriver,
+  roadmap: Roadmap,
+): Promise<bigint> {
+  return await db.insert('roadmaps', roadmap);
+}
+
+export async function updateRoadmap(
+  db: DatabaseDriver,
+  roadmapId: bigint,
+  roadmap: Roadmap,
+): Promise<boolean> {
+  return await db.update('roadmaps', roadmapId, roadmap);
+}
+
+export async function deleteRoadmap(
+  db: DatabaseDriver,
+  roadmapId: bigint,
+): Promise<boolean> {
+  return await db.delete('roadmaps', roadmapId);
+}
+
 export async function getRoadmapLike(
   db: DatabaseDriver,
   userId: bigint,

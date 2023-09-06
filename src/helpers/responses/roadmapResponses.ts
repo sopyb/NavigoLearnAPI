@@ -3,6 +3,35 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import JSONStringify from '@src/util/JSONStringify';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 
+export function responseRoadmapNotFound(res: Response): void {
+  res.status(HttpStatusCodes.NOT_FOUND).json({
+    message: 'Roadmap not found',
+    success: false,
+  });
+}
+
+export function responseNotAllowed(res: Response): void {
+  res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json({
+    message: 'Not allowed to perform this action',
+    success: false,
+  });
+}
+
+export function responseRoadmapCreated(res: Response, id: bigint): void {
+  res.status(HttpStatusCodes.CREATED).json({
+    data: { id: id.toString() },
+    message: 'Roadmap created',
+    success: true,
+  });
+}
+
+export function responseRoadmapDeleted(res: Response): void {
+  res.status(HttpStatusCodes.OK).json({
+    message: 'Roadmap deleted',
+    success: true,
+  });
+}
+
 export function responseUserNoRoadmaps(res: Response): void {
   res
     .status(HttpStatusCodes.OK)
