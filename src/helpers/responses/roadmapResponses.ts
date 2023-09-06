@@ -15,6 +15,13 @@ export function responseRoadmap(res: Response, roadmap: ResFullRoadmap): void {
     }));
 }
 
+export function responseRoadmapUpdated(res: Response): void {
+  res.status(HttpStatusCodes.OK).json({
+    message: 'Roadmap updated',
+    success: true,
+  });
+}
+
 export function responseRoadmapNotFound(res: Response): void {
   res.status(HttpStatusCodes.NOT_FOUND).json({
     message: 'Roadmap not found',

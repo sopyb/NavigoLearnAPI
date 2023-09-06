@@ -1,6 +1,9 @@
 import { RequestWithSession } from '@src/middleware/session';
 import { Response } from 'express';
-import { responseServerError } from '@src/helpers/responses/generalResponses';
+import {
+  responseInvalidBody,
+  responseServerError,
+} from '@src/helpers/responses/generalResponses';
 import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
@@ -12,6 +15,7 @@ import {
   responseRoadmapNotFound,
   responseRoadmapNotRated,
   responseRoadmapRated,
+  responseRoadmapUpdated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
   getRoadmapData,
@@ -106,6 +110,181 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
     res,
     new ResFullRoadmap(roadmap, user, likeCount, viewCount, isLiked),
   );
+}
+
+export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { name, description, data, topic, isDraft } = req.body;
+
+  if (!name || !description || !data || !topic || !isDraft)
+    return responseServerError(res);
+
+  if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
+    return responseInvalidBody(res);
+
+  roadmap.set({
+    name: name as string,
+    description: description as string,
+    data: data as string,
+    topic: topic as RoadmapTopic,
+    isDraft: isDraft as boolean,
+  });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { name } = req.body;
+
+  if (!name) return responseServerError(res);
+
+  roadmap.set({ name: name as string });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateDescriptionRoadmap(
+  req: RequestWithBody,
+  res: Response,
+) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { description } = req.body;
+
+  if (!description) return responseServerError(res);
+
+  roadmap.set({ description: description as string });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { data } = req.body;
+
+  if (!data) return responseServerError(res);
+
+  roadmap.set({ data: data as string });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateTopicRoadmap(req: RequestWithBody, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { topic } = req.body;
+
+  if (!topic) return responseServerError(res);
+
+  if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
+    return responseInvalidBody(res);
+
+  roadmap.set({ topic: topic as RoadmapTopic });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateIsDraftRoadmap(
+  req: RequestWithBody,
+  res: Response,
+) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { isDraft } = req.body;
+
+  if (!isDraft) return responseServerError(res);
+
+  roadmap.set({ isDraft: !!isDraft });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
 }
 
 export async function deleteRoadmap(req: RequestWithSession, res: Response) {
