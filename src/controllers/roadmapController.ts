@@ -38,7 +38,9 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = undefined;
 
-  if (isPublic !== true && isPublic !== false) isPublic = true;
+  // isPublic can't be modified by the user yet
+  // if (isPublic !== true && isPublic !== false) isPublic = true;
+  isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
 
   const roadmap = new Roadmap({
