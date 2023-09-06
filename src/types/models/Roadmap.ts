@@ -1,9 +1,18 @@
+export enum RoadmapTopic {
+  PROGRAMMING = 'programming',
+  MATH = 'math',
+  DESIGN = 'design',
+  OTHER = 'other',
+}
+
 // Interface for full Roadmap object
 export interface IRoadmap {
   readonly id: bigint;
   readonly name: string;
   readonly description: string;
+  readonly topic: RoadmapTopic;
   readonly userId: bigint;
+  readonly isFeatured: boolean;
   readonly isPublic: boolean;
   readonly isDraft: boolean;
   readonly data: string;
@@ -16,7 +25,9 @@ interface IRoadmapConstructor {
   readonly id?: bigint;
   readonly name: string;
   readonly description: string;
+  readonly topic?: RoadmapTopic;
   readonly userId: bigint;
+  readonly isFeatured?: boolean;
   readonly isPublic?: boolean;
   readonly isDraft?: boolean;
   readonly data: string;
@@ -29,7 +40,9 @@ interface IRoadmapModifications {
   readonly id?: bigint;
   readonly name?: string;
   readonly description?: string;
+  readonly topic?: RoadmapTopic;
   readonly userId?: bigint;
+  // isFeatured is not modifiable
   readonly isPublic?: boolean;
   readonly isDraft?: boolean;
   readonly data?: string;
@@ -42,7 +55,9 @@ export class Roadmap implements IRoadmap {
   private _id: bigint;
   private _name: string;
   private _description: string;
+  private _topic: RoadmapTopic;
   private _userId: bigint;
+  private _isFeatured: boolean;
   private _isPublic: boolean;
   private _isDraft: boolean;
   private _data: string;
@@ -53,7 +68,9 @@ export class Roadmap implements IRoadmap {
     id = 0n,
     name,
     description,
+    topic = RoadmapTopic.PROGRAMMING,
     userId,
+    isFeatured = false,
     isPublic = true,
     isDraft = false,
     data,
@@ -63,7 +80,9 @@ export class Roadmap implements IRoadmap {
     this._id = id;
     this._name = name;
     this._description = description;
+    this._topic = topic;
     this._userId = userId;
+    this._isFeatured = isFeatured;
     this._isPublic = isPublic;
     this._isDraft = isDraft;
     this._data = data;
@@ -76,6 +95,7 @@ export class Roadmap implements IRoadmap {
     id,
     name,
     description,
+    topic,
     userId,
     isPublic,
     isDraft,
@@ -86,6 +106,7 @@ export class Roadmap implements IRoadmap {
     if (id !== undefined) this._id = id;
     if (name !== undefined) this._name = name;
     if (description !== undefined) this._description = description;
+    if (topic !== undefined) this._topic = topic;
     if (userId !== undefined) this._userId = userId;
     if (isPublic !== undefined) this._isPublic = isPublic;
     if (isDraft !== undefined) this._isDraft = isDraft;
@@ -106,8 +127,16 @@ export class Roadmap implements IRoadmap {
     return this._description;
   }
 
+  public get topic(): RoadmapTopic {
+    return this._topic;
+  }
+
   public get userId(): bigint {
     return this._userId;
+  }
+
+  public get isFeatured(): boolean {
+    return this._isFeatured;
   }
 
   public get isPublic(): boolean {
@@ -137,6 +166,7 @@ export class Roadmap implements IRoadmap {
       obj !== null &&
       'name' in obj &&
       'description' in obj &&
+      'topic' in obj &&
       'userId' in obj &&
       'isPublic' in obj &&
       'data' in obj &&
@@ -151,7 +181,9 @@ export class Roadmap implements IRoadmap {
       id: this._id,
       name: this._name,
       description: this._description,
+      topic: this._topic,
       userId: this._userId,
+      isFeatured: this._isFeatured,
       isPublic: this._isPublic,
       isDraft: this._isDraft,
       data: this._data,

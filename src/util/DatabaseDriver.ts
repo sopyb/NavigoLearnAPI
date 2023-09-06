@@ -70,7 +70,7 @@ interface Data {
 type DataType = bigint | string | number | Date | null;
 
 // config interface
-interface DatabaseConfig {
+export interface DatabaseConfig {
   host: string;
   user: string;
   password: string;
@@ -258,14 +258,32 @@ class Database {
     for (let i = 0; i < values.length - 1; i += 2) {
       const key = values[i] as string;
 
-      if (i > 0) keyString += ' AND ';
-      keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-
-      params = [...params, values[i + 1]];
+      if (Array.isArray(values[i + 1])) {
+        const arrayParams = values[i + 1] as unknown[];
+        if ((values[i + 1] as unknown[]).length === 0) continue;
+        const subKeyString = arrayParams
+          .map(() => `${key} ${like ? 'LIKE' : '='} ?`)
+          .join(' OR ');
+        keyString += i > 0 ? ' AND ' : '';
+        keyString += `(${subKeyString})`;
+        params = [...params, ...arrayParams];
+      } else {
+        if (i > 0) keyString += ' AND ';
+        keyString += `${key} ${like ? 'LIKE' : '='} ?`;
+        params = [...params, values[i + 1]];
+      }
     }
 
     return { keyString, params };
   };
+
+  public async getQuery(
+    sql: string,
+    params?: unknown[],
+  ): Promise<RowDataPacket[] | null> {
+    const result = await this._query(sql, params);
+    return parseResult(result);
+  }
 
   public async get<T>(table: string, id: bigint): Promise<T | null> {
     // create sql query - select * from table where id = ?
@@ -294,7 +312,7 @@ class Database {
     return this._getWhere<T>(table, true, ...values);
   }
 
-  private async _getWhere<T>(
+  protected async _getWhere<T>(
     table: string,
     like: boolean,
     ...values: unknown[]
@@ -337,7 +355,7 @@ class Database {
     return this._getAllWhere<T>(table, true, ...values);
   }
 
-  private async _getAllWhere<T>(
+  protected async _getAllWhere<T>(
     table: string,
     like: boolean,
     ...values: unknown[]
@@ -384,7 +402,7 @@ class Database {
     return await this._countWhere(table, true, ...values);
   }
 
-  private async _countWhere(
+  protected async _countWhere(
     table: string,
     like: boolean,
     ...values: unknown[]

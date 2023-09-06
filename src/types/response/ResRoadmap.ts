@@ -1,10 +1,11 @@
-import { IRoadmap } from '@src/types/models/Roadmap';
+import { IRoadmap, RoadmapTopic } from '@src/types/models/Roadmap';
 import { IUser } from '@src/types/models/User';
 
 export interface IResRoadmap {
   readonly id: bigint;
   readonly name: string;
   readonly description: string;
+  readonly topic: RoadmapTopic;
   readonly isPublic: boolean;
   readonly isDraft: boolean;
   readonly data: string;
@@ -21,6 +22,8 @@ export class ResRoadmap implements IResRoadmap {
   public readonly id: bigint;
   public readonly name: string;
   public readonly description: string;
+  public readonly topic: RoadmapTopic;
+  public readonly isFeatured: boolean;
   public readonly isPublic: boolean;
   public readonly isDraft: boolean;
   public readonly data: string;
@@ -33,29 +36,32 @@ export class ResRoadmap implements IResRoadmap {
 
   public constructor(
     {
-      id = 0n,
+      id,
       name,
       description,
+      topic,
       userId,
-      isPublic = true,
-      isDraft = false,
+      isFeatured,
+      isPublic,
+      isDraft,
       data,
-      createdAt = new Date(),
-      updatedAt = new Date(),
+      createdAt,
+      updatedAt,
     }: IRoadmap,
-    { avatar, name: userName }: IUser,
+    { avatar: userAvatar, name: userName }: IUser,
   ) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.topic = topic;
+    this.isFeatured = isFeatured;
     this.isPublic = isPublic;
     this.isDraft = isDraft;
     this.data = data;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-
     this.userId = userId;
-    this.userAvatar = avatar;
+    this.userAvatar = userAvatar;
     this.userName = userName;
   }
 
@@ -66,7 +72,9 @@ export class ResRoadmap implements IResRoadmap {
       'id' in obj &&
       'name' in obj &&
       'description' in obj &&
+      'topic' in obj &&
       'userId' in obj &&
+      'isFeatured' in obj &&
       'isPublic' in obj &&
       'isDraft' in obj &&
       'data' in obj &&
