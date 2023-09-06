@@ -11,7 +11,7 @@ function responseSearchRoadmaps(
 ): unknown {
   return res.status(HttpStatusCodes.OK).json({
     success: true,
-    message: 'Roadmaps found',
+    message: `Roadmaps ${roadmaps.length ? '' : 'not '}found`,
     data: roadmaps,
   });
 }

@@ -9,7 +9,7 @@ export interface RequestWithTargetUserId extends RequestWithSession {
   issuerUserId?: bigint;
 }
 
-export default function validateUser(
+export default function (
   ownUserOnly = false,
 ): (
   req: RequestWithTargetUserId,

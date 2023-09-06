@@ -88,3 +88,9 @@ export function responseUserUnfollowed(res: Response): void {
     .status(HttpStatusCodes.OK)
     .json({ message: 'User unfollowed', success: true });
 }
+
+export function responseProfileUpdated(res: Response): void {
+  res
+    .status(HttpStatusCodes.OK)
+    .json({ message: 'Profile updated', success: true });
+}

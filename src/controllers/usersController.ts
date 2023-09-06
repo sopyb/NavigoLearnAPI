@@ -10,6 +10,8 @@ import {
   getUserStats,
   isUserFollowing,
   unfollowUser,
+  updateUser,
+  updateUserInfo,
 } from '@src/helpers/databaseManagement';
 import {
   RequestWithTargetUserId,
@@ -19,6 +21,7 @@ import { responseServerError } from '@src/helpers/responses/generalResponses';
 import {
   responseAlreadyFollowing,
   responseCantFollowYourself,
+  responseProfileUpdated,
   responseUserDeleted,
   responseUserFollowed,
   responseUserMiniProfile,
@@ -194,3 +197,178 @@ export async function userUnfollow(
 /*
  ! UsersPost route controllers
  */
+export async function usersPostProfile(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { name, githubUrl, websiteUrl, quote } = req.body as {
+    [key: string]: string;
+  };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+  const userInfo = await getUserInfo(db, userId);
+
+  // check if user exists
+  if (!user || !userInfo) return responseServerError(res);
+
+  user.set({
+    name,
+  });
+
+  userInfo.set({
+    githubUrl,
+    websiteUrl,
+    quote,
+  });
+
+  // save user to database
+  if (await updateUser(db, userId, user, userInfo))
+    return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}
+
+export async function usersPostProfileName(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { name } = req.body as { [key: string]: string };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+
+  // check if user exists
+  if (!user) return responseServerError(res);
+
+  user.set({
+    name,
+  });
+
+  // save user to database
+  if (await updateUser(db, userId, user)) return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}
+
+export async function usersPostProfileGithubUrl(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { githubUrl } = req.body as { [key: string]: string };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+  const userInfo = await getUserInfo(db, userId);
+
+  // check if user exists
+  if (!user || !userInfo) return responseServerError(res);
+
+  userInfo.set({
+    githubUrl,
+  });
+
+  // save user to database
+  if (await updateUserInfo(db, userId, userInfo))
+    return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}
+
+export async function usersPostProfileWebsiteUrl(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { websiteUrl } = req.body as { [key: string]: string };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+  const userInfo = await getUserInfo(db, userId);
+
+  // check if user exists
+  if (!user || !userInfo) return responseServerError(res);
+
+  userInfo.set({
+    websiteUrl,
+  });
+
+  // save user to database
+  if (await updateUserInfo(db, userId, userInfo))
+    return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}
+
+export async function usersPostProfileQuote(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { quote } = req.body as { [key: string]: string };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+  const userInfo = await getUserInfo(db, userId);
+
+  // check if user exists
+  if (!user || !userInfo) return responseServerError(res);
+
+  userInfo.set({
+    quote,
+  });
+
+  // save user to database
+  if (await updateUserInfo(db, userId, userInfo))
+    return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}

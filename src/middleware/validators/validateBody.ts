@@ -10,7 +10,7 @@ export interface RequestWithBody extends RequestWithSession {
   body: IBody;
 }
 
-export default function ValidateBody(
+export default function (
   ...requiredFields: string[]
 ): (req: RequestWithBody, res: Response, next: NextFunction) => unknown {
   return (req: RequestWithBody, res: Response, next: NextFunction): unknown => {
