@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { RequestWithSession } from '@src/middleware/session';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import {
   deleteUser,
   followUser,
@@ -33,6 +33,8 @@ import {
   responseUserNoRoadmaps,
   responseUserRoadmaps,
 } from '@src/helpers/responses/roadmapResponses';
+import { addRoadmapImpression } from '@src/util/Views';
+import logger from 'jet-logger';
 
 /*
  ! Main route controllers
@@ -127,10 +129,40 @@ export async function userGetRoadmaps(
   // check if user exists
   if (!roadmaps) return responseUserNoRoadmaps(res);
 
+  const likes: bigint[] = [];
+  const views: bigint[] = [];
+  const isLiked: boolean[] = [];
+
+  for (const roadmap of roadmaps) {
+    likes.push(await db.countWhere('roadmapLikes', 'roadmapId', roadmap.id));
+    views.push(await db.countWhere('roadmapViews', 'roadmapId', roadmap.id));
+    isLiked.push(
+      !!(
+        await db.countWhere(
+          'roadmapLikes',
+          'roadmapId',
+          roadmap.id,
+          'userId',
+          req.issuerUserId,
+        )
+      ),
+    );
+  }
+
+  // add impressions to roadmaps
+  addRoadmapImpression(
+    db,
+    roadmaps.map((roadmap) => roadmap.id),
+    req.issuerUserId,
+  ).catch((e) => logger.err(e));
+
   // send user json
   return responseUserRoadmaps(
     res,
-    roadmaps.map((roadmap) => new ResRoadmap(roadmap, user)),
+    roadmaps.map(
+      (roadmap, i) =>
+        new ResRoadmap(roadmap, user, likes[i], views[i], isLiked[i]),
+    ),
   );
 }
 

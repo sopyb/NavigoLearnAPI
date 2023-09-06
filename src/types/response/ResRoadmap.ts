@@ -8,7 +8,6 @@ export interface IResRoadmap {
   readonly topic: RoadmapTopic;
   readonly isPublic: boolean;
   readonly isDraft: boolean;
-  readonly data: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -16,6 +15,13 @@ export interface IResRoadmap {
   readonly userId: bigint;
   readonly userAvatar: string | null;
   readonly userName: string;
+
+  // stats
+  readonly likeCount: bigint;
+  readonly viewCount: bigint;
+
+  // user stats
+  readonly isLiked: boolean;
 }
 
 export class ResRoadmap implements IResRoadmap {
@@ -26,13 +32,17 @@ export class ResRoadmap implements IResRoadmap {
   public readonly isFeatured: boolean;
   public readonly isPublic: boolean;
   public readonly isDraft: boolean;
-  public readonly data: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
   public readonly userId: bigint;
   public readonly userAvatar: string | null;
   public readonly userName: string;
+
+  public readonly likeCount: bigint;
+  public readonly viewCount: bigint;
+
+  public readonly isLiked: boolean;
 
   public constructor(
     {
@@ -44,11 +54,13 @@ export class ResRoadmap implements IResRoadmap {
       isFeatured,
       isPublic,
       isDraft,
-      data,
       createdAt,
       updatedAt,
     }: IRoadmap,
     { avatar: userAvatar, name: userName }: IUser,
+    likeCount: bigint,
+    viewCount: bigint,
+    isLiked: boolean,
   ) {
     this.id = id;
     this.name = name;
@@ -57,12 +69,16 @@ export class ResRoadmap implements IResRoadmap {
     this.isFeatured = isFeatured;
     this.isPublic = isPublic;
     this.isDraft = isDraft;
-    this.data = data;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.userId = userId;
     this.userAvatar = userAvatar;
     this.userName = userName;
+
+    this.likeCount = likeCount;
+    this.viewCount = viewCount;
+
+    this.isLiked = isLiked;
   }
 
   public static isRoadmap(obj: unknown): obj is IResRoadmap {
@@ -73,13 +89,17 @@ export class ResRoadmap implements IResRoadmap {
       'name' in obj &&
       'description' in obj &&
       'topic' in obj &&
-      'userId' in obj &&
       'isFeatured' in obj &&
       'isPublic' in obj &&
       'isDraft' in obj &&
-      'data' in obj &&
       'createdAt' in obj &&
-      'updatedAt' in obj
+      'updatedAt' in obj &&
+      'userId' in obj &&
+      'userAvatar' in obj &&
+      'userName' in obj &&
+      'likeCount' in obj &&
+      'viewCount' in obj &&
+      'isLiked' in obj
     );
   }
 }
