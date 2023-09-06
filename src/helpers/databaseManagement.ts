@@ -1,4 +1,4 @@
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import { IUserInfo, UserInfo } from '@src/types/models/UserInfo';
 import { IUser, User } from '@src/types/models/User';
 import { Roadmap } from '@src/types/models/Roadmap';

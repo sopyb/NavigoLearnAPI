@@ -1,6 +1,6 @@
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Response } from 'express';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import { User } from '@src/types/models/User';
 import axios, { HttpStatusCode } from 'axios';
 import { comparePassword, saltPassword } from '@src/util/LoginUtil';

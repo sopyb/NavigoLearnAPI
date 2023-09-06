@@ -2,12 +2,13 @@ import {
   RequestWithSearchParameters,
 } from '@src/middleware/validators/validateSearchParameters';
 import { Response } from 'express';
-import { ExploreDB, SearchRoadmap } from '@src/util/ExploreDB';
+import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
+import { ResRoadmap } from '@src/types/response/ResRoadmap';
 
 function responseSearchRoadmaps(
   res: Response,
-  roadmaps: SearchRoadmap[],
+  roadmaps: ResRoadmap[],
 ): unknown {
   return res.status(HttpStatusCodes.OK).json({
     success: true,

@@ -2,7 +2,7 @@ import { IUser, User } from '@src/types/models/User';
 import { randomString } from '@spec/utils/randomString';
 import request from 'supertest';
 import app from '@src/server';
-import Database from '@src/util/DatabaseDriver';
+import Database from '@src/util/Database/DatabaseDriver';
 import { CreatedUser } from '@spec/types/tests/CreatedUser';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
 import { Response } from '@spec/types/supertest';

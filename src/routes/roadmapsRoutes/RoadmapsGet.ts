@@ -2,7 +2,7 @@ import { Response, Router } from 'express';
 import Paths from '@src/constants/Paths';
 import { RequestWithSession } from '@src/middleware/session';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import Database from '@src/util/DatabaseDriver';
+import Database from '@src/util/Database/DatabaseDriver';
 import { Roadmap } from '@src/types/models/Roadmap';
 import axios from 'axios';
 import EnvVars from '@src/constants/EnvVars';

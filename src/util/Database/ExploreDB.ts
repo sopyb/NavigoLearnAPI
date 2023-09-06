@@ -1,29 +1,12 @@
-import Database, { DatabaseConfig } from '@src/util/DatabaseDriver';
+import Database, { DatabaseConfig } from '@src/util/Database/DatabaseDriver';
 import EnvVars from '@src/constants/EnvVars';
 import {
   SearchParameters,
 } from '@src/middleware/validators/validateSearchParameters';
-import { RoadmapTopic } from '@src/types/models/Roadmap';
+import { ResRoadmap } from '@src/types/response/ResRoadmap';
 
 // database credentials
 const { DBCred } = EnvVars;
-
-export interface SearchRoadmap{
-    id: bigint;
-    name: string;
-    description: string;
-    topic: RoadmapTopic;
-    isFeatured: boolean;
-    isPublic: boolean;
-    isDraft: boolean;
-    userAvatar: string | null;
-    userName: string;
-
-    likeCount: number;
-    viewCount: number;
-
-    isLiked: number;
-}
 
 class ExploreDB extends Database {
   public constructor(config: DatabaseConfig = DBCred as DatabaseConfig) {
@@ -36,7 +19,7 @@ class ExploreDB extends Database {
     limit,
     topic,
     order,
-  }: SearchParameters, userid?: bigint): Promise<SearchRoadmap[]> {
+  }: SearchParameters, userid?: bigint): Promise<ResRoadmap[]> {
     if(!search || !page || !limit || !topic || !order) return [];
     const query = `
       SELECT
@@ -84,7 +67,7 @@ class ExploreDB extends Database {
 
     const result = await this.getQuery(query, params);
     if (result === null) return [];
-    return result as unknown as SearchRoadmap[];
+    return result as unknown as ResRoadmap[];
   }
 }
 

@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { RequestWithSession } from '@src/middleware/session';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 
 function invalidSession(res: Response): void {
   res.status(HttpStatusCodes.UNAUTHORIZED).json({

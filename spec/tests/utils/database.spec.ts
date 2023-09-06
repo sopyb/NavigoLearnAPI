@@ -1,4 +1,4 @@
-import Database from '@src/util/DatabaseDriver';
+import Database from '@src/util/Database/DatabaseDriver';
 import { IUser, User } from '@src/types/models/User';
 import { randomString } from '@spec/utils/randomString';
 

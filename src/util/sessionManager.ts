@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import { Response } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import EnvVars from '@src/constants/EnvVars';

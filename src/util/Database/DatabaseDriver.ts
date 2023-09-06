@@ -90,7 +90,7 @@ interface CountQueryPacket extends RowDataPacket {
   result: bigint;
 }
 
-interface ResultSetHeader {
+export interface ResultSetHeader {
   fieldCount: number;
   affectedRows: number;
   insertId: number;
@@ -421,7 +421,7 @@ class Database {
   protected async _setup() {
     // get setup.sql file
     let setupSql = fs.readFileSync(
-      path.join(__dirname, '..', 'sql', 'setup.sql'),
+      path.join(__dirname, '..', '..', 'sql', 'setup.sql'),
       'utf8',
     );
 

@@ -1,7 +1,7 @@
 import { RequestWithSession } from '@src/middleware/session';
 import { Response } from 'express';
 import { responseServerError } from '@src/helpers/responses/generalResponses';
-import Database from '@src/util/DatabaseDriver';
+import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
   responseNotAllowed,

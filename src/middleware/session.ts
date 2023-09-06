@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
 
