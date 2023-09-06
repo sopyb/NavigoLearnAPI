@@ -8,7 +8,7 @@ import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
   responseNotAllowed,
-  responseRoadmap,
+  responseRoadmap, responseRoadmapAlreadyDisliked,
   responseRoadmapAlreadyLiked,
   responseRoadmapCreated,
   responseRoadmapDeleted,
@@ -369,7 +369,7 @@ export async function dislikeRoadmap(req: RequestWithSession, res: Response) {
   }
 
   if (!liked) return responseServerError(res);
-  if (liked.value == -1) return responseRoadmapAlreadyLiked(res);
+  if (liked.value == -1) return responseRoadmapAlreadyDisliked(res);
 
   liked.set({ value: -1 });
 

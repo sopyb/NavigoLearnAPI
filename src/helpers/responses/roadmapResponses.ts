@@ -67,6 +67,7 @@ export function responseUserNoRoadmaps(res: Response): void {
 export function responseUserRoadmaps(
   res: Response,
   roadmaps: ResRoadmap[],
+  total: bigint,
 ): void {
   res
     .status(HttpStatusCodes.OK)
@@ -76,6 +77,7 @@ export function responseUserRoadmaps(
         data: roadmaps,
         message: 'Roadmaps found',
         success: true,
+        total: total,
       }),
     );
 }

@@ -129,6 +129,8 @@ export async function userGetRoadmaps(
   // check if user exists
   if (!roadmaps) return responseUserNoRoadmaps(res);
 
+  const totalRoadmaps = await db.countWhere('roadmaps', 'userId', userId);
+
   const likes: bigint[] = [];
   const views: bigint[] = [];
   const isLiked: bigint[] = [];
@@ -162,6 +164,7 @@ export async function userGetRoadmaps(
       (roadmap, i) =>
         new ResRoadmap(roadmap, user, likes[i], views[i], isLiked[i]),
     ),
+    totalRoadmaps,
   );
 }
 

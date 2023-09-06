@@ -8,6 +8,10 @@ import { ResRoadmap } from '@src/types/response/ResRoadmap';
 // database credentials
 const { DBCred } = EnvVars;
 
+export interface ResRoadmapExplore extends ResRoadmap {
+  totalRoadmaps: bigint;
+}
+
 class ExploreDB extends Database {
   public constructor(config: DatabaseConfig = DBCred as DatabaseConfig) {
     super(config);
@@ -19,7 +23,7 @@ class ExploreDB extends Database {
     limit,
     topic,
     order,
-  }: SearchParameters, userid?: bigint): Promise<ResRoadmap[]> {
+  }: SearchParameters, userid?: bigint): Promise<ResRoadmapExplore[]> {
     if(!search || !page || !limit || !topic || !order) return [];
     const query = `
       SELECT
@@ -41,7 +45,9 @@ class ExploreDB extends Database {
                         WHERE roadmapId = r.id
                         AND userId = ?
   )
-    ` : '0'} AS isLiked
+    ` : '0'} AS isLiked,
+
+        (SELECT COUNT(*) FROM roadmaps) AS totalRoadmaps
       FROM
         roadmaps r
         INNER JOIN users u ON r.userId = u.id
@@ -67,7 +73,7 @@ class ExploreDB extends Database {
 
     const result = await this.getQuery(query, params);
     if (result === null) return [];
-    return result as unknown as ResRoadmap[];
+    return result as unknown as ResRoadmapExplore[];
   }
 }
 
