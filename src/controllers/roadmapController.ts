@@ -4,7 +4,7 @@ import { responseServerError } from '@src/helpers/responses/generalResponses';
 import Database from '@src/util/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
-  responseRoadmapAlreadyLiked,
+  responseRoadmapAlreadyLiked, responseRoadmapNotRated,
   responseRoadmapRated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
@@ -99,7 +99,7 @@ export async function removeLikeRoadmap(
 
   const liked = await getRoadmapLike(db, BigInt(roadmapId), userId);
 
-  if (!liked) return responseServerError(res);
+  if (!liked) return responseRoadmapNotRated(res);
 
   if (await db.delete('roadmapLikes', liked.id))
     return responseRoadmapRated(res);
