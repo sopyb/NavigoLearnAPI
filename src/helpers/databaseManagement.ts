@@ -3,6 +3,7 @@ import { IUserInfo, UserInfo } from '@src/types/models/UserInfo';
 import { IUser, User } from '@src/types/models/User';
 import { Roadmap } from '@src/types/models/Roadmap';
 import { Follower } from '@src/types/models/Follower';
+import { IRoadmapLike, RoadmapLike } from '@src/types/models/RoadmapLike';
 
 /*
  * Interfaces
@@ -199,4 +200,48 @@ export async function updateUserInfo(
   userInfo: UserInfo,
 ): Promise<boolean> {
   return await db.update('userInfo', userId, userInfo);
+}
+
+export async function getRoadmapLike(
+  db: DatabaseDriver,
+  userId: bigint,
+  roadmapId: bigint,
+): Promise<RoadmapLike | null> {
+  const like = await db.getWhere<IRoadmapLike>(
+    'roadmapLikes',
+    'userId',
+    userId,
+    'roadmapId',
+    roadmapId,
+  );
+  if (!like) return null;
+  return new RoadmapLike(like);
+}
+
+export async function insertRoadmapLike(
+  db: DatabaseDriver,
+  data: IRoadmapLike,
+) {
+  return await db.insert('roadmapLikes', data);
+}
+
+export async function updateRoadmapLike(
+  db: DatabaseDriver,
+  id: bigint,
+  data: IRoadmapLike,
+): Promise<boolean> {
+  return await db.update('roadmapLikes', id, data);
+}
+
+export async function deleteRoadmapLike(
+  db: DatabaseDriver,
+  data: IRoadmapLike,
+): Promise<boolean> {
+  return await db.deleteWhere(
+    'roadmapLikes',
+    'userId',
+    data.userId,
+    'roadmapId',
+    data.roadmapId,
+  );
 }

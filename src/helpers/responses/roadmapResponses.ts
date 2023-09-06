@@ -31,3 +31,31 @@ export function responseUserRoadmaps(
       }),
     );
 }
+
+export function responseRoadmapAlreadyLiked(res: Response) {
+  return res.status(HttpStatusCodes.BAD_REQUEST).json({
+    message: 'Already liked',
+    success: false,
+  });
+}
+
+export function responseRoadmapAlreadyDisliked(res: Response) {
+  return res.status(HttpStatusCodes.BAD_REQUEST).json({
+    message: 'Already disliked',
+    success: false,
+  });
+}
+
+export function responseRoadmapNotRated(res: Response) {
+  return res.status(HttpStatusCodes.BAD_REQUEST).json({
+    message: 'Not rated',
+    success: false,
+  });
+}
+
+export function responseRoadmapRated(res: Response) {
+  return res.status(HttpStatusCodes.OK).json({
+    message: 'Roadmap rated',
+    success: true,
+  });
+}
