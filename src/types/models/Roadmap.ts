@@ -1,8 +1,8 @@
 export enum RoadmapTopic {
   PROGRAMMING = 'programming',
   MATH = 'math',
-  DESIGN = 'design',
-  OTHER = 'other',
+  PHYSICS = 'physics',
+  BIOLOGY = 'biology',
 }
 
 // Interface for full Roadmap object

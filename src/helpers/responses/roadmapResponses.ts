@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import JSONStringify from '@src/util/JSONStringify';
+import JSONSafety from '@src/util/JSONSafety';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
 
@@ -8,7 +8,7 @@ export function responseRoadmap(res: Response, roadmap: ResFullRoadmap): void {
   res
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
-    .send(JSONStringify({
+    .send(JSONSafety({
       data: roadmap,
       message: 'Roadmap found',
       success: true,
@@ -56,7 +56,7 @@ export function responseUserNoRoadmaps(res: Response): void {
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
     .send(
-      JSONStringify({
+      JSONSafety({
         data: [],
         message: 'User has no roadmaps',
         success: true,
@@ -73,7 +73,7 @@ export function responseUserRoadmaps(
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
     .send(
-      JSONStringify({
+      JSONSafety({
         data: roadmaps,
         message: 'Roadmaps found',
         success: true,

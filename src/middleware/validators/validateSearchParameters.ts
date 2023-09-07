@@ -25,7 +25,7 @@ export default function (
   next: NextFunction,
 ) {
   // get parameters from request
-  const { searchParam, pageParam, limitParam, topicParam, orderParam } =
+  const { query: searchParam, page: pageParam, limit: limitParam, topic: topicParam, order: orderParam } =
     req.query;
   const search = (searchParam as string) || '';
   const page = parseInt((pageParam as string) || '1');
@@ -35,12 +35,12 @@ export default function (
     ([
       RoadmapTopic.PROGRAMMING,
       RoadmapTopic.MATH,
-      RoadmapTopic.DESIGN,
-      RoadmapTopic.OTHER,
+      RoadmapTopic.PHYSICS,
+      RoadmapTopic.BIOLOGY,
     ] as RoadmapTopic[]);
   let order: Order;
 
-  const [by, direction] = (orderParam as string).split(':');
+  const [by, direction] = (orderParam as string)?.split(':') || ['age', 'DESC'];
   switch (by) {
     case 'views':
       order = {
@@ -69,14 +69,31 @@ export default function (
     order.direction = 'ASC';
   }
 
-  topic = topic.filter((t) => {
-    return (
-      t === RoadmapTopic.PROGRAMMING ||
-      t === RoadmapTopic.MATH ||
-      t === RoadmapTopic.DESIGN ||
-      t === RoadmapTopic.OTHER
-    );
-  });
+  // make sure topic is valid
+  if (Array.isArray(topic)) {
+    topic = topic.filter((t) => {
+      return (
+        t === RoadmapTopic.PROGRAMMING ||
+        t === RoadmapTopic.MATH ||
+        t === RoadmapTopic.PHYSICS ||
+        t === RoadmapTopic.BIOLOGY
+      );
+    });
+  } else {
+    if (
+      topic !== RoadmapTopic.PROGRAMMING &&
+      topic !== RoadmapTopic.MATH &&
+      topic !== RoadmapTopic.PHYSICS &&
+      topic !== RoadmapTopic.BIOLOGY
+    ) topic = [
+      RoadmapTopic.PROGRAMMING,
+      RoadmapTopic.MATH,
+      RoadmapTopic.PHYSICS,
+      RoadmapTopic.BIOLOGY,
+    ];
+  }
+
+  console.log("search parameters", search, page, limit, topic, order);
 
   req.search = search;
   req.page = page;
