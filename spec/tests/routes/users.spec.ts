@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '@src/server';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
 import { CreatedUser } from '@spec/types/tests/CreatedUser';
-import JSONSafety from '@src/util/JSONSafety';
+import { JSONSafety } from '@src/util/misc';
 import { ResUserProfile } from '@src/types/response/ResUserProfile';
 import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 

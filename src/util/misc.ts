@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default function JSONSafety(obj: unknown): unknown {
+export function JSONSafety(obj: unknown): unknown {
   return JSON.parse(JSON.stringify(obj, (key, value) => {
     // if value is a bigint, convert it to a string
     if (typeof value === 'bigint') return value.toString();
@@ -16,4 +16,8 @@ export default function JSONSafety(obj: unknown): unknown {
     // return value as is
     return value;
   }));
+}
+
+export function isEmptyObject(obj: any): obj is Record<string, any> {
+  return obj && typeof obj === 'object' && Object.keys(obj).length === 0
 }

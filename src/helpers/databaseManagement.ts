@@ -199,7 +199,7 @@ export async function updateUserInfo(
   userId: bigint,
   userInfo: UserInfo,
 ): Promise<boolean> {
-  return await db.update('userInfo', userId, userInfo);
+  return await db.updateWhere('userInfo', userInfo, 'userId', userId);
 }
 
 export async function getRoadmapData(

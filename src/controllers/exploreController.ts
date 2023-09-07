@@ -5,7 +5,7 @@ import { Response } from 'express';
 import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
-import JSONSafety from '@src/util/JSONSafety';
+import { JSONSafety } from '@src/util/misc';
 
 function responseSearchRoadmaps(
   res: Response,

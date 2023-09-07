@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import JSONSafety from '@src/util/JSONSafety';
+import { JSONSafety } from '@src/util/misc';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
 

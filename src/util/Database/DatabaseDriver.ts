@@ -220,6 +220,36 @@ class Database {
     return affectedRows > 0;
   }
 
+  public async updateWhere(
+    table: string,
+    data: object | Record<string, DataType>,
+    ...values: unknown[]
+  ): Promise<boolean> {
+    const { keys, values: dataValues } = processData(data);
+
+    const queryBuilderResult = this._buildWhereQuery(false, ...values);
+    if (!queryBuilderResult) return false;
+
+    // create sql query - update table set key = ?, key = ? where id = ?
+    // ? for values to be replaced by params
+    const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
+    const sql = `UPDATE ${table}
+                 SET ${sqlKeys}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const params = [...dataValues, ...queryBuilderResult.params];
+
+    // execute query
+    const result = (await this._query(sql, params)) as ResultSetHeader;
+
+    let affectedRows = -1;
+    if (result) {
+      affectedRows = result.affectedRows || -1;
+    }
+
+    // return true if affected rows > 0 else false
+    return affectedRows > 0;
+  }
+
   public async delete(table: string, id: bigint): Promise<boolean> {
     const sql = `DELETE
                  FROM ${table}

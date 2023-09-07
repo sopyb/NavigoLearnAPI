@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { User } from '@src/types/models/User';
 import { UserInfo } from '@src/types/models/UserInfo';
 import { UserStats } from '@src/helpers/databaseManagement';
-import JSONSafety from '@src/util/JSONSafety';
+import { JSONSafety } from '@src/util/misc';
 import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 import { ResUserProfile } from '@src/types/response/ResUserProfile';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
