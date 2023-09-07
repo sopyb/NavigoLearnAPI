@@ -39,7 +39,8 @@ class ExploreDB extends Database {
         u.id AS userId,
         u.avatar AS userAvatar,
         u.name AS userName,
-        (SELECT SUM(rl.value) FROM roadmapLikes rl WHERE roadmapId = r.id) AS likeCount,
+        (SELECT SUM(rl.value) 
+            FROM roadmapLikes rl WHERE roadmapId = r.id) AS likeCount,
         (SELECT COUNT(*) FROM roadmapViews WHERE roadmapId = r.id) AS viewCount,
         ${!!userid ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
@@ -51,9 +52,11 @@ class ExploreDB extends Database {
         INNER JOIN users u ON r.userId = u.id
       WHERE
         r.name LIKE ? or r.description LIKE ?
-        AND r.topic IN (${Array.isArray(topic) ?
-              topic.map(() => '?').join(', ') :
-        '?'})
+        AND r.topic IN (${
+  Array.isArray(topic) ?
+    topic.map(() => '?').join(', ') :
+    '?'
+})
         AND r.isPublic = 1
         AND r.isDraft = 0
       ORDER BY
@@ -74,8 +77,8 @@ class ExploreDB extends Database {
       WHERE
         r.name LIKE ? or r.description LIKE ?
         AND r.topic IN (${Array.isArray(topic) ?
-      topic.map(() => '?').join(', ') :
-      '?'})
+    topic.map(() => '?').join(', ') :
+    '?'})
         AND r.isPublic = 1
         AND r.isDraft = 0
       ORDER BY
@@ -101,7 +104,7 @@ class ExploreDB extends Database {
     if (result === null) return { result: [], totalRoadmaps: 0n };
     return {
       result: result as unknown as ResRoadmap[],
-      totalRoadmaps: result2
+      totalRoadmaps: result2,
     };
   }
 }

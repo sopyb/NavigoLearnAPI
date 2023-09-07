@@ -25,12 +25,17 @@ export default function (
   next: NextFunction,
 ) {
   // get parameters from request
-  const { query: searchParam, page: pageParam, limit: limitParam, topic: topicParam, order: orderParam } =
-    req.query;
+  const {
+    query: searchParam,
+    page: pageParam,
+    limit: limitParam,
+    topic: topicParam,
+    order: orderParam } =
+      req.query;
   const search = (searchParam as string) || '';
   const page = parseInt((pageParam as string) || '1');
   const limit = parseInt((limitParam as string) || '12');
-  let topic =
+  let topic: RoadmapTopic | RoadmapTopic[] =
     (topicParam as RoadmapTopic[]) ||
     ([
       RoadmapTopic.PROGRAMMING,
@@ -92,8 +97,6 @@ export default function (
       RoadmapTopic.BIOLOGY,
     ];
   }
-
-  console.log("search parameters", search, page, limit, topic, order);
 
   req.search = search;
   req.page = page;

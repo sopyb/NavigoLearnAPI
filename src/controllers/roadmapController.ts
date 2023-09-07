@@ -391,7 +391,7 @@ export async function removeLikeRoadmap(
 
   const db = new Database();
 
-  const liked = await getRoadmapLike(db, userId, BigInt(roadmapId),);
+  const liked = await getRoadmapLike(db, userId, BigInt(roadmapId));
 
   if (!liked) return responseRoadmapNotRated(res);
 

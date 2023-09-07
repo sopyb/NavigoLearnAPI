@@ -238,7 +238,6 @@ export async function getRoadmapLike(
   userId: bigint,
   roadmapId: bigint,
 ): Promise<RoadmapLike | null> {
-  console.log(userId, roadmapId)
   const like = await db.getWhere<IRoadmapLike>(
     'roadmapLikes',
     'userId',

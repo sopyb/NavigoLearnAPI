@@ -8,11 +8,13 @@ export function responseRoadmap(res: Response, roadmap: ResFullRoadmap): void {
   res
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
-    .send(JSONSafety({
-      data: roadmap,
-      message: 'Roadmap found',
-      success: true,
-    }));
+    .send(
+      JSONSafety({
+        data: roadmap,
+        message: 'Roadmap found',
+        success: true,
+      }),
+    );
 }
 
 export function responseRoadmapUpdated(res: Response): void {
@@ -111,8 +113,8 @@ export function responseRoadmapRated(res: Response) {
 }
 
 export function responseRoadmapUnrated(res: Response) {
-    return res.status(HttpStatusCodes.OK).json({
-        message: 'Roadmap unrated',
-        success: true,
-    });
+  return res.status(HttpStatusCodes.OK).json({
+    message: 'Roadmap unrated',
+    success: true,
+  });
 }
