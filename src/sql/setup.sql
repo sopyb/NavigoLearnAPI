@@ -39,7 +39,7 @@ create table if not exists roadmaps
         primary key,
     name        varchar(255)                                       not null,
     description varchar(255)                                       not null,
-    topic       enum ('programming', 'math', 'phisics', 'biology') not null,
+    topic       enum ('programming', 'math', 'physics', 'biology') not null,
     userId      bigint                                             not null,
     isFeatured  tinyint(1) default 0                               not null,
     isPublic    tinyint(1) default 1                               not null,

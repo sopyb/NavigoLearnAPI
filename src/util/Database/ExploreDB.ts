@@ -51,7 +51,7 @@ class ExploreDB extends Database {
         roadmaps r
         INNER JOIN users u ON r.userId = u.id
       WHERE
-        r.name LIKE ? or r.description LIKE ?
+        (r.name LIKE ? OR r.description LIKE ?)
         AND r.topic IN (${
   Array.isArray(topic) ?
     topic.map(() => '?').join(', ') :
@@ -75,7 +75,7 @@ class ExploreDB extends Database {
         roadmaps r
         INNER JOIN users u ON r.userId = u.id
       WHERE
-        r.name LIKE ? or r.description LIKE ?
+        (r.name LIKE ? OR r.description LIKE ?)
         AND r.topic IN (${Array.isArray(topic) ?
     topic.map(() => '?').join(', ') :
     '?'})
