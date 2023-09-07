@@ -1,6 +1,4 @@
-import {
-  RequestWithSearchParameters,
-} from '@src/middleware/validators/validateSearchParameters';
+import { RequestWithSearchParameters } from '@src/middleware/validators/validateSearchParameters';
 import { Response } from 'express';
 import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
@@ -12,12 +10,14 @@ function responseSearchRoadmaps(
   roadmaps: ResRoadmap[],
   total: bigint,
 ): unknown {
-  return res.status(HttpStatusCodes.OK).json(JSONSafety({
-    success: true,
-    message: `Roadmaps ${roadmaps.length ? '' : 'not '}found`,
-    data: roadmaps,
-    total: total,
-  }));
+  return res.status(HttpStatusCodes.OK).json(
+    JSONSafety({
+      success: true,
+      message: `Roadmaps ${roadmaps.length ? '' : 'not '}found`,
+      data: roadmaps,
+      total: total,
+    }),
+  );
 }
 
 export async function searchRoadmaps(
@@ -28,9 +28,5 @@ export async function searchRoadmaps(
 
   const roadmaps = await db.getRoadmaps(req, req.session?.userId);
 
-  return responseSearchRoadmaps(
-    res,
-    roadmaps.result,
-    roadmaps.totalRoadmaps,
-  );
+  return responseSearchRoadmaps(res, roadmaps.result, roadmaps.totalRoadmaps);
 }
