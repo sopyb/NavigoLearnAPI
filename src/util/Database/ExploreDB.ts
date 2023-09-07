@@ -1,6 +1,8 @@
 import Database, { DatabaseConfig } from '@src/util/Database/DatabaseDriver';
 import EnvVars from '@src/constants/EnvVars';
-import { SearchParameters } from '@src/middleware/validators/validateSearchParameters';
+import {
+  SearchParameters,
+} from '@src/middleware/validators/validateSearchParameters';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 
 // database credentials
@@ -38,22 +40,22 @@ class ExploreDB extends Database {
             FROM roadmapLikes rl WHERE roadmapId = r.id) AS likeCount,
         (SELECT COUNT(*) FROM roadmapViews WHERE roadmapId = r.id) AS viewCount,
         ${
-          !!userid
-            ? `(SELECT value FROM roadmapLikes
+  !!userid
+    ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
                         AND userId = ?
   )
     `
-            : '0'
-        } AS isLiked
+    : '0'
+} AS isLiked
       FROM
         roadmaps r
         INNER JOIN users u ON r.userId = u.id
       WHERE
         (r.name LIKE ? OR r.description LIKE ?)
         AND r.topic IN (${
-          Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
-        })
+  Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
+})
         AND r.isPublic = 1
         AND r.isDraft = 0
       ORDER BY
@@ -64,20 +66,20 @@ class ExploreDB extends Database {
         SELECT
             count(*) AS result,
             ${
-                    !!userid
-                            ? `(SELECT value FROM roadmapLikes
+  !!userid
+    ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
                         AND userId = ?
   )` : '0'
-            } AS isLiked
+} AS isLiked
         FROM
             roadmaps r
                 INNER JOIN users u ON r.userId = u.id
         WHERE
             (r.name LIKE ? OR r.description LIKE ?)
           AND r.topic IN (${
-                Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
-        })
+  Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
+})
           AND r.isPublic = 1
           AND r.isDraft = 0;
       `;

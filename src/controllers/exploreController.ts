@@ -1,4 +1,6 @@
-import { RequestWithSearchParameters } from '@src/middleware/validators/validateSearchParameters';
+import {
+  RequestWithSearchParameters,
+} from '@src/middleware/validators/validateSearchParameters';
 import { Response } from 'express';
 import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
