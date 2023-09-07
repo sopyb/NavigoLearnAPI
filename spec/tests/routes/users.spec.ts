@@ -50,9 +50,7 @@ describe('Get User Tests', () => {
         expect(body.success).toBe(true);
         expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
         expect(body.data).toEqual(
-          JSON.parse(
-            JSONSafety(new ResUserMiniProfile(user.user.toObject())),
-          ),
+          JSONSafety(new ResUserMiniProfile(user.user.toObject())),
         );
       });
   });
@@ -66,10 +64,8 @@ describe('Get User Tests', () => {
         expect(body.success).toBe(true);
         expect(body.data).toBeDefined();
         expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
-        expect(body.data).toEqual(
-          JSON.parse(
-            JSONSafety(new ResUserMiniProfile(user.user.toObject())),
-          ),
+        expect(JSONSafety(body.data)).toEqual(
+          JSONSafety(new ResUserMiniProfile(user.user.toObject())),
         );
       });
   });
