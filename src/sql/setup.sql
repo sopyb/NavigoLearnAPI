@@ -37,16 +37,16 @@ create table if not exists roadmaps
 (
     id          bigint auto_increment
         primary key,
-    name        varchar(255)                                    not null,
-    description varchar(255)                                    not null,
-    topic       enum ('programming', 'math', 'design', 'other') not null,
-    userId      bigint                                          not null,
-    isFeatured  tinyint(1) default 0                            not null,
-    isPublic    tinyint(1) default 1                            not null,
-    isDraft     tinyint(1) default 0                            not null,
-    data        longtext                                        not null,
-    createdAt   timestamp  default current_timestamp()          not null,
-    updatedAt   timestamp  default current_timestamp()          not null on update current_timestamp(),
+    name        varchar(255)                                       not null,
+    description varchar(255)                                       not null,
+    topic       enum ('programming', 'math', 'phisics', 'biology') not null,
+    userId      bigint                                             not null,
+    isFeatured  tinyint(1) default 0                               not null,
+    isPublic    tinyint(1) default 1                               not null,
+    isDraft     tinyint(1) default 0                               not null,
+    data        longtext                                           not null,
+    createdAt   timestamp  default current_timestamp()             not null,
+    updatedAt   timestamp  default current_timestamp()             not null on update current_timestamp(),
     constraint roadmaps_userId_fk
         foreign key (userId) references users (id)
             on delete cascade

@@ -5,18 +5,19 @@ import { Response } from 'express';
 import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
+import JSONSafety from '@src/util/JSONSafety';
 
 function responseSearchRoadmaps(
   res: Response,
   roadmaps: ResRoadmap[],
   total: bigint,
 ): unknown {
-  return res.status(HttpStatusCodes.OK).json({
+  return res.status(HttpStatusCodes.OK).json(JSONSafety({
     success: true,
     message: `Roadmaps ${roadmaps.length ? '' : 'not '}found`,
     data: roadmaps,
     total: total,
-  });
+  }));
 }
 
 export async function searchRoadmaps(
@@ -29,7 +30,7 @@ export async function searchRoadmaps(
 
   return responseSearchRoadmaps(
     res,
-    roadmaps,
-    roadmaps[0]?.totalRoadmaps || 0n,
+    roadmaps.result,
+    roadmaps.totalRoadmaps,
   );
 }

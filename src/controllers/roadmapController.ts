@@ -14,7 +14,7 @@ import {
   responseRoadmapDeleted,
   responseRoadmapNotFound,
   responseRoadmapNotRated,
-  responseRoadmapRated,
+  responseRoadmapRated, responseRoadmapUnrated,
   responseRoadmapUpdated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
@@ -316,9 +316,9 @@ export async function likeRoadmap(req: RequestWithSession, res: Response) {
 
   const db = new Database();
 
-  const liked = await getRoadmapLike(db, BigInt(roadmapId), userId);
+  const likeEntry = await getRoadmapLike(db, userId, BigInt(roadmapId));
 
-  if (!liked) {
+  if (!likeEntry) {
     if (
       (await insertRoadmapLike(
         db,
@@ -332,12 +332,12 @@ export async function likeRoadmap(req: RequestWithSession, res: Response) {
       return responseRoadmapRated(res);
   }
 
-  if (!liked) return responseServerError(res);
-  if (liked.value == 1) return responseRoadmapAlreadyLiked(res);
+  if (!likeEntry) return responseServerError(res);
+  if (likeEntry.value == 1) return responseRoadmapAlreadyLiked(res);
 
-  liked.set({ value: 1 });
+  likeEntry.set({ value: 1 });
 
-  if (await updateRoadmapLike(db, liked.id, liked))
+  if (await updateRoadmapLike(db, likeEntry.id, likeEntry))
     return responseRoadmapRated(res);
 
   return responseServerError(res);
@@ -352,7 +352,7 @@ export async function dislikeRoadmap(req: RequestWithSession, res: Response) {
 
   const db = new Database();
 
-  const liked = await getRoadmapLike(db, BigInt(roadmapId), userId);
+  const liked = await getRoadmapLike(db, userId, BigInt(roadmapId));
 
   if (!liked) {
     if (
@@ -391,12 +391,12 @@ export async function removeLikeRoadmap(
 
   const db = new Database();
 
-  const liked = await getRoadmapLike(db, BigInt(roadmapId), userId);
+  const liked = await getRoadmapLike(db, userId, BigInt(roadmapId));
 
   if (!liked) return responseRoadmapNotRated(res);
 
   if (await db.delete('roadmapLikes', liked.id))
-    return responseRoadmapRated(res);
+    return responseRoadmapUnrated(res);
 
   return responseServerError(res);
 }

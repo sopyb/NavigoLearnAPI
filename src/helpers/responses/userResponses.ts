@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { User } from '@src/types/models/User';
 import { UserInfo } from '@src/types/models/UserInfo';
 import { UserStats } from '@src/helpers/databaseManagement';
-import JSONStringify from '@src/util/JSONStringify';
+import JSONSafety from '@src/util/JSONSafety';
 import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 import { ResUserProfile } from '@src/types/response/ResUserProfile';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
@@ -56,7 +56,7 @@ export function responseUserProfile(
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
     .send(
-      JSONStringify({
+      JSONSafety({
         data: new ResUserProfile(user, userInfo, userStats, isFollowing),
         message: 'User found',
         success: true,
@@ -69,7 +69,7 @@ export function responseUserMiniProfile(res: Response, user: User): void {
     .status(HttpStatusCodes.OK)
     .contentType('application/json')
     .send(
-      JSONStringify({
+      JSONSafety({
         data: new ResUserMiniProfile(user),
         message: 'User found',
         success: true,

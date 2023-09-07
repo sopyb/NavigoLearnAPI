@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '@src/server';
 import httpStatusCodes from '@src/constants/HttpStatusCodes';
 import { CreatedUser } from '@spec/types/tests/CreatedUser';
-import JSONStringify from '@src/util/JSONStringify';
+import JSONSafety from '@src/util/JSONSafety';
 import { ResUserProfile } from '@src/types/response/ResUserProfile';
 import { ResUserMiniProfile } from '@src/types/response/ResUserMiniProfile';
 
@@ -51,7 +51,7 @@ describe('Get User Tests', () => {
         expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
         expect(body.data).toEqual(
           JSON.parse(
-            JSONStringify(new ResUserMiniProfile(user.user.toObject())),
+            JSONSafety(new ResUserMiniProfile(user.user.toObject())),
           ),
         );
       });
@@ -68,7 +68,7 @@ describe('Get User Tests', () => {
         expect(ResUserMiniProfile.isMiniProfile(body.data)).toBe(true);
         expect(body.data).toEqual(
           JSON.parse(
-            JSONStringify(new ResUserMiniProfile(user.user.toObject())),
+            JSONSafety(new ResUserMiniProfile(user.user.toObject())),
           ),
         );
       });

@@ -1,6 +1,6 @@
 /* eslint-disable */
-export default function JSONStringify(obj: unknown): string {
-  return JSON.stringify(obj, (key, value) => {
+export default function JSONSafety(obj: unknown): unknown {
+  return JSON.parse(JSON.stringify(obj, (key, value) => {
     // if value is a bigint, convert it to a string
     if (typeof value === 'bigint') return value.toString();
     // if value has a toObject method, call it and return the result
@@ -15,5 +15,5 @@ export default function JSONStringify(obj: unknown): string {
 
     // return value as is
     return value;
-  });
+  }));
 }

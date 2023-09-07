@@ -245,7 +245,9 @@ export async function getRoadmapLike(
     'roadmapId',
     roadmapId,
   );
+
   if (!like) return null;
+
   return new RoadmapLike(like);
 }
 

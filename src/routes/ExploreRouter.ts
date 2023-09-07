@@ -7,7 +7,7 @@ import { searchRoadmaps } from '@src/controllers/exploreController';
 const ExploreRouter = Router();
 
 ExploreRouter.get(
-  Paths.Explore.Search.Base + Paths.Explore.Search.Roadmaps,
+  Paths.Explore.Roadmaps,
   validateSearchParameters,
   searchRoadmaps,
 );

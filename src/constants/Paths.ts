@@ -17,11 +17,8 @@ const Paths = {
     Logout: '/logout',
   },
   Explore: {
-    Base: '/explore',
-    Search: {
-      Base: '/search',
-      Roadmaps: '/roadmaps',
-    },
+    Base: '/search',
+    Roadmaps: '/roadmaps',
   },
   Roadmaps: {
     Base: '/roadmaps',
