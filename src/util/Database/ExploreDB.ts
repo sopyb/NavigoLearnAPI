@@ -2,7 +2,6 @@ import Database, { DatabaseConfig } from '@src/util/Database/DatabaseDriver';
 import EnvVars from '@src/constants/EnvVars';
 import { SearchParameters } from '@src/middleware/validators/validateSearchParameters';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
-import * as console from 'console';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -62,18 +61,25 @@ class ExploreDB extends Database {
       LIMIT ?, ?;
     `;
     const query2 = `
-          SELECT
-              COUNT(*) AS result
-          FROM
-              roadmaps r
-                  INNER JOIN users u ON r.userId = u.id
-          WHERE
-              (r.name LIKE ? OR r.description LIKE ?)
-            AND r.topic IN (${
-              Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
-            })
-            AND r.isPublic = 1
-            AND r.isDraft = 0;
+        SELECT
+            count(*) AS result,
+            ${
+                    !!userid
+                            ? `(SELECT value FROM roadmapLikes
+                        WHERE roadmapId = r.id
+                        AND userId = ?
+  )` : '0'
+            } AS isLiked
+        FROM
+            roadmaps r
+                INNER JOIN users u ON r.userId = u.id
+        WHERE
+            (r.name LIKE ? OR r.description LIKE ?)
+          AND r.topic IN (${
+                Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
+        })
+          AND r.isPublic = 1
+          AND r.isDraft = 0;
       `;
     const params = [];
 
@@ -88,7 +94,7 @@ class ExploreDB extends Database {
     params.push(limit);
 
     const result = await this.getQuery(query, params);
-    const result2 = await this.countQuery(query2, params);
+    const result2 = await this.countQuery(query2, params.slice(0, -2));
 
     if (result === null) return { result: [], totalRoadmaps: 0n };
     return {

@@ -4,7 +4,6 @@ import { ExploreDB } from '@src/util/Database/ExploreDB';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 import JSONSafety from '@src/util/JSONSafety';
-import * as console from 'console';
 
 function responseSearchRoadmaps(
   res: Response,
@@ -28,7 +27,6 @@ export async function searchRoadmaps(
   const db = new ExploreDB();
 
   const roadmaps = await db.getRoadmaps(req, req.session?.userId);
-  console.log(roadmaps);
 
   return responseSearchRoadmaps(res, roadmaps.result, roadmaps.totalRoadmaps);
 }
