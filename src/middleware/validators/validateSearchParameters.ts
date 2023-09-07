@@ -46,22 +46,22 @@ export default function (
   let order: Order;
 
   const [by, direction] = (orderParam as string)?.split(':') || ['age', 'DESC'];
-  switch (by) {
+  switch (by.toLowerCase()) {
     case 'views':
       order = {
-        by: 'views',
+        by: 'viewCount',
         direction: 'DESC',
       };
       break;
 
     case 'likes':
       order = {
-        by: 'likes',
+        by: 'likeCount',
         direction: 'DESC',
       };
       break;
 
-    case 'age':
+    case 'new':
     default:
       order = {
         by: 'r.createdAt',
