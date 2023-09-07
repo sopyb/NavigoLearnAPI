@@ -4,7 +4,7 @@ import { RoadmapTopic } from '@src/types/models/Roadmap';
 
 interface Order {
   by: string;
-  direction?: 'ASC' | 'DESC';
+  direction: 'ASC' | 'DESC';
 }
 
 export interface SearchParameters {
@@ -30,7 +30,7 @@ export default function (
     page: pageParam,
     limit: limitParam,
     topic: topicParam,
-    order: orderParam } =
+    sortBy: orderParam } =
       req.query;
   const search = (searchParam as string) || '';
   const page = parseInt((pageParam as string) || '1');
@@ -49,14 +49,14 @@ export default function (
   switch (by.toLowerCase()) {
     case 'views':
       order = {
-        by: 'viewCount',
+        by: 't.viewCount',
         direction: 'DESC',
       };
       break;
 
     case 'likes':
       order = {
-        by: 'likeCount',
+        by: 't.likeCount',
         direction: 'DESC',
       };
       break;
@@ -64,7 +64,7 @@ export default function (
     case 'new':
     default:
       order = {
-        by: 'r.createdAt',
+        by: 't.createdAt',
         direction: 'DESC',
       };
       break;

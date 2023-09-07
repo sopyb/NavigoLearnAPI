@@ -25,6 +25,8 @@ class ExploreDB extends Database {
     if (typeof search != 'string' || !page || !limit || !topic || !order)
       return { result: [], totalRoadmaps: 0n };
     const query = `
+    SELECT *
+    FROM (
       SELECT
         r.id as id,
         r.name AS name,
@@ -33,6 +35,8 @@ class ExploreDB extends Database {
         r.isFeatured AS isFeatured,
         r.isPublic AS isPublic,
         r.isDraft AS isDraft,
+        r.createdAt AS createdAt,
+        r.updatedAt AS updatedAt,
         u.id AS userId,
         u.avatar AS userAvatar,
         u.name AS userName,
@@ -58,9 +62,16 @@ class ExploreDB extends Database {
 })
         AND r.isPublic = 1
         AND r.isDraft = 0
-      ORDER BY
-        r.isFeatured DESC, ${order.by} ${order.direction}
-      LIMIT ?, ?;
+   ) as t
+    ORDER BY
+        t.isFeatured DESC, ${order.by === 't.likeCount' ? 
+            `CASE
+    WHEN t.likeCount < 0 THEN 3
+    WHEN t.likeCount = 0 THEN 2
+    ELSE 1
+  END,` : ''} ${order.by} ${order.direction}
+    LIMIT ?, ?
+    ;
     `;
     const query2 = `
         SELECT
