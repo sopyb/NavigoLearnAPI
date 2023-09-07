@@ -109,3 +109,10 @@ export function responseRoadmapRated(res: Response) {
     success: true,
   });
 }
+
+export function responseRoadmapUnrated(res: Response) {
+    return res.status(HttpStatusCodes.OK).json({
+        message: 'Roadmap unrated',
+        success: true,
+    });
+}

@@ -32,8 +32,8 @@ RoadmapsRouter.delete(Paths.Roadmaps.Delete, validateSession, deleteRoadmap);
 RoadmapsRouter.all(Paths.Roadmaps.Like, validateSession);
 RoadmapsRouter.all(Paths.Roadmaps.Dislike, validateSession);
 
-RoadmapsRouter.post(Paths.Roadmaps.Like, likeRoadmap);
-RoadmapsRouter.post(Paths.Roadmaps.Dislike, dislikeRoadmap);
+RoadmapsRouter.get(Paths.Roadmaps.Like, likeRoadmap);
+RoadmapsRouter.get(Paths.Roadmaps.Dislike, dislikeRoadmap);
 
 RoadmapsRouter.delete(Paths.Roadmaps.Like, removeLikeRoadmap);
 RoadmapsRouter.delete(Paths.Roadmaps.Dislike, removeLikeRoadmap);
