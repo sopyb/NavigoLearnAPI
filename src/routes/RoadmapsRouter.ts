@@ -17,7 +17,7 @@ const RoadmapsRouter = Router();
 RoadmapsRouter.post(
   Paths.Roadmaps.Create,
   validateSession,
-  validateBody('name', 'description', 'data'),
+  validateBody('name', 'description', 'data', 'isPublic', 'isDraft'),
   createRoadmap,
 );
 

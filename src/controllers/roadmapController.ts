@@ -32,6 +32,8 @@ import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
 import { IUser } from '@src/types/models/User';
 import { addRoadmapView } from '@src/util/Views';
 import logger from 'jet-logger';
+import * as console from 'console';
+import { alterResponseToBooleans } from '@src/util/data-alteration/AlterResponse';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
@@ -50,7 +52,6 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = undefined;
 
-  // isPublic can't be modified by the user yet
   if (isPublic !== true && isPublic !== false) isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
 
@@ -107,10 +108,12 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
 
   addRoadmapView(db, roadmap.id, userId).catch((e) => logger.err(e));
 
-  return responseRoadmap(
-    res,
+  const roadmapResponsePayload: ResFullRoadmap = alterResponseToBooleans(
     new ResFullRoadmap(roadmap, user, likeCount, viewCount, isLiked),
+    ['isFeatured', 'isPublic', 'isDraft'],
   );
+
+  return responseRoadmap(res, roadmapResponsePayload);
 }
 
 export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
