@@ -8,13 +8,15 @@ import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
   responseNotAllowed,
-  responseRoadmap, responseRoadmapAlreadyDisliked,
+  responseRoadmap,
+  responseRoadmapAlreadyDisliked,
   responseRoadmapAlreadyLiked,
   responseRoadmapCreated,
   responseRoadmapDeleted,
   responseRoadmapNotFound,
   responseRoadmapNotRated,
-  responseRoadmapRated, responseRoadmapUnrated,
+  responseRoadmapRated,
+  responseRoadmapUnrated,
   responseRoadmapUpdated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
@@ -49,8 +51,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     topic = undefined;
 
   // isPublic can't be modified by the user yet
-  // if (isPublic !== true && isPublic !== false) isPublic = true;
-  isPublic = true;
+  if (isPublic !== true && isPublic !== false) isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
 
   const roadmap = new Roadmap({
