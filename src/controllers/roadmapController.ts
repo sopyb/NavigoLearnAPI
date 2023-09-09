@@ -324,18 +324,10 @@ export async function updateMiscDataRoadmap(
 
   if (!miscData) return responseServerError(res);
 
-  console.log(typeof miscData, miscData);
   roadmap.set({ miscData: miscData as string});
-  console.log('NEW ROADMAP BEFORE SAVE', atob(roadmap.miscData) , miscData);
 
   if (await db.update('roadmaps', roadmap.id, roadmap)){
-    console.log('WORKED');
     const roadmap = await getRoadmapData(db, BigInt(roadmapId));
-    if(roadmap){
-      console.log(miscData);
-      console.log('DIAWHEA',roadmap.name, roadmap.miscData, atob(roadmap.miscData));
-    }
-
     return responseRoadmapUpdated(res);
   }
 
@@ -361,7 +353,7 @@ export async function updateIsDraftRoadmap(
 
   const { isDraft } = req.body;
 
-  if (!isDraft) return responseServerError(res);
+  if (isDraft === null || isDraft === undefined) return responseServerError(res);
 
   roadmap.set({ isDraft: !!isDraft });
 
