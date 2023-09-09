@@ -33,6 +33,7 @@ const Paths = {
     Update: {
       Base: '/:roadmapId([0-9]+)',
       All: '/',
+      About: '/about',
       Name: '/title',
       Description: '/description',
       Topic: '/topic',

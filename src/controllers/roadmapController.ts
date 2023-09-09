@@ -33,6 +33,7 @@ import { IUser } from '@src/types/models/User';
 import { addRoadmapView } from '@src/util/Views';
 import logger from 'jet-logger';
 import { alterResponseToBooleans } from '@src/util/data-alteration/AlterResponse';
+import * as console from 'console';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
@@ -76,12 +77,14 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
   const roadmapId = req.params.roadmapId;
   const userId = req.session?.userId;
 
+  console.log('WAIdehAIOE',roadmapId, userId, req.params );
   if (!roadmapId) return responseServerError(res);
 
   const db = new Database();
 
   const roadmap = await getRoadmapData(db, BigInt(roadmapId));
   if (!roadmap) return responseRoadmapNotFound(res);
+
 
   const user = await db.get<IUser>('users', roadmap.userId);
   if (!user) return responseServerError(res);
@@ -108,6 +111,7 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
 
   addRoadmapView(db, roadmap.id, userId).catch((e) => logger.err(e));
 
+
   const roadmapResponsePayload: ResFullRoadmap = alterResponseToBooleans(
     new ResFullRoadmap(roadmap, user, likeCount, viewCount, isLiked),
     ['isFeatured', 'isPublic', 'isDraft'],
@@ -115,6 +119,42 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
 
   return responseRoadmap(res, roadmapResponsePayload);
 }
+
+export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { name, description,  topic, miscData} = req.body;
+
+  if (!name || !description || !miscData || !topic )
+    return responseServerError(res);
+
+  if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
+    return responseInvalidBody(res);
+
+  roadmap.set({
+    name: name as string,
+    description: description as string,
+    topic: topic as RoadmapTopic,
+    miscData: miscData as string,
+  });
+
+  if (await db.update('roadmaps', roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
 
 export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   const roadmapId = req.params.roadmapId;
@@ -134,6 +174,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
 
   if (!name || !description || !data || !topic || !isDraft)
     return responseServerError(res);
+
 
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
@@ -258,6 +299,45 @@ export async function updateTopicRoadmap(req: RequestWithBody, res: Response) {
 
   if (await db.update('roadmaps', roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateMiscDataRoadmap(
+  req: RequestWithBody,
+  res: Response,
+) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  const { miscData }  = req.body;
+
+  if (!miscData) return responseServerError(res);
+
+  console.log(typeof miscData, miscData);
+  roadmap.set({ miscData: miscData as string});
+  console.log('NEW ROADMAP BEFORE SAVE', atob(roadmap.miscData) , miscData);
+
+  if (await db.update('roadmaps', roadmap.id, roadmap)){
+    console.log('WORKED');
+    const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+    if(roadmap){
+      console.log(miscData);
+      console.log('DIAWHEA',roadmap.name, roadmap.miscData, atob(roadmap.miscData));
+    }
+
+    return responseRoadmapUpdated(res);
+  }
 
   return responseServerError(res);
 }

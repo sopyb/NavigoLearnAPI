@@ -201,6 +201,8 @@ class Database {
     discardId = true,
   ): Promise<boolean> {
     const { keys, values } = processData(data, discardId);
+    // console.log('keys', keys);
+    // console.log('values', values);
 
     // create sql query - update table set key = ?, key = ? where id = ?
     // ? for values to be replaced by params

@@ -106,6 +106,7 @@ export class Roadmap implements IRoadmap {
     isPublic,
     isDraft,
     data,
+    miscData,
     createdAt,
     updatedAt,
   }: IRoadmapModifications): void {
@@ -117,6 +118,7 @@ export class Roadmap implements IRoadmap {
     if (isPublic !== undefined) this._isPublic = isPublic;
     if (isDraft !== undefined) this._isDraft = isDraft;
     if (data !== undefined) this._data = data;
+    if (miscData !== undefined) this._miscData = miscData;
     if (createdAt !== undefined) this._createdAt = createdAt;
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
   }
