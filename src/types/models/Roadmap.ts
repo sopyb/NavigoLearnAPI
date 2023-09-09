@@ -16,6 +16,7 @@ export interface IRoadmap {
   readonly isPublic: boolean;
   readonly isDraft: boolean;
   readonly data: string;
+  readonly miscData: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -27,6 +28,7 @@ interface IRoadmapConstructor {
   readonly description: string;
   readonly topic?: RoadmapTopic;
   readonly userId: bigint;
+  readonly miscData: string;
   readonly isFeatured?: boolean;
   readonly isPublic?: boolean;
   readonly isDraft?: boolean;
@@ -46,6 +48,7 @@ interface IRoadmapModifications {
   readonly isPublic?: boolean;
   readonly isDraft?: boolean;
   readonly data?: string;
+  readonly miscData?: string;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
@@ -61,6 +64,7 @@ export class Roadmap implements IRoadmap {
   private _isPublic: boolean;
   private _isDraft: boolean;
   private _data: string;
+  private _miscData: string;
   private _createdAt: Date;
   private _updatedAt: Date;
 
@@ -74,6 +78,7 @@ export class Roadmap implements IRoadmap {
     isPublic = true,
     isDraft = false,
     data,
+    miscData,
     createdAt = new Date(),
     updatedAt = new Date(),
   }: IRoadmapConstructor) {
@@ -86,6 +91,7 @@ export class Roadmap implements IRoadmap {
     this._isPublic = isPublic;
     this._isDraft = isDraft;
     this._data = data;
+    this._miscData = miscData;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
   }
@@ -151,6 +157,10 @@ export class Roadmap implements IRoadmap {
     return this._data;
   }
 
+  public get miscData(): string {
+    return this._miscData;
+  }
+
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -187,6 +197,7 @@ export class Roadmap implements IRoadmap {
       isPublic: this._isPublic,
       isDraft: this._isDraft,
       data: this._data,
+      miscData: this._miscData,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

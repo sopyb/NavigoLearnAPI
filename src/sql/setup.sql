@@ -45,6 +45,7 @@ create table if not exists roadmaps
     isPublic    tinyint(1) default 1                               not null,
     isDraft     tinyint(1) default 0                               not null,
     data        longtext                                           not null,
+    miscData    longtext                                           not null,
     createdAt   timestamp  default current_timestamp()             not null,
     updatedAt   timestamp  default current_timestamp()             not null on update current_timestamp(),
     constraint roadmaps_userId_fk

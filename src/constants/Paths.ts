@@ -39,6 +39,7 @@ const Paths = {
       Visibility: '/visibility',
       Draft: '/draft',
       Data: '/data',
+      MiscData: '/misc-data', // used for different roadmap wide data like roadmap theme
     },
     Delete: '/:roadmapId([0-9]+)',
     Like: '/:roadmapId([0-9]+)/like',

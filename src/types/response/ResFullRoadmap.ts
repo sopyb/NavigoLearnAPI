@@ -31,6 +31,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
   public readonly description: string;
   public readonly topic: RoadmapTopic;
   public readonly data: string;
+  public readonly miscData: string;
   public readonly isFeatured: boolean;
   public readonly isPublic: boolean;
   public readonly isDraft: boolean;
@@ -53,6 +54,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
       description,
       topic,
       data,
+      miscData,
       userId,
       isFeatured,
       isPublic,
@@ -70,6 +72,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
     this.description = description;
     this.topic = topic;
     this.data = data;
+    this.miscData = miscData;
     this.isFeatured = isFeatured;
     this.isPublic = isPublic;
     this.isDraft = isDraft;
@@ -94,6 +97,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
       'description' in obj &&
       'topic' in obj &&
         'data' in obj &&
+      'miscData' in obj &&
       'isFeatured' in obj &&
       'isPublic' in obj &&
       'isDraft' in obj &&

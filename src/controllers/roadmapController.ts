@@ -32,12 +32,11 @@ import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
 import { IUser } from '@src/types/models/User';
 import { addRoadmapView } from '@src/util/Views';
 import logger from 'jet-logger';
-import * as console from 'console';
 import { alterResponseToBooleans } from '@src/util/data-alteration/AlterResponse';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
-  const { name, description, data } = req.body;
+  const { name, description, data, miscData } = req.body;
 
   // non guaranteed to exist by middleware of type Roadmap
   let { topic, isPublic, isDraft } = req.body;
@@ -52,7 +51,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = undefined;
 
-  if (isPublic !== true && isPublic !== false) isPublic = true;
+  isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
 
   const roadmap = new Roadmap({
@@ -63,6 +62,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     isPublic: isPublic as boolean,
     isDraft: isDraft as boolean,
     data: data as string,
+    miscData: miscData as string,
   });
 
   const id = await insertRoadmap(db, roadmap);
