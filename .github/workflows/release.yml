@@ -32,40 +32,39 @@ jobs:
         id: version
         run: echo "version=$(date +%y.%m.%d-%s)" >> $GITHUB_ENV
 
-      - name: Fetch previous release
-        id: prev_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        run: |
-          result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
-          echo "$result"
-          tag=$(echo "$result" | jq -r '.[0].tag_name')
-          echo "tag=$tag" >> $GITHUB_ENV
-
-      - name: Prepare release notes
-        id: release_notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        run: |
-          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
-          prev_commit=$(echo "$data" | jq -r '.base_commit.sha' | cut -c -7)
-          current_commit=$(echo "${{ github.sha }}" | cut -c -7)
-          echo "notes=$commits" >> $GITHUB_ENV
-          echo "prev_commit=$prev_commit" >> $GITHUB_ENV
-          echo "current_commit=$current_commit" >> $GITHUB_ENV
+#      - name: Fetch previous release
+#        id: prev_release
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.PAT }}
+#        run: |
+#          result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
+#          echo "$result"
+#          tag=$(echo "$result" | jq -r '.[0].tag_name')
+#          echo "tag=$tag" >> $GITHUB_ENV
+#
+#      - name: Prepare release notes
+#        id: release_notes
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.PAT }}
+#        run: |
+#          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
+#          prev_commit=$(echo "$data" | jq -r '.base_commit.sha' | cut -c -7)
+#          current_commit=$(echo "${{ github.sha }}" | cut -c -7)
+#          echo "notes=$commits" >> $GITHUB_ENV
+#          echo "prev_commit=$prev_commit" >> $GITHUB_ENV
+#          echo "current_commit=$current_commit" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ env.version }}
-          release_name: Release ${{ env.version }}
-          body: |
-            Release based on commit ${{ github.sha }}.
-            
-            Full change log:
-            [`${{ env.prev_commit }}...${{ env.current_commit }}`](${{ github.server_url }}/${{ github.repository }}/compare/${{ env.prev_commit }}...${{ env.current_commit }})
+          token: ${{ secrets.PAT }}
+          generateReleaseNotes: true
+          name: Release ${{ env.version }}
+#          body: |
+#            Release based on commit ${{ github.sha }}.
+#
+#            Full change log:
+#            [`${{ env.prev_commit }}...${{ env.current_commit }}`](${{ github.server_url }}/${{ github.repository }}/compare/${{ env.prev_commit }}...${{ env.current_commit }})
           draft: false
           prerelease: false
