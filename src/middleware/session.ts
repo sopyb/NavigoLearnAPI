@@ -85,19 +85,11 @@ export async function sessionMiddleware(
       });
 
       req.session = undefined;
-
-      next();
-
-      return;
     } else {
       await extendSession(db, req, res);
     }
   } else {
     req.session = undefined;
-  }
-
-  // if session still doesn't exist, delete cookie
-  if (!req.session) {
     res.cookie('token', '', {
       httpOnly: false,
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
@@ -105,6 +97,5 @@ export async function sessionMiddleware(
       sameSite: 'strict',
     });
   }
-
   next();
 }
