@@ -53,7 +53,8 @@ jobs:
           prev_commit=$(echo "$data" | jq -r '.base_commit.sha')
           current_commit=${{ github.sha }}
           echo "notes=$commits" >> $GITHUB_ENV
-          echo "compare_link=`$prev_commit...$current_commit`" >> $GITHUB_ENV
+          echo "prev_commit=$prev_commit" >> $GITHUB_ENV
+          echo "current_commit=$current_commit" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -67,6 +68,10 @@ jobs:
             Release based on commit ${{ github.sha }}
             Changes:
             ${{ env.notes }}
-            `${{ env.compare_link }}`
+            
+            Full change log:
+            ```
+            ${{ env.prev_commit }}...${{ env.current_commit }}
+            ```
           draft: false
           prerelease: false
