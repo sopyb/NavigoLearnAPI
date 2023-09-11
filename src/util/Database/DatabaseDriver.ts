@@ -467,8 +467,8 @@ class Database {
     const result = await this._query(sql, queryBuilderResult.params);
 
     return BigInt(
-      (result as CountDataPacket[])[0][`SUM(${column})`] as number,
-    ) || 0n;
+      (result as CountDataPacket[])[0][`SUM(${column})`] as number || 0,
+    );
   }
 
   protected async _countWhere(
