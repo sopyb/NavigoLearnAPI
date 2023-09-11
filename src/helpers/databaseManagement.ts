@@ -69,23 +69,23 @@ export async function getUserStats(
   userId: bigint,
 ): Promise<UserStats> {
   const roadmapsCount = await db.countWhere('roadmaps', 'userId', userId);
-  const roadmapsViews = await db.countQuery(
-    `
-        SELECT SUM(rl.value) AS 'result'
-        FROM users u
-                 LEFT JOIN roadmaps r ON u.id = r.userId
-                 LEFT JOIN roadmapLikes rl ON r.id = rl.roadmapId
-        WHERE u.id = ?;
-    `,
-    [userId],
-  );
-  const roadmapsLikes = await db.countQuery(
+  const roadmapsViews = await db.sumQuery(
     `
         SELECT COUNT(rv.userId) AS 'result'
         FROM roadmaps r
                  JOIN roadmapViews rv ON r.id = rv.roadmapId
         WHERE rv.full = 1
           AND r.userId = ?;
+    `,
+    [userId],
+  );
+  const roadmapsLikes = await db.sumQuery(
+    `
+        SELECT SUM(rl.value) AS 'result'
+        FROM users u
+                 LEFT JOIN roadmaps r ON u.id = r.userId
+                 LEFT JOIN roadmapLikes rl ON r.id = rl.roadmapId
+        WHERE u.id = ?;
     `,
     [userId],
   );
