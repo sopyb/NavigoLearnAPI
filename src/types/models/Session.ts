@@ -24,11 +24,6 @@ interface ISessionModifications {
 
 // Class
 export class Session implements ISession {
-  private _id: bigint;
-  private _userId: bigint;
-  private _token: string;
-  private _expires: Date;
-
   public constructor({
     id = -1n,
     userId,
@@ -41,25 +36,25 @@ export class Session implements ISession {
     this._expires = expires;
   }
 
-  // Method to modify the properties
-  public set({ id, userId, token, expires }: ISessionModifications): void {
-    if (id !== undefined) this._id = id;
-    if (userId !== undefined) this._userId = userId;
-    if (token !== undefined) this._token = token;
-    if (expires !== undefined) this._expires = expires;
-  }
+  private _id: bigint;
 
   public get id(): bigint {
     return this._id;
   }
 
+  private _userId: bigint;
+
   public get userId(): bigint {
     return this._userId;
   }
 
+  private _token: string;
+
   public get token(): string {
     return this._token;
   }
+
+  private _expires: Date;
 
   public get expires(): Date {
     return this._expires;
@@ -74,6 +69,14 @@ export class Session implements ISession {
       'token' in obj &&
       'expires' in obj
     );
+  }
+
+  // Method to modify the properties
+  public set({ id, userId, token, expires }: ISessionModifications): void {
+    if (id !== undefined) this._id = id;
+    if (userId !== undefined) this._userId = userId;
+    if (token !== undefined) this._token = token;
+    if (expires !== undefined) this._expires = expires;
   }
 
   // toObject method to convert the class instance to an object

@@ -16,7 +16,7 @@ const Paths = {
     GithubCallback: '/github-callback',
     Logout: '/logout',
   },
-  Explore: {
+  Search: {
     Base: '/search',
     Roadmaps: '/roadmaps',
   },
@@ -26,46 +26,22 @@ const Paths = {
     Get: {
       Base: '/:roadmapId([0-9]+)?',
       Roadmap: '/',
-      MiniRoadmap: '/mini',
-      Owner: '/owner',
-      OwnerMini: '/owner/mini',
     },
     Update: {
       Base: '/:roadmapId([0-9]+)',
       All: '/',
       About: '/about',
-      Name: '/title',
+      Name: '/name',
       Description: '/description',
       Topic: '/topic',
       Visibility: '/visibility',
       Draft: '/draft',
       Data: '/data',
-      MiscData: '/misc-data', // used for different roadmap wide data like roadmap theme
+      MiscData: '/misc-data', // used for roadmap wide data like roadmap theme
     },
     Delete: '/:roadmapId([0-9]+)',
     Like: '/:roadmapId([0-9]+)/like',
     Dislike: '/:roadmapId([0-9]+)/dislike',
-    Issues: {
-      Base: '/:roadmapId([0-9]+)/issues',
-      Create: '/create',
-      Get: '/:issueId([0-9]+)',
-      GetAll: '/',
-      Update: {
-        Base: '/:issueId([0-9]+)',
-        All: '/',
-        Title: '/title',
-        Content: '/content',
-        Status: '/status',
-      },
-      Delete: '/:issueId',
-      Comments: {
-        Base: '/:issueId/comments',
-        Create: '/create',
-        Get: '/:commentId?',
-        Update: '/:commentId',
-        Delete: '/:commentId',
-      },
-    },
   },
   Users: {
     Base: '/users',

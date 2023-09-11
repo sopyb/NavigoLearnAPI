@@ -7,7 +7,8 @@ import {
   updateAllRoadmap,
   updateDataRoadmap,
   updateDescriptionRoadmap,
-  updateIsDraftRoadmap, updateMiscDataRoadmap,
+  updateIsDraftRoadmap,
+  updateMiscDataRoadmap,
   updateNameRoadmap,
   updateTopicRoadmap,
 } from '@src/controllers/roadmapController';
@@ -19,6 +20,13 @@ RoadmapsUpdate.post(
   validateSession,
   validateBody('name', 'description', 'data', 'topic', 'isDraft'),
   updateAllRoadmap,
+);
+
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.About,
+  validateSession,
+  validateBody('name', 'description', 'topic', 'miscData'),
+  updateAboutRoadmap,
 );
 
 RoadmapsUpdate.post(
@@ -56,22 +64,11 @@ RoadmapsUpdate.post(
   updateIsDraftRoadmap,
 );
 
-
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.MiscData,
   validateSession,
   validateBody('miscData'),
   updateMiscDataRoadmap,
 );
-
-RoadmapsUpdate.post(
-  Paths.Roadmaps.Update.About,
-  validateSession,
-  validateBody('name', 'description', 'topic', 'miscData'),
-  updateAboutRoadmap,
-);
-
-
-
 
 export default RoadmapsUpdate;

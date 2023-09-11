@@ -3,18 +3,18 @@ import Paths from '@src/constants/Paths';
 import AuthRouter from '@src/routes/AuthRouter';
 import RoadmapsRouter from '@src/routes/RoadmapsRouter';
 import UsersRouter from '@src/routes/UsersRouter';
-import ExploreRouter from '@src/routes/ExploreRouter';
+import SearchRouter from '@src/routes/SearchRouter';
 
 const BaseRouter = Router();
 
 // Import all routes at base path
-const { Auth, Explore, Roadmaps, Users } = Paths;
+const { Auth, Search, Roadmaps, Users } = Paths;
 
 // Auth routes
 BaseRouter.use(Auth.Base, AuthRouter);
 
-// Explore routes
-BaseRouter.use(Explore.Base, ExploreRouter);
+// Search routes
+BaseRouter.use(Search.Base, SearchRouter);
 
 // Roadmaps routes
 BaseRouter.use(Roadmaps.Base, RoadmapsRouter);

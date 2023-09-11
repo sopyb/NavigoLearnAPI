@@ -281,35 +281,6 @@ class Database {
     return result.affectedRows > 0;
   }
 
-  private _buildWhereQuery = (
-    like: boolean,
-    ...values: unknown[]
-  ): { keyString: string; params: unknown[] } | null => {
-    let keyString = '';
-    let params: unknown[] = [];
-
-    for (let i = 0; i < values.length - 1; i += 2) {
-      const key = values[i] as string;
-
-      if (Array.isArray(values[i + 1])) {
-        const arrayParams = values[i + 1] as unknown[];
-        if ((values[i + 1] as unknown[]).length === 0) continue;
-        const subKeyString = arrayParams
-          .map(() => `${key} ${like ? 'LIKE' : '='} ?`)
-          .join(' OR ');
-        keyString += i > 0 ? ' AND ' : '';
-        keyString += `(${subKeyString})`;
-        params = [...params, ...arrayParams];
-      } else {
-        if (i > 0) keyString += ' AND ';
-        keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-        params = [...params, values[i + 1]];
-      }
-    }
-
-    return { keyString, params };
-  };
-
   public async getQuery(
     sql: string,
     params?: unknown[],
@@ -345,22 +316,6 @@ class Database {
     return this._getWhere<T>(table, true, ...values);
   }
 
-  protected async _getWhere<T>(
-    table: string,
-    like: boolean,
-    ...values: unknown[]
-  ): Promise<T | null> {
-    const queryBuilderResult = this._buildWhereQuery(like, ...values);
-    if (!queryBuilderResult) return null;
-
-    const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
-    const result = await this._query(sql, queryBuilderResult.params);
-
-    return getFirstResult<T>(result);
-  }
-
   public async getAll<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
@@ -386,22 +341,6 @@ class Database {
     ...values: unknown[]
   ): Promise<T[] | null> {
     return this._getAllWhere<T>(table, true, ...values);
-  }
-
-  protected async _getAllWhere<T>(
-    table: string,
-    like: boolean,
-    ...values: unknown[]
-  ): Promise<T[] | null> {
-    const queryBuilderResult = this._buildWhereQuery(like, ...values);
-    if (!queryBuilderResult) return null;
-
-    const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
-    const result = await this._query(sql, queryBuilderResult.params);
-
-    return parseResult(result) as T[] | null;
   }
 
   public async sum(table: string, column: string): Promise<bigint> {
@@ -431,23 +370,6 @@ class Database {
     ...values: unknown[]
   ): Promise<bigint> {
     return await this._sumWhere(table, column, true, ...values);
-  }
-
-  protected async _sumWhere(
-    table: string,
-    column: string,
-    like: boolean,
-    ...values: unknown[]
-  ): Promise<bigint> {
-    const queryBuilderResult = this._buildWhereQuery(like, ...values);
-    if (!queryBuilderResult) return 0n;
-
-    const sql = `SELECT SUM(${column})
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
-    const result = await this._query(sql, queryBuilderResult.params);
-
-    return ((result as CountDataPacket[])[0][`SUM(${column})`] as bigint) || 0n;
   }
 
   public async countQuery(sql: string, params?: unknown[]): Promise<bigint> {
@@ -480,6 +402,73 @@ class Database {
     ...values: unknown[]
   ): Promise<bigint> {
     return await this._countWhere(table, true, ...values);
+  }
+
+  public async _query(
+    sql: string,
+    params?: unknown[],
+  ): Promise<ResultSetHeader | RowDataPacket[]> {
+    while (!Database.isSetup) await new Promise((r) => setTimeout(r, 100));
+    if (!sql) return Promise.reject(new Error('No SQL query'));
+
+    // get connection from pool
+    const conn = await Database.pool.getConnection();
+    try {
+      // execute query and return result
+      return await conn.query(sql, params);
+    } finally {
+      // release connection
+      await conn.release();
+    }
+  }
+
+  protected async _getWhere<T>(
+    table: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<T | null> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return null;
+
+    const sql = `SELECT *
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
+
+    return getFirstResult<T>(result);
+  }
+
+  protected async _getAllWhere<T>(
+    table: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<T[] | null> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return null;
+
+    const sql = `SELECT *
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
+
+    return parseResult(result) as T[] | null;
+  }
+
+  protected async _sumWhere(
+    table: string,
+    column: string,
+    like: boolean,
+    ...values: unknown[]
+  ): Promise<bigint> {
+    const queryBuilderResult = this._buildWhereQuery(like, ...values);
+    if (!queryBuilderResult) return 0n;
+
+    const sql = `SELECT SUM(${column})
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const result = await this._query(sql, queryBuilderResult.params);
+
+    return ((result as CountDataPacket[])[0][`SUM(${column})`] as bigint) || 0n;
   }
 
   protected async _countWhere(
@@ -544,23 +533,34 @@ class Database {
     } else await this.insert('users', user, false);
   }
 
-  public async _query(
-    sql: string,
-    params?: unknown[],
-  ): Promise<ResultSetHeader | RowDataPacket[]> {
-    while (!Database.isSetup) await new Promise((r) => setTimeout(r, 100));
-    if (!sql) return Promise.reject(new Error('No SQL query'));
+  private _buildWhereQuery = (
+    like: boolean,
+    ...values: unknown[]
+  ): { keyString: string; params: unknown[] } | null => {
+    let keyString = '';
+    let params: unknown[] = [];
 
-    // get connection from pool
-    const conn = await Database.pool.getConnection();
-    try {
-      // execute query and return result
-      return await conn.query(sql, params);
-    } finally {
-      // release connection
-      await conn.release();
+    for (let i = 0; i < values.length - 1; i += 2) {
+      const key = values[i] as string;
+
+      if (Array.isArray(values[i + 1])) {
+        const arrayParams = values[i + 1] as unknown[];
+        if ((values[i + 1] as unknown[]).length === 0) continue;
+        const subKeyString = arrayParams
+          .map(() => `${key} ${like ? 'LIKE' : '='} ?`)
+          .join(' OR ');
+        keyString += i > 0 ? ' AND ' : '';
+        keyString += `(${subKeyString})`;
+        params = [...params, ...arrayParams];
+      } else {
+        if (i > 0) keyString += ' AND ';
+        keyString += `${key} ${like ? 'LIKE' : '='} ?`;
+        params = [...params, values[i + 1]];
+      }
     }
-  }
+
+    return { keyString, params };
+  };
 }
 
 export default Database;

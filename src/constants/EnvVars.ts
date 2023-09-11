@@ -4,7 +4,6 @@
  * Environments variables declared here.
  */
 
-
 import { NodeEnvs } from '@src/constants/misc';
 
 interface IEnvVars {

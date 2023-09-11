@@ -320,8 +320,7 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (isEmptyObject(response.data))
-      return responseServerError(res);
+    if (isEmptyObject(response.data)) return responseServerError(res);
 
     // get access token from response
     const data = response.data as { access_token?: string };
@@ -338,13 +337,11 @@ export async function authGitHubCallback(
 
     // check if response is valid
     if (response.status !== 200) return _handleNotOkay(res, response.status);
-    if (isEmptyObject(response.data))
-      return responseServerError(res);
+    if (isEmptyObject(response.data)) return responseServerError(res);
 
     // get user data
     const userData = response.data as GitHubUserData;
-    if (isEmptyObject(userData) && !userData)
-      return responseServerError(res);
+    if (isEmptyObject(userData) && !userData) return responseServerError(res);
 
     // get email from github
     response = await axios.get('https://api.github.com/user/emails', {
@@ -369,8 +366,7 @@ export async function authGitHubCallback(
     userData.email = emails.find((e) => e.primary && e.verified)?.email ?? '';
 
     // check if email is valid
-    if (userData.email === '')
-      return responseServerError(res);
+    if (userData.email === '') return responseServerError(res);
 
     // get database
     const db = new DatabaseDriver();

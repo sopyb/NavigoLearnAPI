@@ -30,13 +30,6 @@ interface IUserInfoModifications {
 
 // Class
 export class UserInfo implements IUserInfo {
-  private _id: bigint;
-  private _userId: bigint;
-  private _bio: string | null;
-  private _quote: string | null;
-  private _websiteUrl: string | null;
-  private _githubUrl: string | null;
-
   public constructor({
     id = -1n,
     userId,
@@ -51,6 +44,47 @@ export class UserInfo implements IUserInfo {
     this._quote = quote;
     this._websiteUrl = websiteUrl;
     this._githubUrl = githubUrl;
+  }
+
+  private _id: bigint;
+
+  public get id(): bigint {
+    return this._id;
+  }
+
+  private _userId: bigint;
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  private _bio: string | null;
+
+  public get bio(): string | null {
+    return this._bio;
+  }
+
+  private _quote: string | null;
+
+  public get quote(): string | null {
+    return this._quote;
+  }
+
+  private _websiteUrl: string | null;
+
+  public get websiteUrl(): string | null {
+    return this._websiteUrl;
+  }
+
+  private _githubUrl: string | null;
+
+  public get githubUrl(): string | null {
+    return this._githubUrl;
+  }
+
+  // Static method to check if an object is of type IUserInfo
+  public static isUserInfo(obj: unknown): obj is IUserInfo {
+    return typeof obj === 'object' && obj !== null && 'userId' in obj;
   }
 
   // Method to modify the properties
@@ -68,35 +102,6 @@ export class UserInfo implements IUserInfo {
     if (quote !== undefined) this._quote = quote;
     if (websiteUrl !== undefined) this._websiteUrl = websiteUrl;
     if (githubUrl !== undefined) this._githubUrl = githubUrl;
-  }
-
-  public get id(): bigint {
-    return this._id;
-  }
-
-  public get userId(): bigint {
-    return this._userId;
-  }
-
-  public get bio(): string | null {
-    return this._bio;
-  }
-
-  public get quote(): string | null {
-    return this._quote;
-  }
-
-  public get websiteUrl(): string | null {
-    return this._websiteUrl;
-  }
-
-  public get githubUrl(): string | null {
-    return this._githubUrl;
-  }
-
-  // Static method to check if an object is of type IUserInfo
-  public static isUserInfo(obj: unknown): obj is IUserInfo {
-    return typeof obj === 'object' && obj !== null && 'userId' in obj;
   }
 
   // toObject method

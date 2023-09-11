@@ -29,9 +29,9 @@ interface IRoadmapConstructor {
   readonly topic?: RoadmapTopic;
   readonly userId: bigint;
   readonly miscData: string;
-  readonly isFeatured?: boolean;
-  readonly isPublic?: boolean;
-  readonly isDraft?: boolean;
+  readonly isFeatured?: boolean | bigint;
+  readonly isPublic?: boolean | bigint;
+  readonly isDraft?: boolean | bigint;
   readonly data: string;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
@@ -45,8 +45,8 @@ interface IRoadmapModifications {
   readonly topic?: RoadmapTopic;
   readonly userId?: bigint;
   // isFeatured is not modifiable
-  readonly isPublic?: boolean;
-  readonly isDraft?: boolean;
+  readonly isPublic?: boolean | bigint;
+  readonly isDraft?: boolean | bigint;
   readonly data?: string;
   readonly miscData?: string;
   readonly createdAt?: Date;
@@ -55,19 +55,6 @@ interface IRoadmapModifications {
 
 // Class
 export class Roadmap implements IRoadmap {
-  private _id: bigint;
-  private _name: string;
-  private _description: string;
-  private _topic: RoadmapTopic;
-  private _userId: bigint;
-  private _isFeatured: boolean;
-  private _isPublic: boolean;
-  private _isDraft: boolean;
-  private _data: string;
-  private _miscData: string;
-  private _createdAt: Date;
-  private _updatedAt: Date;
-
   public constructor({
     id = 0n,
     name,
@@ -87,13 +74,101 @@ export class Roadmap implements IRoadmap {
     this._description = description;
     this._topic = topic;
     this._userId = userId;
-    this._isFeatured = isFeatured;
-    this._isPublic = isPublic;
-    this._isDraft = isDraft;
+    this._isFeatured = !!isFeatured;
+    this._isPublic = !!isPublic;
+    this._isDraft = !!isDraft;
     this._data = data;
     this._miscData = miscData;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
+  }
+
+  private _id: bigint;
+
+  public get id(): bigint {
+    return this._id;
+  }
+
+  private _name: string;
+
+  public get name(): string {
+    return this._name;
+  }
+
+  private _description: string;
+
+  public get description(): string {
+    return this._description;
+  }
+
+  private _topic: RoadmapTopic;
+
+  public get topic(): RoadmapTopic {
+    return this._topic;
+  }
+
+  private _userId: bigint;
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  private _isFeatured: boolean;
+
+  public get isFeatured(): boolean {
+    return this._isFeatured;
+  }
+
+  private _isPublic: boolean;
+
+  public get isPublic(): boolean {
+    return this._isPublic;
+  }
+
+  private _isDraft: boolean;
+
+  public get isDraft(): boolean {
+    return this._isDraft;
+  }
+
+  private _data: string;
+
+  public get data(): string {
+    return this._data;
+  }
+
+  private _miscData: string;
+
+  public get miscData(): string {
+    return this._miscData;
+  }
+
+  private _createdAt: Date;
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  private _updatedAt: Date;
+
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  // Static method to check if an object is of type IRoadmap
+  public static isRoadmap(obj: unknown): obj is IRoadmap {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'name' in obj &&
+      'description' in obj &&
+      'topic' in obj &&
+      'userId' in obj &&
+      'isPublic' in obj &&
+      'data' in obj &&
+      'createdAt' in obj &&
+      'updatedAt' in obj
+    );
   }
 
   // Method to modify the properties
@@ -115,76 +190,12 @@ export class Roadmap implements IRoadmap {
     if (description !== undefined) this._description = description;
     if (topic !== undefined) this._topic = topic;
     if (userId !== undefined) this._userId = userId;
-    if (isPublic !== undefined) this._isPublic = isPublic;
-    if (isDraft !== undefined) this._isDraft = isDraft;
+    if (isPublic !== undefined) this._isPublic = !!isPublic;
+    if (isDraft !== undefined) this._isDraft = !!isDraft;
     if (data !== undefined) this._data = data;
     if (miscData !== undefined) this._miscData = miscData;
     if (createdAt !== undefined) this._createdAt = createdAt;
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
-  }
-
-  public get id(): bigint {
-    return this._id;
-  }
-
-  public get name(): string {
-    return this._name;
-  }
-
-  public get description(): string {
-    return this._description;
-  }
-
-  public get topic(): RoadmapTopic {
-    return this._topic;
-  }
-
-  public get userId(): bigint {
-    return this._userId;
-  }
-
-  public get isFeatured(): boolean {
-    return this._isFeatured;
-  }
-
-  public get isPublic(): boolean {
-    return this._isPublic;
-  }
-
-  public get isDraft(): boolean {
-    return this._isDraft;
-  }
-
-  public get data(): string {
-    return this._data;
-  }
-
-  public get miscData(): string {
-    return this._miscData;
-  }
-
-  public get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  public get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
-  // Static method to check if an object is of type IRoadmap
-  public static isRoadmap(obj: unknown): obj is IRoadmap {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'name' in obj &&
-      'description' in obj &&
-      'topic' in obj &&
-      'userId' in obj &&
-      'isPublic' in obj &&
-      'data' in obj &&
-      'createdAt' in obj &&
-      'updatedAt' in obj
-    );
   }
 
   // toObject method

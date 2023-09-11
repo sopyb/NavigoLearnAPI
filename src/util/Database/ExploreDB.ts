@@ -25,25 +25,26 @@ class ExploreDB extends Database {
     if (typeof search != 'string' || !page || !limit || !topic || !order)
       return { result: [], totalRoadmaps: 0n };
     const query = `
-    SELECT *
-    FROM (
-      SELECT
-        r.id as id,
-        r.name AS name,
-        r.description AS description,
-        r.topic AS topic,
-        r.isFeatured AS isFeatured,
-        r.isPublic AS isPublic,
-        r.isDraft AS isDraft,
-        r.createdAt AS createdAt,
-        r.updatedAt AS updatedAt,
-        u.id AS userId,
-        u.avatar AS userAvatar,
-        u.name AS userName,
-        (SELECT SUM(rl.value) 
-            FROM roadmapLikes rl WHERE roadmapId = r.id) AS likeCount,
-        (SELECT COUNT(*) FROM roadmapViews WHERE roadmapId = r.id) AS viewCount,
-        ${
+        SELECT *
+        FROM (SELECT r.id                     as id,
+                     r.name                   AS name,
+                     r.description            AS description,
+                     r.topic                  AS topic,
+                     r.isFeatured             AS isFeatured,
+                     r.isPublic               AS isPublic,
+                     r.isDraft                AS isDraft,
+                     r.createdAt              AS createdAt,
+                     r.updatedAt              AS updatedAt,
+                     u.id                     AS userId,
+                     u.avatar                 AS userAvatar,
+                     u.name                   AS userName,
+                     (SELECT SUM(rl.value)
+                      FROM roadmapLikes rl
+                      WHERE roadmapId = r.id) AS likeCount,
+                     (SELECT COUNT(*)
+                      FROM roadmapViews
+                      WHERE roadmapId = r.id) AS viewCount,
+                     ${
   !!userid
     ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
@@ -51,49 +52,46 @@ class ExploreDB extends Database {
   )
     `
     : '0'
-} AS isLiked
-      FROM
-        roadmaps r
-        INNER JOIN users u ON r.userId = u.id
-      WHERE
-        (r.name LIKE ? OR r.description LIKE ?)
-        AND r.topic IN (${
+}                        AS isLiked
+              FROM roadmaps r
+                       INNER JOIN users u ON r.userId = u.id
+              WHERE (r.name LIKE ? OR r.description LIKE ?)
+                AND r.topic IN (${
   Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
 })
-        AND r.isPublic = 1
-        AND r.isDraft = 0
-   ) as t
-    ORDER BY
-        t.isFeatured DESC, ${order.by === 't.likeCount' ? 
-            `CASE
+                AND r.isPublic = 1
+                AND r.isDraft = 0) as t
+        ORDER BY t.isFeatured DESC, ${
+  order.by === 't.likeCount'
+    ? `CASE
     WHEN t.likeCount < 0 THEN 3
     WHEN t.likeCount = 0 THEN 2
     ELSE 1
-  END,` : ''} ${order.by} ${order.direction}
-    LIMIT ?, ?
-    ;
+  END,`
+    : ''
+} ${order.by} ${order.direction}
+        LIMIT ?, ?
+        ;
     `;
     const query2 = `
-        SELECT
-            count(*) AS result,
-            ${
+        SELECT count(*) AS result,
+               ${
   !!userid
     ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
                         AND userId = ?
-  )` : '0'
-} AS isLiked
-        FROM
-            roadmaps r
-                INNER JOIN users u ON r.userId = u.id
-        WHERE
-            (r.name LIKE ? OR r.description LIKE ?)
+  )`
+    : '0'
+}        AS isLiked
+        FROM roadmaps r
+                 INNER JOIN users u ON r.userId = u.id
+        WHERE (r.name LIKE ? OR r.description LIKE ?)
           AND r.topic IN (${
   Array.isArray(topic) ? topic.map(() => '?').join(', ') : '?'
 })
           AND r.isPublic = 1
           AND r.isDraft = 0;
-      `;
+    `;
     const params = [];
 
     if (!!userid) {

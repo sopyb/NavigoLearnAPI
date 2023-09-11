@@ -28,8 +28,12 @@ export async function addRoadmapImpression(
 ): Promise<boolean> {
   if (!userId) userId = -1n;
   const values = roadmapId.map((id) => `(${id}, ${userId}, 0)`).join(', ');
-  return ((await db._query(`
+  return (
+    (
+      (await db._query(`
       INSERT INTO roadmapViews (roadmapId, userId, full)
       VALUES ${values}
-  `)) as ResultSetHeader).affectedRows >= 0;
+  `)) as ResultSetHeader
+    ).affectedRows >= 0
+  );
 }

@@ -9,7 +9,9 @@ import validateBody from '@src/middleware/validators/validateBody';
 import {
   usersPostProfile,
   usersPostProfileGithubUrl,
-  usersPostProfileName, usersPostProfileQuote, usersPostProfileWebsiteUrl,
+  usersPostProfileName,
+  usersPostProfileQuote,
+  usersPostProfileWebsiteUrl,
 } from '@src/controllers/usersController';
 
 const UsersUpdate = Router({ mergeParams: true });
@@ -39,7 +41,6 @@ UsersUpdate.post(
   validateBody('websiteUrl'),
   usersPostProfileWebsiteUrl,
 );
-
 
 UsersUpdate.post(
   Paths.Users.Update.Quote,

@@ -96,7 +96,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
       'name' in obj &&
       'description' in obj &&
       'topic' in obj &&
-        'data' in obj &&
+      'data' in obj &&
       'miscData' in obj &&
       'isFeatured' in obj &&
       'isPublic' in obj &&

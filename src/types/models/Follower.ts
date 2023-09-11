@@ -24,11 +24,6 @@ interface IFollowerModifications {
 
 // Class
 export class Follower implements IFollower {
-  private _id: bigint;
-  private _followerId: bigint;
-  private _userId: bigint;
-  private _createdAt: Date;
-
   public constructor({
     id = -1n,
     followerId,
@@ -41,30 +36,25 @@ export class Follower implements IFollower {
     this._createdAt = createdAt;
   }
 
-  // Method to modify the properties
-  public set({
-    id,
-    followerId,
-    userId,
-    createdAt,
-  }: IFollowerModifications): void {
-    if (id !== undefined) this._id = id;
-    if (followerId !== undefined) this._followerId = followerId;
-    if (userId !== undefined) this._userId = userId;
-    if (createdAt !== undefined) this._createdAt = createdAt;
-  }
+  private _id: bigint;
 
   public get id(): bigint {
     return this._id;
   }
 
+  private _followerId: bigint;
+
   public get followerId(): bigint {
     return this._followerId;
   }
 
+  private _userId: bigint;
+
   public get userId(): bigint {
     return this._userId;
   }
+
+  private _createdAt: Date;
 
   public get createdAt(): Date {
     return this._createdAt;
@@ -79,6 +69,19 @@ export class Follower implements IFollower {
       'userId' in obj &&
       'createdAt' in obj
     );
+  }
+
+  // Method to modify the properties
+  public set({
+    id,
+    followerId,
+    userId,
+    createdAt,
+  }: IFollowerModifications): void {
+    if (id !== undefined) this._id = id;
+    if (followerId !== undefined) this._followerId = followerId;
+    if (userId !== undefined) this._userId = userId;
+    if (createdAt !== undefined) this._createdAt = createdAt;
   }
 
   // toObject method

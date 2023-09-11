@@ -39,16 +39,6 @@ interface IUserModifications {
 
 // Class
 export class User implements IUser {
-  private _id: bigint;
-  private _avatar: string | null;
-  private _name: string;
-  private _email: string;
-  private _role: number | null;
-  private _pwdHash: string | null;
-  private _googleId: string | null;
-  private _githubId: string | null;
-  private _createdAt: Date;
-
   public constructor({
     id = -1n,
     avatar = null,
@@ -69,6 +59,71 @@ export class User implements IUser {
     this._googleId = googleId;
     this._githubId = githubId;
     this._createdAt = createdAt;
+  }
+
+  private _id: bigint;
+
+  public get id(): bigint {
+    return this._id;
+  }
+
+  private _avatar: string | null;
+
+  public get avatar(): string | null {
+    return this._avatar;
+  }
+
+  private _name: string;
+
+  public get name(): string {
+    return this._name;
+  }
+
+  private _email: string;
+
+  public get email(): string {
+    return this._email;
+  }
+
+  private _role: number | null;
+
+  public get role(): number | null {
+    return this._role;
+  }
+
+  private _pwdHash: string | null;
+
+  public get pwdHash(): string | null {
+    return this._pwdHash;
+  }
+
+  private _googleId: string | null;
+
+  public get googleId(): string | null {
+    return this._googleId;
+  }
+
+  private _githubId: string | null;
+
+  public get githubId(): string | null {
+    return this._githubId;
+  }
+
+  private _createdAt: Date;
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  // Static method to check if an object is of type IUser
+  public static isUser(obj: unknown): obj is IUser {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'name' in obj &&
+      'email' in obj &&
+      'createdAt' in obj
+    );
   }
 
   // Method to modify the properties
@@ -92,53 +147,6 @@ export class User implements IUser {
     if (googleId !== undefined) this._googleId = googleId;
     if (githubId !== undefined) this._githubId = githubId;
     if (createdAt !== undefined) this._createdAt = createdAt;
-  }
-
-  public get id(): bigint {
-    return this._id;
-  }
-
-  public get avatar(): string | null {
-    return this._avatar;
-  }
-
-  public get name(): string {
-    return this._name;
-  }
-
-  public get email(): string {
-    return this._email;
-  }
-
-  public get role(): number | null {
-    return this._role;
-  }
-
-  public get pwdHash(): string | null {
-    return this._pwdHash;
-  }
-
-  public get googleId(): string | null {
-    return this._googleId;
-  }
-
-  public get githubId(): string | null {
-    return this._githubId;
-  }
-
-  public get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  // Static method to check if an object is of type IUser
-  public static isUser(obj: unknown): obj is IUser {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'name' in obj &&
-      'email' in obj &&
-      'createdAt' in obj
-    );
   }
 
   // toObject method

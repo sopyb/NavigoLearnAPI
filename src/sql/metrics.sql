@@ -20,7 +20,7 @@ select
 
 #   get count of users that created a roadmap in the last 7 days
     (select
-         count(distinct ownerId)
+         count(distinct userId)
     from roadmaps
     where createdAt >= CURRENT_TIMESTAMP - interval 7 day) as creators,
 

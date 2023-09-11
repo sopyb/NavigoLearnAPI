@@ -4,12 +4,12 @@ import validateSearchParameters
   from '@src/middleware/validators/validateSearchParameters';
 import { searchRoadmaps } from '@src/controllers/exploreController';
 
-const ExploreRouter = Router();
+const SearchRouter = Router();
 
-ExploreRouter.get(
-  Paths.Explore.Roadmaps,
+SearchRouter.get(
+  Paths.Search.Roadmaps,
   validateSearchParameters,
   searchRoadmaps,
 );
 
-export default ExploreRouter;
+export default SearchRouter;

@@ -30,8 +30,8 @@ export default function (
     page: pageParam,
     limit: limitParam,
     topic: topicParam,
-    sortBy: orderParam } =
-      req.query;
+    sortBy: orderParam,
+  } = req.query;
   const search = (searchParam as string) || '';
   const page = parseInt((pageParam as string) || '1');
   const limit = parseInt((limitParam as string) || '12');
@@ -90,12 +90,13 @@ export default function (
       topic !== RoadmapTopic.MATH &&
       topic !== RoadmapTopic.PHYSICS &&
       topic !== RoadmapTopic.BIOLOGY
-    ) topic = [
-      RoadmapTopic.PROGRAMMING,
-      RoadmapTopic.MATH,
-      RoadmapTopic.PHYSICS,
-      RoadmapTopic.BIOLOGY,
-    ];
+    )
+      topic = [
+        RoadmapTopic.PROGRAMMING,
+        RoadmapTopic.MATH,
+        RoadmapTopic.PHYSICS,
+        RoadmapTopic.BIOLOGY,
+      ];
   }
 
   req.search = search;

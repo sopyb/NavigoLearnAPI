@@ -226,7 +226,7 @@ export async function updateRoadmap(
   return await db.update('roadmaps', roadmapId, roadmap);
 }
 
-export async function deleteRoadmap(
+export async function deleteDBRoadmap(
   db: DatabaseDriver,
   roadmapId: bigint,
 ): Promise<boolean> {

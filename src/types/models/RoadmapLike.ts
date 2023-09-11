@@ -27,12 +27,6 @@ interface IRoadmapLikeModifications {
 
 // Class
 export class RoadmapLike implements IRoadmapLike {
-  private _id: bigint;
-  private _roadmapId: bigint;
-  private _userId: bigint;
-  private _value: number;
-  private _createdAt: Date;
-
   public constructor({
     id = -1n,
     roadmapId,
@@ -45,6 +39,46 @@ export class RoadmapLike implements IRoadmapLike {
     this._userId = userId;
     this._value = value;
     this._createdAt = createdAt;
+  }
+
+  private _id: bigint;
+
+  public get id(): bigint {
+    return this._id;
+  }
+
+  private _roadmapId: bigint;
+
+  public get roadmapId(): bigint {
+    return this._roadmapId;
+  }
+
+  private _userId: bigint;
+
+  public get userId(): bigint {
+    return this._userId;
+  }
+
+  private _value: number;
+
+  public get value(): number {
+    return this._value;
+  }
+
+  private _createdAt: Date;
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  // Static method to check if an object is of type IRoadmapLike
+  public static isRoadmapLike(obj: unknown): obj is IRoadmapLike {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'roadmapId' in obj &&
+      'userId' in obj
+    );
   }
 
   // Method to modify the properties
@@ -60,36 +94,6 @@ export class RoadmapLike implements IRoadmapLike {
     if (userId !== undefined) this._userId = userId;
     if (value !== undefined) this._value = value;
     if (createdAt !== undefined) this._createdAt = createdAt;
-  }
-
-  public get id(): bigint {
-    return this._id;
-  }
-
-  public get roadmapId(): bigint {
-    return this._roadmapId;
-  }
-
-  public get userId(): bigint {
-    return this._userId;
-  }
-
-  public get value(): number {
-    return this._value;
-  }
-
-  public get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  // Static method to check if an object is of type IRoadmapLike
-  public static isRoadmapLike(obj: unknown): obj is IRoadmapLike {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'roadmapId' in obj &&
-      'userId' in obj
-    );
   }
 
   // toObject method

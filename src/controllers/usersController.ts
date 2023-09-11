@@ -136,7 +136,9 @@ export async function userGetRoadmaps(
   const isLiked: bigint[] = [];
 
   for (const roadmap of roadmaps) {
-    likes.push(await db.countWhere('roadmapLikes', 'roadmapId', roadmap.id));
+    likes.push(
+      await db.sumWhere('roadmapLikes', 'value', 'roadmapId', roadmap.id),
+    );
     views.push(await db.countWhere('roadmapViews', 'roadmapId', roadmap.id));
     isLiked.push(
       await db.sumWhere(

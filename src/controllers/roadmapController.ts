@@ -20,20 +20,21 @@ import {
   responseRoadmapUpdated,
 } from '@src/helpers/responses/roadmapResponses';
 import {
+  deleteDBRoadmap,
+  deleteRoadmapLike,
   getRoadmapData,
   getRoadmapLike,
+  getUser,
   insertRoadmap,
   insertRoadmapLike,
+  updateRoadmap,
   updateRoadmapLike,
 } from '@src/helpers/databaseManagement';
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Roadmap, RoadmapTopic } from '@src/types/models/Roadmap';
 import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
-import { IUser } from '@src/types/models/User';
 import { addRoadmapView } from '@src/util/Views';
 import logger from 'jet-logger';
-import { alterResponseToBooleans } from '@src/util/data-alteration/AlterResponse';
-import * as console from 'console';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
@@ -77,7 +78,6 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
   const roadmapId = req.params.roadmapId;
   const userId = req.session?.userId;
 
-  console.log('WAIdehAIOE',roadmapId, userId, req.params );
   if (!roadmapId) return responseServerError(res);
 
   const db = new Database();
@@ -85,11 +85,13 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
   const roadmap = await getRoadmapData(db, BigInt(roadmapId));
   if (!roadmap) return responseRoadmapNotFound(res);
 
+  const user = await getUser(db, roadmap.userId);
 
-  const user = await db.get<IUser>('users', roadmap.userId);
-  if (!user) return responseServerError(res);
-  const likeCount = await db.countWhere(
+  if (user === null) return responseServerError(res);
+
+  const likeCount = await db.sumWhere(
     'roadmapLikes',
+    'value',
     'roadmapId',
     roadmap.id,
   );
@@ -100,6 +102,7 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
   );
   const isLiked = await db.sumWhere(
     'roadmapLikes',
+    'value',
     'roadmapId',
     roadmap.id,
     'userId',
@@ -111,13 +114,10 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
 
   addRoadmapView(db, roadmap.id, userId).catch((e) => logger.err(e));
 
-
-  const roadmapResponsePayload: ResFullRoadmap = alterResponseToBooleans(
+  return responseRoadmap(
+    res,
     new ResFullRoadmap(roadmap, user, likeCount, viewCount, isLiked),
-    ['isFeatured', 'isPublic', 'isDraft'],
   );
-
-  return responseRoadmap(res, roadmapResponsePayload);
 }
 
 export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
@@ -134,9 +134,9 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
   if (!roadmap) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
-  const { name, description,  topic, miscData} = req.body;
+  const { name, description, topic, miscData } = req.body;
 
-  if (!name || !description || !miscData || !topic )
+  if (!name || !description || !miscData || !topic)
     return responseServerError(res);
 
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
@@ -149,12 +149,11 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
     miscData: miscData as string,
   });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
 }
-
 
 export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   const roadmapId = req.params.roadmapId;
@@ -175,7 +174,6 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (!name || !description || !data || !topic || !isDraft)
     return responseServerError(res);
 
-
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
 
@@ -184,10 +182,10 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
     description: description as string,
     data: data as string,
     topic: topic as RoadmapTopic,
-    isDraft: isDraft as boolean,
+    isDraft: Boolean(isDraft),
   });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -213,7 +211,7 @@ export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
 
   roadmap.set({ name: name as string });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -242,7 +240,7 @@ export async function updateDescriptionRoadmap(
 
   roadmap.set({ description: description as string });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -268,7 +266,7 @@ export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
 
   roadmap.set({ data: data as string });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -297,7 +295,7 @@ export async function updateTopicRoadmap(req: RequestWithBody, res: Response) {
 
   roadmap.set({ topic: topic as RoadmapTopic });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -320,16 +318,14 @@ export async function updateMiscDataRoadmap(
   if (!roadmap) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
-  const { miscData }  = req.body;
+  const { miscData } = req.body;
 
   if (!miscData) return responseServerError(res);
 
-  roadmap.set({ miscData: miscData as string});
+  roadmap.set({ miscData: miscData as string });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap)){
-    const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
-  }
 
   return responseServerError(res);
 }
@@ -353,11 +349,12 @@ export async function updateIsDraftRoadmap(
 
   const { isDraft } = req.body;
 
-  if (isDraft === null || isDraft === undefined) return responseServerError(res);
+  if (isDraft === null || isDraft === undefined)
+    return responseInvalidBody(res);
 
-  roadmap.set({ isDraft: !!isDraft });
+  roadmap.set({ isDraft: Boolean(isDraft) });
 
-  if (await db.update('roadmaps', roadmap.id, roadmap))
+  if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
 
   return responseServerError(res);
@@ -377,7 +374,7 @@ export async function deleteRoadmap(req: RequestWithSession, res: Response) {
   if (!roadmap) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
-  if (await db.delete('roadmaps', BigInt(roadmapId)))
+  if (await deleteDBRoadmap(db, BigInt(roadmapId)))
     return responseRoadmapDeleted(res);
 
   return responseServerError(res);
@@ -471,8 +468,7 @@ export async function removeLikeRoadmap(
 
   if (!liked) return responseRoadmapNotRated(res);
 
-  if (await db.delete('roadmapLikes', liked.id))
-    return responseRoadmapUnrated(res);
+  if (await deleteRoadmapLike(db, liked)) return responseRoadmapUnrated(res);
 
   return responseServerError(res);
 }

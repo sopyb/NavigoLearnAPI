@@ -14,9 +14,9 @@ export interface ISession {
 }
 
 interface RequestWithCookies extends RequestWithSession {
-    cookies: {
-        [COOKIE_NAME: string]: string | undefined;
-    }
+  cookies: {
+    [COOKIE_NAME: string]: string | undefined;
+  };
 }
 
 export interface RequestWithSession extends Request {
