@@ -32,6 +32,10 @@ jobs:
         id: version
         run: echo "version=$(date +%y.%m.%d-%s)" >> $GITHUB_ENV
 
+      - name: Get package.json version
+        id: package_version
+        run: echo "package_version=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+
 #      - name: Fetch previous release
 #        id: prev_release
 #        env:
@@ -61,6 +65,7 @@ jobs:
           token: ${{ secrets.PAT }}
           generateReleaseNotes: true
           name: Release ${{ env.version }}
+          tag: ${{ env.package_version }}
 #          body: |
 #            Release based on commit ${{ github.sha }}.
 #
