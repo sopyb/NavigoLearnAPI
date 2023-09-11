@@ -100,14 +100,17 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
     'roadmapId',
     roadmap.id,
   );
-  const isLiked = await db.sumWhere(
-    'roadmapLikes',
-    'value',
-    'roadmapId',
-    roadmap.id,
-    'userId',
-    userId,
-  );
+  const isLiked =
+    userId !== undefined && userId !== null ?
+      await db.sumWhere(
+        'roadmapLikes',
+        'value',
+        'roadmapId',
+        roadmap.id,
+        'userId',
+        userId,
+      )
+      : 0n;
 
   if (!roadmap.isPublic && roadmap.userId !== userId)
     return responseNotAllowed(res);

@@ -5,7 +5,6 @@ import path from 'path';
 import logger from 'jet-logger';
 import { User } from '@src/types/models/User';
 import { GenericModelClass } from '@src/types/models/GenericModelClass';
-import * as console from 'console';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -374,7 +373,6 @@ class Database {
 
   public async countQuery(sql: string, params?: unknown[]): Promise<bigint> {
     const result = await this._query(sql, params);
-    console.log(result);
     return (result as CountQueryPacket[])[0]['result'] || 0n;
   }
 
@@ -468,7 +466,9 @@ class Database {
                  WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
-    return ((result as CountDataPacket[])[0][`SUM(${column})`] as bigint) || 0n;
+    return BigInt(
+      (result as CountDataPacket[])[0][`SUM(${column})`] as number,
+    ) || 0n;
   }
 
   protected async _countWhere(
