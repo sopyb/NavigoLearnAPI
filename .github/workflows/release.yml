@@ -44,6 +44,6 @@ jobs:
           generateReleaseNotes: true
           name: Release ${{ env.version }}
           tag: ${{ env.package_version }}
-          commit: ${{ github.sha }}
+          commit: prod
           draft: false
           prerelease: false
