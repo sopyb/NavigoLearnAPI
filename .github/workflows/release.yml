@@ -49,9 +49,9 @@ jobs:
         run: |
           data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
           echo "$data"
-          commits=$(echo "$data" | jq -r '.commits | map(.commit.message) | join("\n\n")')
-          prev_commit=$(echo "$data" | jq -r '.base_commit.sha')
-          current_commit=${{ github.sha }}
+          commits=$(echo "$data" | jq -r '.commits | map(".commit.message") | join( "\n\n")')
+          prev_commit=$(echo "$data" | jq -r '.base_commit.sha' | cut -c -7)
+          current_commit=$(echo "${{ github.sha }}" | cut -c -7)
           echo "notes=$commits" >> $GITHUB_ENV
           echo "prev_commit=$prev_commit" >> $GITHUB_ENV
           echo "current_commit=$current_commit" >> $GITHUB_ENV
@@ -70,8 +70,6 @@ jobs:
             ${{ env.notes }}
             
             Full change log:
-            ```
-            ${{ env.prev_commit }}...${{ env.current_commit }}
-            ```
+            `${{ env.prev_commit }}...${{ env.current_commit }}`
           draft: false
           prerelease: false
