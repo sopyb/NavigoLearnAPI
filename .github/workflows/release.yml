@@ -18,6 +18,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '18'
+          
+      - name: Set up JQ
+        run: sudo apt-get install jq
 
       - name: Install dependencies
         run: npm ci
@@ -26,8 +29,30 @@ jobs:
         run: npm run build
 
       - name: Generate version number
-        id: vars
+        id: version
         run: echo ::set-output name=version::$(date +%y.%m.%d-%s)
+
+      - name: Fetch previous release
+        id: prev_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: |
+          result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
+          echo "$result"
+          tag=$(echo "$result" | jq -r '.[0].tag_name')
+          echo ::set-output name=tag::"$tag"
+
+      - name: Prepare release notes
+        id: release_notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: |
+          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ steps.prev_release.outputs.tag }}...${{ github.sha }}")
+          echo "$data"
+          commits=$(echo "$data" | jq -r '.commits | map(.commit.message) | join("\n\n")')
+          compare_url=$(echo "$data" | jq -r '.html_url')
+          echo ::set-output name=notes::"$commits"
+          echo ::set-output name=url::"$compare_url"
 
       - name: Create Release
         id: create_release
@@ -35,8 +60,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          tag_name: ${{ steps.vars.outputs.version }}
-          release_name: Release ${{ steps.vars.outputs.version }}
-          body: Release based on commit ${{ github.sha }}
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          body: |
+            Release based on commit ${{ github.sha }}
+            Changes:
+            ${{ steps.release_notes.outputs.notes }}
+            [See changes here](${{ steps.release_notes.outputs.url }})
           draft: false
           prerelease: false
