@@ -36,28 +36,6 @@ jobs:
         id: package_version
         run: echo "package_version=$(jq -r '.version' package.json)" >> $GITHUB_ENV
 
-#      - name: Fetch previous release
-#        id: prev_release
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.PAT }}
-#        run: |
-#          result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
-#          echo "$result"
-#          tag=$(echo "$result" | jq -r '.[0].tag_name')
-#          echo "tag=$tag" >> $GITHUB_ENV
-#
-#      - name: Prepare release notes
-#        id: release_notes
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.PAT }}
-#        run: |
-#          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
-#          prev_commit=$(echo "$data" | jq -r '.base_commit.sha' | cut -c -7)
-#          current_commit=$(echo "${{ github.sha }}" | cut -c -7)
-#          echo "notes=$commits" >> $GITHUB_ENV
-#          echo "prev_commit=$prev_commit" >> $GITHUB_ENV
-#          echo "current_commit=$current_commit" >> $GITHUB_ENV
-
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
@@ -66,10 +44,6 @@ jobs:
           generateReleaseNotes: true
           name: Release ${{ env.version }}
           tag: ${{ env.package_version }}
-#          body: |
-#            Release based on commit ${{ github.sha }}.
-#
-#            Full change log:
-#            [`${{ env.prev_commit }}...${{ env.current_commit }}`](${{ github.server_url }}/${{ github.repository }}/compare/${{ env.prev_commit }}...${{ env.current_commit }})
+          commit: ${{ github.sha }}
           draft: false
           prerelease: false
