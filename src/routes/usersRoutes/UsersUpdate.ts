@@ -14,13 +14,13 @@ import {
   usersPostProfileWebsiteUrl,
 } from '@src/controllers/usersController';
 
-const UsersUpdate = Router({ mergeParams: true });
+const UsersUpdate = Router();
 
 UsersUpdate.post('*', validateSession); // ! Global middleware for file
 
 UsersUpdate.post(
-  Paths.Users.Update.Base,
-  validateBody('name', 'githubUrl', 'websiteUrl', 'quote'),
+  Paths.Users.Update.All,
+  validateBody('name', 'githubUrl', 'websiteUrl', 'bio'),
   usersPostProfile,
 );
 

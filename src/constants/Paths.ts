@@ -54,6 +54,7 @@ const Paths = {
     },
     Update: {
       Base: '/',
+      All: '/',
       ProfilePicture: '/profile-picture',
       Bio: '/bio',
       Quote: '/quote',

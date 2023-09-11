@@ -17,7 +17,9 @@ import {
   RequestWithTargetUserId,
 } from '@src/middleware/validators/validateUser';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
-import { responseServerError } from '@src/helpers/responses/generalResponses';
+import {
+  responseServerError,
+} from '@src/helpers/responses/generalResponses';
 import {
   responseAlreadyFollowing,
   responseCantFollowYourself,
@@ -35,6 +37,8 @@ import {
 } from '@src/helpers/responses/roadmapResponses';
 import { addRoadmapImpression } from '@src/util/Views';
 import logger from 'jet-logger';
+import * as console from 'console';
+import { RequestWithBody } from '@src/middleware/validators/validateBody';
 
 /*
  ! Main route controllers
@@ -234,13 +238,27 @@ export async function userUnfollow(
  ! UsersPost route controllers
  */
 export async function usersPostProfile(
-  req: RequestWithSession,
+  req: RequestWithBody,
   res: Response,
 ): Promise<unknown> {
   // get variables
-  const { name, githubUrl, websiteUrl, quote } = req.body as {
-    [key: string]: string;
-  };
+  const { name, githubUrl, websiteUrl, bio } = req.body;
+
+  if (
+    name === undefined ||
+    name === null ||
+    githubUrl === undefined ||
+    githubUrl === null ||
+    websiteUrl === undefined ||
+    websiteUrl === null ||
+    bio === undefined ||
+    bio === null
+  )
+    return responseServerError(res);
+
+  console.log(req.body);
+
+  console.log(Object.keys(req));
 
   // get database
   const db = new DatabaseDriver();
@@ -258,13 +276,13 @@ export async function usersPostProfile(
   if (!user || !userInfo) return responseServerError(res);
 
   user.set({
-    name,
+    name: name as string,
   });
 
   userInfo.set({
-    githubUrl,
-    websiteUrl,
-    quote,
+    githubUrl: githubUrl as string,
+    websiteUrl: githubUrl as string,
+    bio: bio as string,
   });
 
   // save user to database
