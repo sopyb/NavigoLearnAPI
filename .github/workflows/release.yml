@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-          
+
       - name: Set up JQ
         run: sudo apt-get install jq
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Generate version number
         id: version
-        run: echo ::set-output name=version::$(date +%y.%m.%d-%s)
+        run: echo "version=$(date +%y.%m.%d-%s)" >> $GITHUB_ENV
 
       - name: Fetch previous release
         id: prev_release
@@ -40,19 +40,19 @@ jobs:
           result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
           echo "$result"
           tag=$(echo "$result" | jq -r '.[0].tag_name')
-          echo ::set-output name=tag::"$tag"
+          echo "tag=$tag" >> $GITHUB_ENV
 
       - name: Prepare release notes
         id: release_notes
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ steps.prev_release.outputs.tag }}...${{ github.sha }}")
+          data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
           echo "$data"
           commits=$(echo "$data" | jq -r '.commits | map(.commit.message) | join("\n\n")')
           compare_url=$(echo "$data" | jq -r '.html_url')
-          echo ::set-output name=notes::"$commits"
-          echo ::set-output name=url::"$compare_url"
+          echo "notes=$commits" >> $GITHUB_ENV
+          echo "url=$compare_url" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -60,12 +60,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          tag_name: ${{ steps.version.outputs.version }}
-          release_name: Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ env.version }}
+          release_name: Release ${{ env.version }}
           body: |
             Release based on commit ${{ github.sha }}
             Changes:
-            ${{ steps.release_notes.outputs.notes }}
-            [See changes here](${{ steps.release_notes.outputs.url }})
+            ${{ env.notes }}
+            [See changes here](${{ env.url }})
           draft: false
           prerelease: false
