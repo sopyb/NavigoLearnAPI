@@ -39,7 +39,7 @@ jobs:
         run: |
           result=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases")
           echo "$result"
-          tag=$(echo "$result" | jq -r 'if .[0].tag_name? then .[0].tag_name else empty end')
+          tag=$(echo "$result" | jq -r '.[0].tag_name')
           echo "tag=$tag" >> $GITHUB_ENV
 
       - name: Prepare release notes
@@ -50,8 +50,11 @@ jobs:
           data=$(curl --silent --show-error --location --fail --retry 3 --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/compare/${{ env.tag }}...${{ github.sha }}")
           echo "$data"
           commits=$(echo "$data" | jq -r '.commits | map("* [`" + .sha[0:7] + "`](" + "https://github.com/${{ github.repository }}/commit/" + .sha + ") - " + .commit.message + " by " + .commit.committer.name + " at " + .commit.committer.date) | join("\n\n")')
+          echo "$commits"
           prev_commit=$(echo "$data" | jq -r '.base_commit.sha' | cut -c -7)
+          echo "prev_commit=$prev_commit"
           current_commit=$(echo "${{ github.sha }}" | cut -c -7)
+          echo "current_commit=$current_commit"
           echo "notes=$commits" >> $GITHUB_ENV
           echo "prev_commit=$prev_commit" >> $GITHUB_ENV
           echo "current_commit=$current_commit" >> $GITHUB_ENV
