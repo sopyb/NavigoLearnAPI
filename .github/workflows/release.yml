@@ -70,6 +70,6 @@ jobs:
             ${{ env.notes }}
             
             Full change log:
-            `${{ env.prev_commit }}...${{ env.current_commit }}`
+            [`${{ env.prev_commit }}...${{ env.current_commit }}`](${{ github.server_url }}/${{ github.repository }}/compare/${{ env.prev_commit }}...${{ env.current_commit }})
           draft: false
           prerelease: false
