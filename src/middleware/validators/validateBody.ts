@@ -23,7 +23,7 @@ export default function (
     }
 
     for (const item of requiredFields) {
-      if (!body[item] === null || !body[item] === undefined) {
+      if (body[item] === null || body[item] === undefined) {
         return res
           .status(HttpStatusCode.BadRequest)
           .json({ error: `Missing required field: ${item}` });
