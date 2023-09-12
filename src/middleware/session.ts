@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import DatabaseDriver from '@src/util/DatabaseDriver';
+import DatabaseDriver from '@src/util/Database/DatabaseDriver';
 import EnvVars from '@src/constants/EnvVars';
 import { NodeEnvs } from '@src/constants/misc';
 
@@ -12,6 +11,12 @@ export interface ISession {
   userId: bigint;
   token: string;
   expires: Date;
+}
+
+interface RequestWithCookies extends RequestWithSession {
+  cookies: {
+    [COOKIE_NAME: string]: string | undefined;
+  };
 }
 
 export interface RequestWithSession extends Request {
@@ -46,13 +51,12 @@ async function extendSession(
 }
 
 export async function sessionMiddleware(
-  req: RequestWithSession,
+  req: RequestWithCookies,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   // get token cookie
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const token = req?.cookies?.[COOKIE_NAME] as string;
+  const token = req.cookies?.[COOKIE_NAME] ?? '';
 
   if (!token) {
     req.session = undefined;
@@ -81,19 +85,11 @@ export async function sessionMiddleware(
       });
 
       req.session = undefined;
-
-      next();
-
-      return;
     } else {
       await extendSession(db, req, res);
     }
   } else {
     req.session = undefined;
-  }
-
-  // if session still doesn't exist, delete cookie
-  if (!req.session) {
     res.cookie('token', '', {
       httpOnly: false,
       secure: EnvVars.NodeEnv === NodeEnvs.Production,
@@ -101,23 +97,5 @@ export async function sessionMiddleware(
       sameSite: 'strict',
     });
   }
-
-  next();
-}
-
-export function requireSessionMiddleware(
-  req: RequestWithSession,
-  res: Response,
-  next: NextFunction,
-): void {
-  // if session isn't set, return forbidden
-  if (!req.session) {
-    res
-      .status(HttpStatusCodes.UNAUTHORIZED)
-      .json({ error: 'Token not found, please login' });
-    return;
-  }
-
-  // call next()
   next();
 }
