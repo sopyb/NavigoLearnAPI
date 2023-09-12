@@ -10,7 +10,7 @@ import {
   updateIsDraftRoadmap,
   updateMiscDataRoadmap,
   updateNameRoadmap,
-  updateTopicRoadmap,
+  updateTopicRoadmap, updateVersionRoadmap,
 } from '@src/controllers/roadmapController';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
@@ -18,7 +18,7 @@ const RoadmapsUpdate = Router({ mergeParams: true });
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.All,
   validateSession,
-  validateBody('name', 'description', 'data', 'topic', 'isDraft'),
+  validateBody('name', 'description', 'data', 'topic', 'miscData', 'isDraft'),
   updateAllRoadmap,
 );
 
@@ -69,6 +69,13 @@ RoadmapsUpdate.post(
   validateSession,
   validateBody('miscData'),
   updateMiscDataRoadmap,
+);
+
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Version,
+  validateSession,
+  validateBody('version'),
+  updateVersionRoadmap,
 );
 
 export default RoadmapsUpdate;

@@ -17,6 +17,7 @@ export interface IRoadmap {
   readonly isDraft: boolean;
   readonly data: string;
   readonly miscData: string;
+  readonly version: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -33,6 +34,7 @@ interface IRoadmapConstructor {
   readonly isPublic?: boolean | bigint;
   readonly isDraft?: boolean | bigint;
   readonly data: string;
+  readonly version: string;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
@@ -49,6 +51,7 @@ interface IRoadmapModifications {
   readonly isDraft?: boolean | bigint;
   readonly data?: string;
   readonly miscData?: string;
+  readonly version?: string;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
@@ -66,6 +69,7 @@ export class Roadmap implements IRoadmap {
     isDraft = false,
     data,
     miscData,
+    version = '0.0.0',
     createdAt = new Date(),
     updatedAt = new Date(),
   }: IRoadmapConstructor) {
@@ -81,6 +85,11 @@ export class Roadmap implements IRoadmap {
     this._miscData = miscData;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
+
+    if (!version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/))
+      version = '0.0.0';
+
+    this._version = version;
   }
 
   private _id: bigint;
@@ -143,6 +152,12 @@ export class Roadmap implements IRoadmap {
     return this._miscData;
   }
 
+  private _version: string;
+
+  public get version(): string {
+    return this._version;
+  }
+
   private _createdAt: Date;
 
   public get createdAt(): Date {
@@ -182,6 +197,7 @@ export class Roadmap implements IRoadmap {
     isDraft,
     data,
     miscData,
+    version,
     createdAt,
     updatedAt,
   }: IRoadmapModifications): void {
@@ -196,6 +212,9 @@ export class Roadmap implements IRoadmap {
     if (miscData !== undefined) this._miscData = miscData;
     if (createdAt !== undefined) this._createdAt = createdAt;
     if (updatedAt !== undefined) this._updatedAt = updatedAt;
+
+    if (version !== undefined && version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/))
+      this._version = version;
   }
 
   // toObject method
@@ -211,6 +230,7 @@ export class Roadmap implements IRoadmap {
       isDraft: this._isDraft,
       data: this._data,
       miscData: this._miscData,
+      version: this._version,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

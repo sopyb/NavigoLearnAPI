@@ -38,6 +38,7 @@ const Paths = {
       Draft: '/draft',
       Data: '/data',
       MiscData: '/misc-data', // used for roadmap wide data like roadmap theme
+      Version: '/version',
     },
     Delete: '/:roadmapId([0-9]+)',
     Like: '/:roadmapId([0-9]+)/like',

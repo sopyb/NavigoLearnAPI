@@ -7,6 +7,7 @@ export interface IResFullRoadmap {
   readonly description: string;
   readonly topic: RoadmapTopic;
   readonly data: string;
+  readonly isFeatured: boolean;
   readonly isPublic: boolean;
   readonly isDraft: boolean;
   readonly createdAt: Date;
@@ -23,6 +24,10 @@ export interface IResFullRoadmap {
 
   // user stats
   readonly isLiked: bigint;
+
+  // misc
+  readonly miscData: string;
+  readonly version: string;
 }
 
 export class ResFullRoadmap implements IResFullRoadmap {
@@ -31,7 +36,6 @@ export class ResFullRoadmap implements IResFullRoadmap {
   public readonly description: string;
   public readonly topic: RoadmapTopic;
   public readonly data: string;
-  public readonly miscData: string;
   public readonly isFeatured: boolean;
   public readonly isPublic: boolean;
   public readonly isDraft: boolean;
@@ -47,6 +51,9 @@ export class ResFullRoadmap implements IResFullRoadmap {
 
   public readonly isLiked: bigint;
 
+  public readonly miscData: string;
+  public readonly version: string;
+
   public constructor(
     {
       id,
@@ -59,6 +66,7 @@ export class ResFullRoadmap implements IResFullRoadmap {
       isFeatured,
       isPublic,
       isDraft,
+      version,
       createdAt,
       updatedAt,
     }: IRoadmap,
@@ -72,7 +80,6 @@ export class ResFullRoadmap implements IResFullRoadmap {
     this.description = description;
     this.topic = topic;
     this.data = data;
-    this.miscData = miscData;
     this.isFeatured = isFeatured;
     this.isPublic = isPublic;
     this.isDraft = isDraft;
@@ -86,6 +93,9 @@ export class ResFullRoadmap implements IResFullRoadmap {
     this.viewCount = viewCount;
 
     this.isLiked = isLiked;
+
+    this.miscData = miscData;
+    this.version = version;
   }
 
   public static isRoadmap(obj: unknown): obj is IResFullRoadmap {
@@ -97,7 +107,6 @@ export class ResFullRoadmap implements IResFullRoadmap {
       'description' in obj &&
       'topic' in obj &&
       'data' in obj &&
-      'miscData' in obj &&
       'isFeatured' in obj &&
       'isPublic' in obj &&
       'isDraft' in obj &&
@@ -108,7 +117,9 @@ export class ResFullRoadmap implements IResFullRoadmap {
       'userName' in obj &&
       'likeCount' in obj &&
       'viewCount' in obj &&
-      'isLiked' in obj
+      'isLiked' in obj &&
+      'miscData' in obj &&
+      'version' in obj
     );
   }
 }
