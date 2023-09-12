@@ -15,65 +15,58 @@ import {
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
+RoadmapsUpdate.post('*', validateSession);
+
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.All,
-  validateSession,
   validateBody('name', 'description', 'data', 'topic', 'miscData', 'isDraft'),
   updateAllRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.About,
-  validateSession,
   validateBody('name', 'description', 'topic', 'miscData'),
   updateAboutRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Name,
-  validateSession,
   validateBody('name'),
   updateNameRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Description,
-  validateSession,
   validateBody('description'),
   updateDescriptionRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Data,
-  validateSession,
   validateBody('data'),
   updateDataRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Topic,
-  validateSession,
   validateBody('topic'),
   updateTopicRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Draft,
-  validateSession,
   validateBody('isDraft'),
   updateIsDraftRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.MiscData,
-  validateSession,
   validateBody('miscData'),
   updateMiscDataRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Version,
-  validateSession,
   validateBody('version'),
   updateVersionRoadmap,
 );
