@@ -38,7 +38,7 @@ import logger from 'jet-logger';
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
-  const { name, description, data, miscData } = req.body;
+  const { name, description, data, miscData, version } = req.body;
 
   // non guaranteed to exist by middleware of type Roadmap
   let { topic, isPublic, isDraft } = req.body;
@@ -51,7 +51,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   const db = new Database();
 
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
-    topic = undefined;
+    topic = null;
 
   isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
@@ -62,9 +62,10 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic | undefined,
     userId,
     isPublic: isPublic as boolean,
-    isDraft: isDraft as boolean,
+    isDraft: isDraft ,
     data: data as string,
     miscData: miscData as string,
+    version: version as string,
   });
 
   const id = await insertRoadmap(db, roadmap);
@@ -172,9 +173,9 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (!roadmap) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
-  const { name, description, data, topic, isDraft } = req.body;
+  const { name, description, data, topic, miscData, isDraft } = req.body;
 
-  if (!name || !description || !data || !topic || !isDraft)
+  if (!name || !description || !data || !topic || !miscData || !isDraft)
     return responseServerError(res);
 
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
@@ -185,6 +186,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
     description: description as string,
     data: data as string,
     topic: topic as RoadmapTopic,
+    miscData: miscData as string,
     isDraft: Boolean(isDraft),
   });
 
@@ -356,6 +358,36 @@ export async function updateIsDraftRoadmap(
     return responseInvalidBody(res);
 
   roadmap.set({ isDraft: Boolean(isDraft) });
+
+  if (await updateRoadmap(db, roadmap.id, roadmap))
+    return responseRoadmapUpdated(res);
+
+  return responseServerError(res);
+}
+
+export async function updateVersionRoadmap(
+  req: RequestWithBody,
+  res: Response,
+) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!roadmapId) return responseServerError(res);
+  if (!userId) return responseServerError(res);
+
+  const { version } = req.body;
+
+  if (!version) return responseServerError(res);
+
+  const db = new Database();
+
+  const roadmap = await getRoadmapData(db, BigInt(roadmapId));
+
+  if (!roadmap) return responseRoadmapNotFound(res);
+
+  if (roadmap.userId !== userId) return responseNotAllowed(res);
+
+  roadmap.set({ version: version as string });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);

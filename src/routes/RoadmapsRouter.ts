@@ -23,6 +23,7 @@ RoadmapsRouter.post(
     'data',
     'isPublic',
     'isDraft',
+    'version',
     'miscData',
   ),
   createRoadmap,

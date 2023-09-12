@@ -3,7 +3,7 @@ import { NextFunction, Response } from 'express';
 import { HttpStatusCode } from 'axios';
 
 interface IBody {
-  [key: string]: unknown;
+  [key: string]: string | number | boolean | object | null;
 }
 
 export interface RequestWithBody extends RequestWithSession {
