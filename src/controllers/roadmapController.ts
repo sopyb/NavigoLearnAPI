@@ -51,7 +51,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   const db = new Database();
 
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
-    topic = null;
+    topic = RoadmapTopic.PROGRAMMING;
 
   isPublic = true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
