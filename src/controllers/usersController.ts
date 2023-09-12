@@ -37,7 +37,6 @@ import {
 } from '@src/helpers/responses/roadmapResponses';
 import { addRoadmapImpression } from '@src/util/Views';
 import logger from 'jet-logger';
-import * as console from 'console';
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 
 /*
@@ -255,10 +254,6 @@ export async function usersPostProfile(
     bio === null
   )
     return responseServerError(res);
-
-  console.log(req.body);
-
-  console.log(Object.keys(req));
 
   // get database
   const db = new DatabaseDriver();
