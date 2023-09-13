@@ -32,4 +32,4 @@ Example:
 
 ### Cookies
 
-- none
+- None
