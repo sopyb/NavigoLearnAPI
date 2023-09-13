@@ -4,6 +4,7 @@ import { IUser, User } from '@src/types/models/User';
 import { Roadmap } from '@src/types/models/Roadmap';
 import { Follower } from '@src/types/models/Follower';
 import { IRoadmapLike, RoadmapLike } from '@src/types/models/RoadmapLike';
+import { RoadmapProgress } from '@src/types/models/RoadmapProgress';
 
 /*
  * Interfaces
@@ -202,7 +203,7 @@ export async function updateUserInfo(
   return await db.updateWhere('userInfo', userInfo, 'userId', userId);
 }
 
-export async function getRoadmapData(
+export async function getRoadmapObject(
   db: DatabaseDriver,
   roadmapId: bigint,
 ): Promise<Roadmap | null> {
@@ -277,4 +278,37 @@ export async function deleteRoadmapLike(
     'roadmapId',
     data.roadmapId,
   );
+}
+
+export async function getRoadmapProgress(
+  db: DatabaseDriver,
+  userId: bigint,
+  roadmapId: bigint,
+): Promise<RoadmapProgress | null> {
+  const progress = await db.getWhere<RoadmapProgress>(
+    'roadmapProgress',
+    'userId',
+    userId,
+    'roadmapId',
+    roadmapId,
+  );
+
+  if (!progress) return null;
+
+  return new RoadmapProgress(progress);
+}
+
+export async function insertRoadmapProgress(
+  db: DatabaseDriver,
+  data: RoadmapProgress,
+) {
+  return await db.insert('roadmapProgress', data);
+}
+
+export async function updateRoadmapProgress(
+  db: DatabaseDriver,
+  id: bigint,
+  data: RoadmapProgress,
+): Promise<boolean> {
+  return await db.update('roadmapProgress', id, data);
 }

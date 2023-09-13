@@ -3,20 +3,24 @@ import Paths from '@src/constants/Paths';
 import validateSession from '@src/middleware/validators/validateSession';
 import validateBody from '@src/middleware/validators/validateBody';
 import {
+  dislikeRoadmap,
+  likeRoadmap, removeLikeRoadmap,
   updateAboutRoadmap,
   updateAllRoadmap,
   updateDataRoadmap,
   updateDescriptionRoadmap,
   updateIsDraftRoadmap,
   updateMiscDataRoadmap,
-  updateNameRoadmap,
+  updateNameRoadmap, updateProgressDataRoadmap,
   updateTopicRoadmap, updateVersionRoadmap,
 } from '@src/controllers/roadmapController';
+import RoadmapsRouter from '@src/routes/RoadmapsRouter';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
 RoadmapsUpdate.post('*', validateSession);
 
+// ! Owner only
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.All,
   validateBody('name', 'description', 'data', 'topic', 'miscData', 'isDraft'),
@@ -69,6 +73,20 @@ RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Version,
   validateBody('version'),
   updateVersionRoadmap,
+);
+
+// ! Everyone
+
+RoadmapsRouter.get(Paths.Roadmaps.Update.Like, likeRoadmap);
+RoadmapsRouter.get(Paths.Roadmaps.Update.Dislike, dislikeRoadmap);
+
+RoadmapsRouter.delete(Paths.Roadmaps.Update.Like, removeLikeRoadmap);
+RoadmapsRouter.delete(Paths.Roadmaps.Update.Dislike, removeLikeRoadmap);
+
+RoadmapsUpdate.post(
+  Paths.Roadmaps.Update.Progress,
+  validateBody('data'),
+  updateProgressDataRoadmap,
 );
 
 export default RoadmapsUpdate;
