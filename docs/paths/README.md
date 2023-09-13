@@ -2,29 +2,17 @@
 
 - Base URL: /api
 - [Auth](auth/README.md)
-    > :memo: /auth/[login, register, change-password, forgot-password] are all depricated
+    > :warning: /auth/[login, register, change-password, forgot-password] are all depricated
     - Base URL: /api/auth
-    - Login: /login
-    - Register: /register
-    - ChangePassword: /change-password
-    - ForgotPassword: /forgot-password
     - GoogleLogin: /google-login
     - GithubLogin: /github-login
     - Logout: /logout
 - [Explore](explore/README.md)
-    > :memo: /explore/* appear to be moved/depricated
-    - Base URL: /api/explore
-    - New: /new
-    - Popular: /popular
-    - Trending: /trending
+    > :warning: /explore/* appear to be depricated
     - [Search](explore/search/README.md):
     > :memo: Search functions were moved to /api/search
-        - Base URL: /api/explore/search
-        - Users: /users
-        > :memo: /users endpoint no longer exists... /roadmaps moved to /search/roadmaps
-        - Roadmaps: /roadmaps
 - [Roadmaps](roadmaps/README.md)
-    > :memo: /roadmaps/[progress, rating, issues] appear to be moved/depricated
+    > :warning: /roadmaps/[progress, rating, issues] appear to be depricated
     - Base URL: /api/roadmaps
     - Create: /create
     - [Get](roadmaps/get/README.md):
@@ -39,42 +27,15 @@
         - Owner: /owner
         - Data: /data
     - Delete: /:roadmapId([0-9]+)
-    - [Progress](roadmaps/progress/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/progress
-        - Get: /:userId?
-        - Update: /
-    - [Rating](roadmaps/rating/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/rating
-        - Get: /:own? # own = true if you want to get your own rating
-        - Update: /
-        - Delete: /
-    - [Issues](roadmaps/issues/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/issues
-        - Create: /create
-        - Get: /:issueId?
-        - Update: /:issueId
-        - Close: /:issueId
-        - [Comments](roadmaps/issues/comments/README.md):
-            - Base URL: /api/roadmaps/:roadmapId/issues/:issueId/comments
-            - Create: /create
-            - Get: /:commentId?
-            - Update: /:commentId
-            - Delete: /:commentId
 - [Users](users/README.md)
     - Base URL: /api/users
     - [Get](users/get/README.md):
-    > :memo: /users/[issues, followers, following, follower-count, following-count] are depricated
+        > :warning: /users/[issues, followers, following, follower-count, following-count] appear depricated
+
         - Base URL: /api/users/:userId([0-9]+)?
         - Profile: /
         - Mini profile: /mini
         - User roadmaps: /roadmaps
-        - User issues: /issues
-        - User followers: /followers
-        - User followed: /following
-        - Roadmap count: /roadmap-count
-        - Issue count: /discussion-count
-        - Followers count: /follower-count
-        - Following count: /following-count
     - [Update](users/update/README.md):
         - Base URL: /api/users/:userId([0-9]+)?
         - ProfilePicture: /profile-picture
