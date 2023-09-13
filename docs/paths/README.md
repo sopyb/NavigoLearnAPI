@@ -2,35 +2,22 @@
 
 - Base URL: /api
 - [Auth](auth/README.md)
+    > :warning: /auth/[login, register, change-password, forgot-password] are all depricated
     - Base URL: /api/auth
-    - Login: /login
-    - Register: /register
-    - ChangePassword: /change-password
-    - ForgotPassword: /forgot-password
     - GoogleLogin: /google-login
     - GithubLogin: /github-login
     - Logout: /logout
 - [Explore](explore/README.md)
-    > :memo: /explore/[new, popular, trending] are not implemented
-    - Base URL: /api/explore
-    - New: /new
-    - Popular: /popular
-    - Trending: /trending
+    > :warning: /explore/* appear to be depricated
     - [Search](explore/search/README.md):
-    > :memo: /explore/search/roadmaps uses /explore?query="query"
-        - Base URL: /api/explore/search
-        - Users: /users
-        - Roadmaps: /roadmaps
+    > :memo: Search functions were moved to /api/search
 - [Roadmaps](roadmaps/README.md)
+    > :warning: /roadmaps/[progress, rating, issues] appear to be depricated
     - Base URL: /api/roadmaps
     - Create: /create
     - [Get](roadmaps/get/README.md):
         - Base URL: /api/roadmaps/:roadmapId([0-9]+)?
         - Roadmap: /
-        - MiniRoadmap: /mini
-        - Owner: /owner - forwards to /users/:ownerId
-        - MiniOwner: /owner/mini - forwards to /users/:ownerId/mini
-        - Tags: /tags
     - [Update](roadmaps/update/README.md):
         - Base URL: /api/roadmaps/:roadmapId([0-9]+)
         - Title: /title
@@ -40,41 +27,15 @@
         - Owner: /owner
         - Data: /data
     - Delete: /:roadmapId([0-9]+)
-    - [Progress](roadmaps/progress/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/progress
-        - Get: /:userId?
-        - Update: /
-    - [Rating](roadmaps/rating/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/rating
-        - Get: /:own? # own = true if you want to get your own rating
-        - Update: /
-        - Delete: /
-    - [Issues](roadmaps/issues/README.md):
-        - Base URL: /api/roadmaps/:roadmapId/issues
-        - Create: /create
-        - Get: /:issueId?
-        - Update: /:issueId
-        - Close: /:issueId
-        - [Comments](roadmaps/issues/comments/README.md):
-            - Base URL: /api/roadmaps/:roadmapId/issues/:issueId/comments
-            - Create: /create
-            - Get: /:commentId?
-            - Update: /:commentId
-            - Delete: /:commentId
 - [Users](users/README.md)
     - Base URL: /api/users
     - [Get](users/get/README.md):
+        > :warning: /users/[issues, followers, following, follower-count, following-count] appear depricated
+
         - Base URL: /api/users/:userId([0-9]+)?
         - Profile: /
         - Mini profile: /mini
         - User roadmaps: /roadmaps
-        - User issues: /issues
-        - User followers: /followers
-        - User followed: /following
-        - Roadmap count: /roadmap-count
-        - Issue count: /discussion-count
-        - Followers count: /follower-count
-        - Following count: /following-count
     - [Update](users/update/README.md):
         - Base URL: /api/users/:userId([0-9]+)?
         - ProfilePicture: /profile-picture
@@ -85,3 +46,24 @@
         - Github url: /github-url
         - Email: /email
     - Delete: /:userId([0-9]+)?
+
+- [Search](search/README.md)
+    - Base URL: /api/search
+    - Roadmaps: /roadmaps
+        - Optional query params:
+            - q: search query (STRING)
+            - topic: search by topic
+                - all: all topics
+                - programming
+                - math
+                - physics
+                - biology
+            - sortBy: sort by
+                - likes
+                - views
+                - new
+            - order: order
+                - asc
+                - desc
+            - limit: limit (INTEGER)
+            - page: page (INTEGER)
