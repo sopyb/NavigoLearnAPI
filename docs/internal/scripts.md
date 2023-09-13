@@ -1,3 +1,7 @@
+# Scripts
+
+## Available scripts
+
 ### `npm run dev`
 
 Run the server in development mode.
@@ -25,6 +29,10 @@ Build the project for production.
 ### `npm start`
 
 Run the production build (Must be built first).
+
+### `npm run staging`
+
+Run the staging build (Must be built first).
 
 ### `npm start -- --env="name of env file" (default is production).`
 

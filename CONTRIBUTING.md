@@ -16,7 +16,7 @@ If you're new to our codebase, we've got you covered. Refer to the setup guide p
 
 2. **Gear Up Your Development Environment** - Make a new branch for your amazing feature or perhaps that clever bug fix (try to name the branch something descriptive!).
 
-3. **Chart Your Changes** - Now, you're all set to modify the necessary files to implement your magic.
+3. **Chart Your Changes** - Now, you're all set to modify the necessary files to implement your magic. Make sure to follow any guidelines in the [Internal Documentation](docs/internal/README.md) and [API Reference](docs/api_reference/README.md) to ensure your changes are consistent with the rest of the codebase. Also, make sure to add any new files to the appropriate documentation files or ask for help regarding writing documentation.
 
 4. **Test the Waters** - Make sure to test your changes. If you can, add tests that cover your changes.
 
@@ -30,7 +30,7 @@ Consistency is key, and a clean, uniform codebase is a joy to work with. For our
 
 Api endpoints are named using kebab-case. For example, `GET /api/users/profile-picture` is a valid endpoint.
 
-For functions, variables and SQL tables, we use camelCase. For example, `const user = await db.getWhere('users', 'id', userId);` is valid.
+For functions, variables and SQL tables, we use camelCase. For example, `db.getWhere('roadmapLikes', 'userId', userId, 'roadmapId', roadmapId);` is valid.
 
 ### ESLint
 

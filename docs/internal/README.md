@@ -4,6 +4,8 @@ This section provides a detailed overview of the internal architecture and impor
 
 ## Table of Contents
 - [Internal Architecture](#internal-architecture)
+- [Table of Contents](#table-of-contents)
+- [Scripts](#scripts)
 - [Controllers](#controllers)
 - [Types](#types)
     - [Models](#models)
@@ -17,13 +19,11 @@ This section provides a detailed overview of the internal architecture and impor
 - [Utilities](#utilities)
 - [SQL](#sql)
 
-## Table of Contents
-- [Controllers](#controllers)
-- [Types](#types)
-- [Routes](#routes)
-- [Middleware](#middleware)
-- [Validators](#validators)
-- [Utilities](#utilities)
+## Scripts
+
+Scripts are used to perform various tasks, such as starting the server or running tests.
+
+- **Further Reading**: [Scripts Documentation](./scripts.md) (To be added)
 
 ## Controllers
 
@@ -94,4 +94,4 @@ Remember, understanding the codebase's architecture is crucial for making meanin
 
 SQL files are used to create and update the database schema. They are also used to create stored procedures and functions for creating dummy data.
 
-- **Further Reading**: [SQL Documentation](./sql.md) (To be added)
+- **Further Reading**: [SQL Documentation](./sql.md)
