@@ -118,3 +118,10 @@ export function responseRoadmapUnrated(res: Response) {
     success: true,
   });
 }
+
+export function responseRoadmapProgressUpdated(res: Response) {
+  return res.status(HttpStatusCodes.OK).json({
+    message: 'Roadmap progress updated',
+    success: true,
+  });
+}
