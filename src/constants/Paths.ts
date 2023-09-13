@@ -53,7 +53,6 @@ const Paths = {
     Get: {
       Base: '/:userId([0-9]+)?',
       Profile: '/',
-      MiniProfile: '/mini',
       UserRoadmaps: '/roadmaps',
       Follow: '/follow',
     },
