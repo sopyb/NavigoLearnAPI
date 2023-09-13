@@ -2,6 +2,7 @@
 
 - Base URL: /api
 - [Auth](auth/README.md)
+    > :memo: /auth/[login, register, change-password, forgot-password] are all depricated
     - Base URL: /api/auth
     - Login: /login
     - Register: /register
@@ -11,26 +12,24 @@
     - GithubLogin: /github-login
     - Logout: /logout
 - [Explore](explore/README.md)
-    > :memo: /explore/[new, popular, trending] are not implemented
+    > :memo: /explore/* appear to be moved/depricated
     - Base URL: /api/explore
     - New: /new
     - Popular: /popular
     - Trending: /trending
     - [Search](explore/search/README.md):
-    > :memo: /explore/search/roadmaps uses /explore?query="query"
+    > :memo: Search functions were moved to /api/search
         - Base URL: /api/explore/search
         - Users: /users
+        > :memo: /users endpoint no longer exists... /roadmaps moved to /search/roadmaps
         - Roadmaps: /roadmaps
 - [Roadmaps](roadmaps/README.md)
+    > :memo: /roadmaps/[progress, rating, issues] appear to be moved/depricated
     - Base URL: /api/roadmaps
     - Create: /create
     - [Get](roadmaps/get/README.md):
         - Base URL: /api/roadmaps/:roadmapId([0-9]+)?
         - Roadmap: /
-        - MiniRoadmap: /mini
-        - Owner: /owner - forwards to /users/:ownerId
-        - MiniOwner: /owner/mini - forwards to /users/:ownerId/mini
-        - Tags: /tags
     - [Update](roadmaps/update/README.md):
         - Base URL: /api/roadmaps/:roadmapId([0-9]+)
         - Title: /title
@@ -64,6 +63,7 @@
 - [Users](users/README.md)
     - Base URL: /api/users
     - [Get](users/get/README.md):
+    > :memo: /users/[issues, followers, following, follower-count, following-count] are depricated
         - Base URL: /api/users/:userId([0-9]+)?
         - Profile: /
         - Mini profile: /mini
@@ -85,3 +85,24 @@
         - Github url: /github-url
         - Email: /email
     - Delete: /:userId([0-9]+)?
+
+- [Search](search/README.md)
+    - Base URL: /api/search
+    - Roadmaps: /roadmaps
+        - Optional query params:
+            - q: search query (STRING)
+            - topic: search by topic
+                - all: all topics
+                - programming
+                - math
+                - physics
+                - biology
+            - sortBy: sort by
+                - likes
+                - views
+                - new
+            - order: order
+                - asc
+                - desc
+            - limit: limit (INTEGER)
+            - page: page (INTEGER)
