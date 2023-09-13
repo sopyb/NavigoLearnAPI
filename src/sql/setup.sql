@@ -71,6 +71,26 @@ create table if not exists roadmapLikes
             on delete cascade
 );
 
+CREATE TABLE IF NOT EXISTS roadmapProgress
+(
+    id          BIGINT AUTO_INCREMENT
+        PRIMARY KEY,
+    roadmapId   BIGINT NOT NULL,
+    userId      BIGINT NOT NULL,
+    data        LONGTEXT NOT NULL,
+    createdAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    updatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() NOT NULL,
+    CONSTRAINT roadmapProgress_roadmapId_fk
+        FOREIGN KEY (roadmapId) REFERENCES roadmaps (id)
+            ON DELETE CASCADE,
+    CONSTRAINT roadmapProgress_userId_fk
+        FOREIGN KEY (userId) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS roadmapProgress_roadmapId_userId_index
+    ON roadmapProgress (roadmapId, userId);
+
 create index if not exists roadmapLikes_roadmapId_index
     on roadmapLikes (roadmapId);
 
