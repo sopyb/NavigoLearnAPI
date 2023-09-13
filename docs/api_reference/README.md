@@ -30,6 +30,7 @@ For each endpoint, we provide the following details:
     - [DELETE /api/auth/logout](./auth/logout.md) (To be added)
   - /api/search (formerly /api/explore)
     - [GET /api/search/roadmaps](./search/roadmaps.md) (To be added)
+    - [GET /api/search/feeling-lucky](./search/feeling-lucky.md) (To be added)
     - ... More to be added
   - /api/roadmaps
     - [GET /api/roadmaps/:roadmapId?](./roadmaps/get-roadmap.md) (To be added)
