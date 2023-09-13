@@ -114,18 +114,25 @@ class ExploreDB extends Database {
     };
   }
 
-  public async getRandomRoadmapId() {
+  public async getRandomRoadmapId(): Promise<bigint | null> {
     const query = `
       SELECT id 
       FROM roadmaps 
       WHERE isPublic = 1 
         AND isDraft = 0 
-      ORDER BY RAND() 
+      ORDER BY RAND()
       LIMIT 1
     `;
     const result = await this.getQuery(query);
-    if (result === null) return null;
-    return result[0].id;
+
+    if (result === null)
+      return null;
+    if(result.length === 0)
+      return null;
+    if(result[0].id === null)
+      return null;
+
+    return result[0].id as bigint;
   }
 }
 
