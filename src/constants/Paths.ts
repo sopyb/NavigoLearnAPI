@@ -29,6 +29,7 @@ const Paths = {
     },
     Update: {
       Base: '/:roadmapId([0-9]+)',
+      // Owner only
       All: '/',
       About: '/about',
       Name: '/name',
@@ -39,10 +40,13 @@ const Paths = {
       Data: '/data',
       MiscData: '/misc-data', // used for roadmap wide data like roadmap theme
       Version: '/version',
+
+      // Everyone
+      Progress: '/progress',
+      Like: '/:roadmapId([0-9]+)/like',
+      Dislike: '/:roadmapId([0-9]+)/dislike',
     },
     Delete: '/:roadmapId([0-9]+)',
-    Like: '/:roadmapId([0-9]+)/like',
-    Dislike: '/:roadmapId([0-9]+)/dislike',
   },
   Users: {
     Base: '/users',
