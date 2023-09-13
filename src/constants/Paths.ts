@@ -19,6 +19,7 @@ const Paths = {
   Search: {
     Base: '/search',
     Roadmaps: '/roadmaps',
+    FeelingLucky: '/feeling-lucky',
   },
   Roadmaps: {
     Base: '/roadmaps',
