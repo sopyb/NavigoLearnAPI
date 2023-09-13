@@ -123,6 +123,7 @@ class ExploreDB extends Database {
       ORDER BY RAND()
       LIMIT 1
     `;
+
     const result = await this.getQuery(query);
 
     if (result === null)
