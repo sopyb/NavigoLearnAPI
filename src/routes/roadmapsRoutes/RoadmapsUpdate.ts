@@ -14,7 +14,6 @@ import {
   updateNameRoadmap, updateProgressDataRoadmap,
   updateTopicRoadmap, updateVersionRoadmap,
 } from '@src/controllers/roadmapController';
-import RoadmapsRouter from '@src/routes/RoadmapsRouter';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
@@ -77,11 +76,11 @@ RoadmapsUpdate.post(
 
 // ! Everyone
 
-RoadmapsRouter.get(Paths.Roadmaps.Update.Like, likeRoadmap);
-RoadmapsRouter.get(Paths.Roadmaps.Update.Dislike, dislikeRoadmap);
+RoadmapsUpdate.get(Paths.Roadmaps.Update.Like, likeRoadmap);
+RoadmapsUpdate.get(Paths.Roadmaps.Update.Dislike, dislikeRoadmap);
 
-RoadmapsRouter.delete(Paths.Roadmaps.Update.Like, removeLikeRoadmap);
-RoadmapsRouter.delete(Paths.Roadmaps.Update.Dislike, removeLikeRoadmap);
+RoadmapsUpdate.delete(Paths.Roadmaps.Update.Like, removeLikeRoadmap);
+RoadmapsUpdate.delete(Paths.Roadmaps.Update.Dislike, removeLikeRoadmap);
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Progress,
