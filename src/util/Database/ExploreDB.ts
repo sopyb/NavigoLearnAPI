@@ -38,18 +38,20 @@ class ExploreDB extends Database {
                      u.id                     AS userId,
                      u.avatar                 AS userAvatar,
                      u.name                   AS userName,
-                     (SELECT SUM(rl.value)
-                      FROM roadmapLikes rl
-                      WHERE roadmapId = r.id) AS likeCount,
+                     (SELECT COALESCE(
+                        (SELECT SUM(rl.value)
+                            FROM roadmapLikes rl
+                        WHERE roadmapId = r.id
+                     ), 0)) AS likeCount,
                      (SELECT COUNT(*)
                       FROM roadmapViews
                       WHERE roadmapId = r.id) AS viewCount,
                      ${
   !!userid
-    ? `(SELECT value FROM roadmapLikes
+    ? `(SELECT COALESCE((SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
                         AND userId = ?
-  )
+  ), 0))
     `
     : '0'
 }                        AS isLiked
@@ -70,8 +72,7 @@ class ExploreDB extends Database {
   END,`
     : ''
 } ${order.by} ${order.direction}
-        LIMIT ?, ?
-        ;
+        LIMIT ?, ?;
     `;
     const query2 = `
         SELECT count(*) AS result,
@@ -80,6 +81,7 @@ class ExploreDB extends Database {
     ? `(SELECT value FROM roadmapLikes
                         WHERE roadmapId = r.id
                         AND userId = ?
+                        LIMIT 1
   )`
     : '0'
 }        AS isLiked
