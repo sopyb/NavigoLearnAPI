@@ -38,7 +38,7 @@ class ExploreDB extends Database {
                      u.id                     AS userId,
                      u.avatar                 AS userAvatar,
                      u.name                   AS userName,
-                     (SELECT COALESCE((
+                     (SELECT COALESCE(
                         (SELECT SUM(rl.value)
                             FROM roadmapLikes rl
                         WHERE roadmapId = r.id
