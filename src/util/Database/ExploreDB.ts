@@ -62,12 +62,17 @@ class ExploreDB extends Database {
   ): unknown[] {
     const params = [];
 
-    if (!isCountQuery) {
+    if (!isCountQuery && userid) {
       params.push(userid);
     }
 
     params.push(`%${search}%`, `%${search}%`);
-    params.push(Array.isArray(topic) ? topic.map((t) => t.toString()) : topic);
+
+    if (Array.isArray(topic)) {
+      params.push(...topic);
+    } else {
+      params.push(topic);
+    }
 
     if (!isCountQuery) {
       params.push((page - 1) * limit, limit);
