@@ -19,6 +19,61 @@ export interface RequestWithSearchParameters
   extends RequestWithSession,
     SearchParameters {}
 
+function isValidTopic(topic: string): boolean {
+  return [
+    RoadmapTopic.PROGRAMMING,
+    RoadmapTopic.MATH,
+    RoadmapTopic.PHYSICS,
+    RoadmapTopic.BIOLOGY,
+  ].includes(topic as RoadmapTopic);
+}
+
+function getDefaultTopics(): RoadmapTopic[] {
+  return [
+    RoadmapTopic.PROGRAMMING,
+    RoadmapTopic.MATH,
+    RoadmapTopic.PHYSICS,
+    RoadmapTopic.BIOLOGY,
+  ];
+}
+
+function parseTopics(topicParam: string | string[]): RoadmapTopic[] {
+  if (Array.isArray(topicParam)) {
+    const result = topicParam.filter(isValidTopic);
+
+    if (result.length === 0)
+      return getDefaultTopics();
+    else return result as RoadmapTopic[];
+  } else {
+    const topic = topicParam as RoadmapTopic;
+    if (isValidTopic(topic)) {
+      return [topic];
+    } else {
+      return getDefaultTopics();
+    }
+  }
+}
+
+function getOrder(orderParam: string): Order {
+  const [by, direction] = orderParam?.split(':') || ['new', 'DESC'];
+  let order: Order;
+  switch (by?.toLowerCase()) {
+    case 'views':
+      order = { by: 't.viewCount', direction: 'DESC' };
+      break;
+    case 'likes':
+      order = { by: 't.likeCount', direction: 'DESC' };
+      break;
+    case 'new':
+    default:
+      order = { by: 't.createdAt', direction: 'DESC' };
+  }
+
+  if (direction?.toLowerCase() === 'asc') {
+    order.direction = 'ASC';
+  }
+  return order;
+}
 export default function (
   req: RequestWithSearchParameters,
   _: Response,
@@ -26,80 +81,21 @@ export default function (
 ) {
   // get parameters from request
   const {
-    query: searchParam,
-    page: pageParam,
-    limit: limitParam,
-    topic: topicParam,
+    query: search = '',
+    page: pageParam = '1',
+    limit: limitParam = '12',
     sortBy: orderParam,
+    topic: topicParam = getDefaultTopics(),
   } = req.query;
-  const search = (searchParam as string) || '';
-  const page = parseInt((pageParam as string) || '1');
-  const limit = parseInt((limitParam as string) || '12');
-  let topic: RoadmapTopic | RoadmapTopic[] =
-    (topicParam as RoadmapTopic[]) ||
-    ([
-      RoadmapTopic.PROGRAMMING,
-      RoadmapTopic.MATH,
-      RoadmapTopic.PHYSICS,
-      RoadmapTopic.BIOLOGY,
-    ] as RoadmapTopic[]);
-  let order: Order;
 
-  const [by, direction] = (orderParam as string)?.split(':') || ['age', 'DESC'];
-  switch (by.toLowerCase()) {
-    case 'views':
-      order = {
-        by: 't.viewCount',
-        direction: 'DESC',
-      };
-      break;
+  // parse parameters
+  const page = parseInt(pageParam as string, 10) || 1;
+  const limit = parseInt(limitParam as string, 10) || 12;
+  const topic = parseTopics(topicParam as string | string[]);
+  const order = getOrder(orderParam as string);
 
-    case 'likes':
-      order = {
-        by: 't.likeCount',
-        direction: 'DESC',
-      };
-      break;
-
-    case 'new':
-    default:
-      order = {
-        by: 't.createdAt',
-        direction: 'DESC',
-      };
-      break;
-  }
-
-  if (direction.toLowerCase() === 'asc') {
-    order.direction = 'ASC';
-  }
-
-  // make sure topic is valid
-  if (Array.isArray(topic)) {
-    topic = topic.filter((t) => {
-      return (
-        t === RoadmapTopic.PROGRAMMING ||
-        t === RoadmapTopic.MATH ||
-        t === RoadmapTopic.PHYSICS ||
-        t === RoadmapTopic.BIOLOGY
-      );
-    });
-  } else {
-    if (
-      topic !== RoadmapTopic.PROGRAMMING &&
-      topic !== RoadmapTopic.MATH &&
-      topic !== RoadmapTopic.PHYSICS &&
-      topic !== RoadmapTopic.BIOLOGY
-    )
-      topic = [
-        RoadmapTopic.PROGRAMMING,
-        RoadmapTopic.MATH,
-        RoadmapTopic.PHYSICS,
-        RoadmapTopic.BIOLOGY,
-      ];
-  }
-
-  req.search = search;
+  // add parameters to request
+  req.search = search as string;
   req.page = page;
   req.limit = limit;
   req.topic = topic;
