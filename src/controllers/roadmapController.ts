@@ -101,6 +101,8 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
     'roadmapViews',
     'roadmapId',
     roadmap.id,
+    'full',
+    1,
   );
   const isLiked =
     userId !== undefined && userId !== null ?

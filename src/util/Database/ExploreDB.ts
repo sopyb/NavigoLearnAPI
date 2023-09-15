@@ -112,7 +112,8 @@ class ExploreDB extends Database {
                                     WHERE roadmapId = r.id), 0)) AS likeCount,
                    (SELECT COUNT(*)
                     FROM roadmapViews
-                    WHERE roadmapId = r.id)                      AS viewCount,
+                    WHERE roadmapId = r.id
+                      AND full     = 1)                         AS viewCount,
                    ( ${isLikeQuery} )                            AS isLiked
             FROM roadmaps r
                      INNER JOIN users u ON r.userId = u.id
