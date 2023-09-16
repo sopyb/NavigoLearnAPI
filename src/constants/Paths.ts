@@ -19,15 +19,7 @@ const Paths = {
   Notifications: {
     Base: '/notifications',
     Get: '/',
-    Update: {
-      Base: '/:commentId([0-9]+)',
-      Dismiss: '/dismiss',
-    },
-  },
-  Search: {
-    Base: '/search',
-    Roadmaps: '/roadmaps',
-    FeelingLucky: '/feeling-lucky',
+    Dismiss: '/:commentId([0-9]+)',
   },
   Roadmaps: {
     Base: '/roadmaps',
@@ -56,6 +48,11 @@ const Paths = {
       Dislike: '/dislike',
     },
     Delete: '/:roadmapId([0-9]+)',
+  },
+  Search: {
+    Base: '/search',
+    Roadmaps: '/roadmaps',
+    FeelingLucky: '/feeling-lucky',
   },
   Users: {
     Base: '/users',
