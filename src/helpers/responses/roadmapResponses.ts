@@ -3,6 +3,7 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { JSONSafety } from '@src/util/misc';
 import { ResRoadmap } from '@src/types/response/ResRoadmap';
 import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
+import {RoadmapProgress} from '@src/types/models/RoadmapProgress';
 
 export function responseRoadmap(res: Response, roadmap: ResFullRoadmap): void {
   res
@@ -115,6 +116,21 @@ export function responseRoadmapRated(res: Response) {
 export function responseRoadmapUnrated(res: Response) {
   return res.status(HttpStatusCodes.OK).json({
     message: 'Roadmap unrated',
+    success: true,
+  });
+}
+
+export function responseRoadmapProgressNotFound(res: Response) {
+  return res.status(HttpStatusCodes.NOT_FOUND).json({
+    message: 'Roadmap progress not found',
+    success: false,
+  });
+}
+
+export function responseRoadmapProgressFound(res: Response, progress: RoadmapProgress) {
+  return res.status(HttpStatusCodes.OK).json({
+    data: progress.data,
+    message: 'Roadmap progress found',
     success: true,
   });
 }
