@@ -14,7 +14,9 @@ import {
   responseRoadmapCreated,
   responseRoadmapDeleted,
   responseRoadmapNotFound,
-  responseRoadmapNotRated, responseRoadmapProgressUpdated,
+  responseRoadmapNotRated,
+  responseRoadmapProgressFound, responseRoadmapProgressNotFound,
+  responseRoadmapProgressUpdated,
   responseRoadmapRated,
   responseRoadmapUnrated,
   responseRoadmapUpdated,
@@ -511,6 +513,25 @@ export async function removeLikeRoadmap(
   if (await deleteRoadmapLike(db, liked)) return responseRoadmapUnrated(res);
 
   return responseServerError(res);
+}
+
+export async function getProgressDataRoadmap(
+  req: RequestWithSession,
+  res: Response,
+) {
+  const roadmapId = req.params.roadmapId;
+  const userId = req.session?.userId;
+
+  if (!userId) return responseServerError(res);
+  if (!roadmapId) return responseServerError(res);
+
+  const db = new Database();
+
+  const progress = await getRoadmapProgress(db, userId, BigInt(roadmapId));
+
+  if (progress === null) return responseRoadmapProgressNotFound(res);
+
+  return responseRoadmapProgressFound(res, progress);
 }
 
 export async function updateProgressDataRoadmap(
