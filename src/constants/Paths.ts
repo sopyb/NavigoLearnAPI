@@ -44,8 +44,8 @@ const Paths = {
 
       // Everyone
       Progress: '/progress',
-      Like: '/:roadmapId([0-9]+)/like',
-      Dislike: '/:roadmapId([0-9]+)/dislike',
+      Like: '/like',
+      Dislike: '/dislike',
     },
     Delete: '/:roadmapId([0-9]+)',
   },

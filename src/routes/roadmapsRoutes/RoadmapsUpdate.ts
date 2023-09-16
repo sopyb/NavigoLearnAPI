@@ -17,7 +17,7 @@ import {
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
-RoadmapsUpdate.post('*', validateSession);
+RoadmapsUpdate.all('*', validateSession);
 
 // ! Owner only
 RoadmapsUpdate.post(
