@@ -16,6 +16,14 @@ const Paths = {
     GithubCallback: '/github-callback',
     Logout: '/logout',
   },
+  Notifications: {
+    Base: '/notifications',
+    Get: '/',
+    Update: {
+      Base: '/:commentId([0-9]+)',
+      Dismiss: '/dismiss',
+    },
+  },
   Search: {
     Base: '/search',
     Roadmaps: '/roadmaps',
