@@ -43,9 +43,9 @@ class ExploreDB extends Database {
     let query = '';
     if (order.by === 't.likeCount') {
       query = `CASE
-                 WHEN t.likeCount < 0 THEN 3
+                 WHEN t.likeCount < 0 THEN 1
                  WHEN t.likeCount = 0 THEN 2
-                 ELSE 1
+                 ELSE 3
                END ${order.direction}, `;
     }
 
