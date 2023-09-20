@@ -12,16 +12,22 @@ export function responseExternalBadGateway(res: Response): void {
   });
 }
 
-export function responseInvalidBody(res: Response): void {
+export function responseInvalidBody(
+  res: Response,
+  message?: string,
+): void {
   res.status(HttpStatusCodes.BAD_REQUEST).json({
-    message: 'Invalid request body',
+    message: `Invalid request body${message ? `: ${message}` : ''}`,
     success: false,
   });
 }
 
-export function responseInvalidParameters(res: Response): void {
+export function responseInvalidParameters(
+  res: Response,
+  message?: string,
+): void {
   res.status(HttpStatusCodes.BAD_REQUEST).json({
-    message: 'Invalid request paramteres',
+    message: `Invalid request parameters${message ? `: ${message}` : ''}`,
     success: false,
   });
 }
