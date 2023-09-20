@@ -388,6 +388,40 @@ export async function usersPostProfileWebsiteUrl(
   return responseServerError(res);
 }
 
+export async function usersPostProfileBio(
+  req: RequestWithSession,
+  res: Response,
+): Promise<unknown> {
+  // get variables
+  const { bio } = req.body as { [key: string]: string };
+
+  // get database
+  const db = new DatabaseDriver();
+
+  // get userId from request
+  const userId = req.session?.userId;
+
+  if (userId === undefined) return responseServerError(res);
+
+  // get user from database
+  const user = await getUser(db, userId);
+  const userInfo = await getUserInfo(db, userId);
+
+  // check if user exists
+  if (!user || !userInfo) return responseServerError(res);
+
+  userInfo.set({
+    bio,
+  });
+
+  // save user to database
+  if (await updateUserInfo(db, userId, userInfo))
+    return responseProfileUpdated(res);
+
+  // send error json
+  return responseServerError(res);
+}
+
 export async function usersPostProfileQuote(
   req: RequestWithSession,
   res: Response,
