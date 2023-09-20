@@ -25,7 +25,7 @@ RoadmapsUpdate.all('*', validateSession);
 // ! Owner only
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.All,
-  validateBody('name', 'description', 'data', 'topic', 'miscData', 'isDraft'),
+  validateBody('name', 'description', 'data', 'topic', 'miscData'),
   validateRoadmapTitle,
   validateRoadmapDescription,
   validateRoadmapIsProfane,

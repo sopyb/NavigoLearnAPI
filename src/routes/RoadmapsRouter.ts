@@ -21,7 +21,6 @@ RoadmapsRouter.post(
     'name',
     'description',
     'data',
-    'isPublic',
     'isDraft',
     'version',
     'miscData',
