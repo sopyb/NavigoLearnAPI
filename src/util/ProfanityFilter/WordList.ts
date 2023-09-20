@@ -82,4 +82,4 @@ const words = [
   /[t\\+]w[a@][t\\+][s\\$]?/,
 ];
 
-export default words.map((pattern) => new RegExp(pattern, 'gim'));
+export default words.map((pattern) => new RegExp(pattern, 'gi'));

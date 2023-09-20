@@ -1,7 +1,11 @@
 import wordList from '@src/util/ProfanityFilter/WordList';
 
+export function checkWordProfanity(word: string): boolean {
+  return wordList.some((wordRegex) => wordRegex.test(word.toLowerCase()));
+}
+
 export function checkStringProfanity(str: string): boolean {
-  return wordList.some((word) => word.test(str));
+  return str.split(' ').some((word) => checkWordProfanity(word));
 }
 
 export function checkArrayProfanity(arr: unknown[]): boolean {
