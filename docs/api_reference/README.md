@@ -54,10 +54,11 @@ For each endpoint, we provide the following details:
       - [DELETE /api/roadmaps/:roadmapId/{like,dislike}](./roadmaps/delete-roadmap-like.md)
     - [DELETE /api/roadmaps/:roadmapId](./roadmaps/delete-roadmap.md)
   - /api/users
-    - [GET /api/users/:userId?](./users/get-user.md) (To be added)
-    - [GET /api/users/:userId/roadmaps](./users/get-user-roadmaps.md) (To be added)
-    - [GET /api/users/:userId/follow](./users/follow-user.md) (To be added)
-    - [DELETE /api/users/:userId/follow](./users/unfollow-user.md) (To be added)
+    - [GET /api/users/:userId?](./users/get-user.md)
+    - [GET /api/users/:userId/mini](./users/get-user-mini.md)
+    - [GET /api/users/:userId/roadmaps](./users/get-user-roadmaps.md)
+    - [GET /api/users/:userId/follow](./users/follow-user.md) 
+    - [DELETE /api/users/:userId/follow](./users/unfollow-user.md)
     - [POST /api/users/]('./users/update-user.md) (To be added)
     - [POST /api/users/:userId/profile-picture](./users/update-user-profile-picture.md) (To be added)
     - [POST /api/users/:userId/bio](./users/update-user-bio.md) (To be added)
@@ -65,7 +66,7 @@ For each endpoint, we provide the following details:
     - [POST /api/users/:userId/name](./users/update-user-name.md) (To be added)
     - [POST /api/users/:userId/website-url](./users/update-user-website-url.md) (To be added)
     - [POST /api/users/:userId/github-url](./users/update-user-github-url.md) (To be added)
-    - [DELETE /api/users/:userId](./users/delete-user.md) (To be added)
+    - [DELETE /api/users/:userId](./users/delete-user.md)
 
 ## Responses
 
