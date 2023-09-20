@@ -59,7 +59,7 @@ For each endpoint, we provide the following details:
     - [GET /api/users/:userId/roadmaps](./users/get-user-roadmaps.md)
     - [GET /api/users/:userId/follow](./users/follow-user.md) 
     - [DELETE /api/users/:userId/follow](./users/unfollow-user.md)
-    - [POST /api/users/]('./users/update-user.md)
+    - [POST /api/users/](./users/update-user.md)
     - [POST /api/users/name](./users/update-user-name.md)
     - [POST /api/users/profile-picture](./users/update-user-profile-picture.md) (Not Implemented - Not plan)
     - [POST /api/users/bio](./users/update-user-bio.md)
