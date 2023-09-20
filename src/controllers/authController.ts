@@ -9,7 +9,7 @@ import {
   deleteClearSession,
 } from '@src/util/sessionManager';
 import { UserInfo } from '@src/types/models/UserInfo';
-import { checkEmail } from '@src/util/EmailUtil';
+import { checkEmail } from '@src/util/misc';
 import EnvVars from '@src/constants/EnvVars';
 import logger from 'jet-logger';
 import { RequestWithSession } from '@src/middleware/session';
