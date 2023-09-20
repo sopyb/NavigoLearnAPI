@@ -29,6 +29,7 @@ Example:
 | Code | Description                 |
 |------|-----------------------------|
 | 302  | Found - Temporary redirect. |
+| 500  | Internal Server Error       |
 
 ### Cookies
 
