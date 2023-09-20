@@ -29,8 +29,8 @@ For each endpoint, we provide the following details:
     - [POST /api/auth/forgot-password](./auth/forgot-password.md) (Not Implemented - Not planned)
     - [DELETE /api/auth/logout](./auth/logout.md)
   - /api/search (formerly /api/explore)
-    - [GET /api/search/roadmaps](./search/roadmaps.md) (To be added)
-    - [GET /api/search/feeling-lucky](./search/feeling-lucky.md) (To be added)
+    - [GET /api/search/roadmaps](./search/roadmaps.md)
+    - [GET /api/search/feeling-lucky](./search/feeling-lucky.md)
     - ... More to be added
   - /api/roadmaps
     - [GET /api/roadmaps/:roadmapId?](./roadmaps/get-roadmap.md) (To be added)
