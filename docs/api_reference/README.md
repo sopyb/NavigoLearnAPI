@@ -47,12 +47,12 @@ For each endpoint, we provide the following details:
       - [POST /api/roadmaps/:roadmapId/data](./roadmaps/update-roadmap-data.md)
       - [POST /api/roadmaps/:roadmapId/misc-data](./roadmaps/update-roadmap-misc-data.md)
       - **Interact with the roadmap**
-      - [GET /api/roadmaps/:roadmapId/like](./roadmaps/like-roadmap.md) (To be added)
-      - [GET /api/roadmaps/:roadmapId/dilike](./roadmaps/unlike-roadmap.md) (To be added)
-      - [GET /api/roadmaps/:roadmapId/progress](./roadmaps/get-roadmap-progress.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/progress](./roadmaps/update-roadmap-progress.md) (To be added)
-      - [DELETE /api/roadmaps/:roadmapId/{like,dislike}](./roadmaps/delete-roadmap-like.md) (To be added)
-    - [DELETE /api/roadmaps/:roadmapId](./roadmaps/delete-roadmap.md) (To be added)
+      - [GET /api/roadmaps/:roadmapId/like](./roadmaps/like-roadmap.md)
+      - [GET /api/roadmaps/:roadmapId/dislike](./roadmaps/unlike-roadmap.md)
+      - [GET /api/roadmaps/:roadmapId/progress](./roadmaps/get-roadmap-progress.md)
+      - [POST /api/roadmaps/:roadmapId/progress](./roadmaps/update-roadmap-progress.md)
+      - [DELETE /api/roadmaps/:roadmapId/{like,dislike}](./roadmaps/delete-roadmap-like.md)
+    - [DELETE /api/roadmaps/:roadmapId](./roadmaps/delete-roadmap.md)
   - /api/users
     - [GET /api/users/:userId?](./users/get-user.md) (To be added)
     - [GET /api/users/:userId/roadmaps](./users/get-user-roadmaps.md) (To be added)

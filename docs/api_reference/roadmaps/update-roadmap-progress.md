@@ -1,20 +1,20 @@
-# POST /api/roadmaps/:roadmapId/misc-data
+# POST /api/roadmaps/:roadmapId/progress
 
 ## Description
 
-This endpoint is used to update the draft status of a roadmap.
+Update the progress of user on a roadmap.
 
 ## Request
 
 ### Parameters
 
-- `roadmapId`: id of the roadmap to update. (required - included in path)
+- `roadmapId`: id of the roadmap to update progress of. (required - included in path)
 
 ### Body
 
 ```json
 {
-  "miscData": "Base64 encoded JSON string"
+  "data": "Base64 encoded JSON string"
 }
 ```
 
@@ -27,7 +27,7 @@ This endpoint is used to update the draft status of a roadmap.
 ```json
 {
   "success": true,
-  "message": "Roadmap updated"
+  "message": "Roadmap progress updated"
 }
 ```
 
@@ -38,7 +38,6 @@ This endpoint is used to update the draft status of a roadmap.
 | 200  | Success                |
 | 400  | Bad Request            |
 | 401  | Unauthorized           |
-| 403  | Forbidden              |
 | 404  | Not Found.             |
 | 500  | Internal Server Error. |
 

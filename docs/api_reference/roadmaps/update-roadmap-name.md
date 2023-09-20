@@ -20,7 +20,7 @@ This endpoint is used to update the name of a roadmap.
 
 ### Headers
 
-None
+- cookie: token=... (required)
 
 ## Response
 

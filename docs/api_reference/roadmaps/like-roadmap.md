@@ -1,22 +1,18 @@
-# POST /api/roadmaps/:roadmapId/misc-data
+# GET /api/roadmaps/:roadmapId/like
 
 ## Description
 
-This endpoint is used to update the draft status of a roadmap.
+This endpoint is used to give a like to a roadmap.
 
 ## Request
 
 ### Parameters
 
-- `roadmapId`: id of the roadmap to update. (required - included in path)
+- `roadmapId`: Id of the roadmap to like. (required - included in path)
 
 ### Body
 
-```json
-{
-  "miscData": "Base64 encoded JSON string"
-}
-```
+None
 
 ### Headers
 
@@ -27,18 +23,18 @@ This endpoint is used to update the draft status of a roadmap.
 ```json
 {
   "success": true,
-  "message": "Roadmap updated"
+  "message": "Roadmap rated"
 }
 ```
 
 ### Response Codes
+
 
 | Code | Description            |
 |------|------------------------|
 | 200  | Success                |
 | 400  | Bad Request            |
 | 401  | Unauthorized           |
-| 403  | Forbidden              |
 | 404  | Not Found.             |
 | 500  | Internal Server Error. |
 

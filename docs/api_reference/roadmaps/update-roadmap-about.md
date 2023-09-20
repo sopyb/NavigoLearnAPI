@@ -23,7 +23,7 @@ This endpoint is used to update the about section of a roadmap.
 
 ### Headers
 
-None
+- cookie: token=... (required)
 
 ## Response
 

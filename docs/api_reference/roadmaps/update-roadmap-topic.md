@@ -20,7 +20,7 @@ This endpoint is used to update the topic of a roadmap.
 
 ### Headers
 
-None
+- cookie: token=... (required)
 
 ## Response
 
