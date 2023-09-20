@@ -44,7 +44,7 @@ None
             "createdAt": "string: date",
             "updatedAt": "string: date",
             "userId": "string",
-            "userAvatar": "string",
+            "userAvatar": "string | null",
             "userName": "string",
             "likeCount": "number",
             "viewCount": "number",

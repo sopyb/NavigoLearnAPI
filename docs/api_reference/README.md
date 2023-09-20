@@ -33,23 +33,23 @@ For each endpoint, we provide the following details:
     - [GET /api/search/feeling-lucky](./search/feeling-lucky.md)
     - ... More to be added
   - /api/roadmaps
-    - [GET /api/roadmaps/:roadmapId?](./roadmaps/get-roadmap.md) (To be added)
-    - [POST /api/roadmaps/create](./roadmaps/create-roadmap.md) (To be added)
+    - [GET /api/roadmaps/:roadmapId](./roadmaps/get-roadmap.md)
+    - [POST /api/roadmaps/create](./roadmaps/create-roadmap.md)
     - /api/roadmaps/:roadmapId
-      - **Update roadmap data** 
-      - [POST /api/roadmaps/:roadmapId/](./roadmaps/update-roadmap.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/about](./roadmaps/update-roadmap-about.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/name](./roadmaps/update-roadmap-name.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/description](./roadmaps/update-roadmap-description.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/topics](./roadmaps/update-roadmap-topic.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/visibility](./roadmaps/update-roadmap-visibility.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/draft](./roadmaps/update-roadmap-draft.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/data](./roadmaps/update-roadmap-data.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/misc-data](./roadmaps/update-roadmap-misc-data.md) (To be added)
-      - [POST /api/roadmaps/:roadmapId/cover-image](./roadmaps/update-roadmap-cover-image.md) (To be added)
+      - **Update roadmap data**
+      - [POST /api/roadmaps/:roadmapId/](./roadmaps/update-roadmap.md)
+      - [POST /api/roadmaps/:roadmapId/about](./roadmaps/update-roadmap-about.md)
+      - [POST /api/roadmaps/:roadmapId/name](./roadmaps/update-roadmap-name.md)
+      - [POST /api/roadmaps/:roadmapId/description](./roadmaps/update-roadmap-description.md)
+      - [POST /api/roadmaps/:roadmapId/topics](./roadmaps/update-roadmap-topic.md)
+      - [POST /api/roadmaps/:roadmapId/draft](./roadmaps/update-roadmap-draft.md)
+      - [POST /api/roadmaps/:roadmapId/version](./roadmaps/update-roadmap-version.md)
+      - [POST /api/roadmaps/:roadmapId/data](./roadmaps/update-roadmap-data.md)
+      - [POST /api/roadmaps/:roadmapId/misc-data](./roadmaps/update-roadmap-misc-data.md)
       - **Interact with the roadmap**
       - [GET /api/roadmaps/:roadmapId/like](./roadmaps/like-roadmap.md) (To be added)
       - [GET /api/roadmaps/:roadmapId/dilike](./roadmaps/unlike-roadmap.md) (To be added)
+      - [GET /api/roadmaps/:roadmapId/progress](./roadmaps/get-roadmap-progress.md) (To be added)
       - [POST /api/roadmaps/:roadmapId/progress](./roadmaps/update-roadmap-progress.md) (To be added)
       - [DELETE /api/roadmaps/:roadmapId/{like,dislike}](./roadmaps/delete-roadmap-like.md) (To be added)
     - [DELETE /api/roadmaps/:roadmapId](./roadmaps/delete-roadmap.md) (To be added)

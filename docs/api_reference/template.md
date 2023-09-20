@@ -43,7 +43,7 @@ List all the headers required here if any
 - `header2`: Description for header2
 
 (**If the endpoint does not require headers, then state that there are no headers required**)
-Example whem requiring token authentication:
+Example when requiring token authentication:
 ```
 - 'cookie': 'token=...'
 ```
