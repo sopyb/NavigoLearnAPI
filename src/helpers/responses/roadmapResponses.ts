@@ -18,6 +18,13 @@ export function responseRoadmap(res: Response, roadmap: ResFullRoadmap): void {
     );
 }
 
+export function responseCantPublishDraft(res: Response): void {
+  res.status(HttpStatusCodes.BAD_REQUEST).json({
+    message: 'Cannot publish draft that\'s unlisted for inappropriate content',
+    success: false,
+  });
+}
+
 export function responseRoadmapUpdated(res: Response): void {
   res.status(HttpStatusCodes.OK).json({
     message: 'Roadmap updated',
@@ -127,7 +134,10 @@ export function responseRoadmapProgressNotFound(res: Response) {
   });
 }
 
-export function responseRoadmapProgressFound(res: Response, progress: RoadmapProgress) {
+export function responseRoadmapProgressFound(
+  res: Response,
+  progress: RoadmapProgress,
+) {
   return res.status(HttpStatusCodes.OK).json({
     data: progress.data,
     message: 'Roadmap progress found',

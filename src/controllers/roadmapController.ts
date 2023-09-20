@@ -7,6 +7,7 @@ import {
 import Database from '@src/util/Database/DatabaseDriver';
 import { RoadmapLike } from '@src/types/models/RoadmapLike';
 import {
+  responseCantPublishDraft,
   responseNotAllowed,
   responseRoadmap,
   responseRoadmapAlreadyDisliked,
@@ -386,7 +387,7 @@ export async function updateIsDraftRoadmap(
 
   if (isDraft === null || isDraft === undefined)
     return responseInvalidBody(res);
-
+  if (!roadmap.isPublic) return responseCantPublishDraft(res);
   roadmap.set({ isDraft: Boolean(isDraft) });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
