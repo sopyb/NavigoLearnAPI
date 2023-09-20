@@ -23,3 +23,11 @@ export function JSONSafety(obj: unknown): unknown {
 export function isEmptyObject(obj: any): obj is Record<string, any> {
   return obj && typeof obj === 'object' && Object.keys(obj).length === 0;
 }
+
+export function Base64Encode(str: string): string {
+  return Buffer.from(str).toString('base64');
+}
+
+export function Base64Decode(str: string): string {
+  return Buffer.from(str, 'base64').toString();
+}

@@ -44,7 +44,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   const { name, description, data, miscData, version } = req.body;
 
   // non guaranteed to exist by middleware of type Roadmap
-  let { topic, isPublic, isDraft } = req.body;
+  let { topic, isDraft } = req.body;
 
   const userId = req.session?.userId;
 
@@ -56,7 +56,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = RoadmapTopic.PROGRAMMING;
 
-  isPublic = true;
+  const isPublic = !Boolean(req.body.isProfane);
   if (isDraft !== true && isDraft !== false) isDraft = false;
 
   const roadmap = new Roadmap({
@@ -64,8 +64,8 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     description: description as string,
     topic: topic as RoadmapTopic | undefined,
     userId,
-    isPublic: isPublic as boolean,
-    isDraft: isDraft ,
+    isPublic,
+    isDraft: isDraft,
     data: data as string,
     miscData: miscData as string,
     version: version as string,
@@ -118,7 +118,7 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
       )
       : 0n;
 
-  if (!roadmap.isPublic && roadmap.userId !== userId)
+  if ((!roadmap.isPublic || roadmap.isDraft) && roadmap.userId !== userId)
     return responseNotAllowed(res);
 
   addRoadmapView(db, roadmap.id, userId).catch((e) => logger.err(e));
@@ -151,11 +151,14 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
 
+  const isPublic = !Boolean(req.body.isProfane);
+
   roadmap.set({
     name: name as string,
     description: description as string,
     topic: topic as RoadmapTopic,
     miscData: miscData as string,
+    isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -186,6 +189,8 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
 
+  const isPublic = !Boolean(req.body.isProfane);
+
   roadmap.set({
     name: name as string,
     description: description as string,
@@ -193,6 +198,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic,
     miscData: miscData as string,
     isDraft: Boolean(isDraft),
+    isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -216,10 +222,14 @@ export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { name } = req.body;
+  const isPublic = !Boolean(req.body.isProfane);
 
   if (!name) return responseServerError(res);
 
-  roadmap.set({ name: name as string });
+  roadmap.set({
+    name: name as string,
+    isPublic,
+  });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
@@ -245,10 +255,14 @@ export async function updateDescriptionRoadmap(
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { description } = req.body;
+  const isPublic = !Boolean(req.body.isProfane);
 
   if (!description) return responseServerError(res);
 
-  roadmap.set({ description: description as string });
+  roadmap.set({
+    description: description as string,
+    isPublic,
+  });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
@@ -271,10 +285,14 @@ export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { data } = req.body;
+  const isPublic = !Boolean(req.body.isProfane);
 
   if (!data) return responseServerError(res);
 
-  roadmap.set({ data: data as string });
+  roadmap.set({
+    data: data as string,
+    isPublic,
+  });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
     return responseRoadmapUpdated(res);
