@@ -58,6 +58,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
 
   const isPublic = !Boolean(req.body.isProfane);
   if (isDraft !== true && isDraft !== false) isDraft = false;
+  if (!isPublic) isDraft = true;
 
   const roadmap = new Roadmap({
     name: name as string,
@@ -65,7 +66,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic | undefined,
     userId,
     isPublic,
-    isDraft: isDraft,
+    isDraft,
     data: data as string,
     miscData: miscData as string,
     version: version as string,
@@ -159,6 +160,7 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic,
     miscData: miscData as string,
     isPublic,
+    isDraft: !isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -181,7 +183,8 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap === null) return responseRoadmapNotFound(res);
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
-  const { name, description, data, topic, miscData, isDraft } = req.body;
+  const { name, description, data, topic, miscData } = req.body;
+  let { isDraft } = req.body;
 
   if (!name || !description || !data || !topic || !miscData || !isDraft)
     return responseServerError(res);
@@ -190,6 +193,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
     return responseInvalidBody(res);
 
   const isPublic = !Boolean(req.body.isProfane);
+  if (!isPublic) isDraft = true;
 
   roadmap.set({
     name: name as string,
@@ -229,6 +233,7 @@ export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
   roadmap.set({
     name: name as string,
     isPublic,
+    isDraft: !isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -262,6 +267,7 @@ export async function updateDescriptionRoadmap(
   roadmap.set({
     description: description as string,
     isPublic,
+    isDraft: !isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -292,6 +298,7 @@ export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
   roadmap.set({
     data: data as string,
     isPublic,
+    isDraft: !isPublic,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
