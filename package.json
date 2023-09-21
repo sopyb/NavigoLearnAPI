@@ -29,7 +29,7 @@
     "@src": "dist"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "dependencies": {
     "axios": "^1.4.0",

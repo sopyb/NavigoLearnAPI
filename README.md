@@ -29,8 +29,8 @@ MariaDB.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/) - v16 or higher
-- [MariaDB](https://mariadb.org/) - v10.6 or higher
+- [Node.js](https://nodejs.org/en/) - v18 or higher
+- [MariaDB](https://mariadb.org/) - v10.11 or higher
 - [Git](https://git-scm.com/) - v2.32 or higher
 
 ## Installation
