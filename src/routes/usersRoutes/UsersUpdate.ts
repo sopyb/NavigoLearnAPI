@@ -7,7 +7,7 @@ import {
 } from '@src/helpers/responses/generalResponses';
 import validateBody from '@src/middleware/validators/validateBody';
 import {
-  usersPostProfile,
+  usersPostProfile, usersPostProfileBio,
   usersPostProfileGithubUrl,
   usersPostProfileName,
   usersPostProfileQuote,
@@ -40,6 +40,12 @@ UsersUpdate.post(
   Paths.Users.Update.WebsiteUrl,
   validateBody('websiteUrl'),
   usersPostProfileWebsiteUrl,
+);
+
+UsersUpdate.post(
+  Paths.Users.Update.Bio,
+  validateBody('bio'),
+  usersPostProfileBio,
 );
 
 UsersUpdate.post(

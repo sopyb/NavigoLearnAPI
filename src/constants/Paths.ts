@@ -27,6 +27,7 @@ const Paths = {
     Get: {
       Base: '/:roadmapId([0-9]+)?',
       Roadmap: '/',
+      Progress: '/progress',
     },
     Update: {
       Base: '/:roadmapId([0-9]+)',

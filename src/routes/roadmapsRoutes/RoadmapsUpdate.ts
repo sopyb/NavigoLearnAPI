@@ -14,6 +14,9 @@ import {
   updateNameRoadmap, updateProgressDataRoadmap,
   updateTopicRoadmap, updateVersionRoadmap,
 } from '@src/controllers/roadmapController';
+import {
+  validateRoadmapIsProfane, validateRoadmapDescription, validateRoadmapTitle,
+} from '@src/middleware/validators/validateRoadmapIsProfane';
 
 const RoadmapsUpdate = Router({ mergeParams: true });
 
@@ -22,31 +25,39 @@ RoadmapsUpdate.all('*', validateSession);
 // ! Owner only
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.All,
-  validateBody('name', 'description', 'data', 'topic', 'miscData', 'isDraft'),
+  validateBody('name', 'description', 'data', 'topic', 'miscData'),
+  validateRoadmapTitle,
+  validateRoadmapDescription,
+  validateRoadmapIsProfane,
   updateAllRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.About,
   validateBody('name', 'description', 'topic', 'miscData'),
+  validateRoadmapTitle,
+  validateRoadmapDescription,
   updateAboutRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Name,
   validateBody('name'),
+  validateRoadmapTitle,
   updateNameRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Description,
   validateBody('description'),
+  validateRoadmapDescription,
   updateDescriptionRoadmap,
 );
 
 RoadmapsUpdate.post(
   Paths.Roadmaps.Update.Data,
   validateBody('data'),
+  validateRoadmapIsProfane,
   updateDataRoadmap,
 );
 

@@ -8,6 +8,9 @@ import {
   deleteRoadmap,
 } from '@src/controllers/roadmapController';
 import validateBody from '@src/middleware/validators/validateBody';
+import {
+  validateRoadmapIsProfane, validateRoadmapDescription, validateRoadmapTitle,
+} from '@src/middleware/validators/validateRoadmapIsProfane';
 
 const RoadmapsRouter = Router();
 
@@ -18,11 +21,13 @@ RoadmapsRouter.post(
     'name',
     'description',
     'data',
-    'isPublic',
     'isDraft',
     'version',
     'miscData',
   ),
+  validateRoadmapTitle,
+  validateRoadmapDescription,
+  validateRoadmapIsProfane,
   createRoadmap,
 );
 
