@@ -29,6 +29,8 @@ export function checkArrayProfanity(arr: unknown[]): boolean {
 export function checkObjectProfanity(
   obj: Record<string, never> | object,
 ): boolean {
+  obj ??= {};
+
   return Object.values(obj).some((value) => {
     if (typeof value === 'string') {
       return checkStringProfanity(value);
