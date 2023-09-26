@@ -1,6 +1,9 @@
 import wordList from '@src/util/ProfanityFilter/WordList';
 
+const URLRegex = /https?:\/\/[^\s]+/g;
+
 export function checkWordProfanity(word: string): boolean {
+  if (URLRegex.test(word)) return false;
   return wordList.some((wordRegex) => wordRegex.test(word.toLowerCase()));
 }
 
