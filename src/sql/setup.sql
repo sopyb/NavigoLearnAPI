@@ -170,3 +170,11 @@ select `navigo`.`sessionTable`.`id`      AS `id`,
        `navigo`.`sessionTable`.`expires` AS `expires`
 from `navigo`.`sessionTable`
 where `navigo`.`sessionTable`.`expires` >= current_timestamp();
+
+create table if not exists migrations
+(
+  id BIGINT AUTO_INCREMENT
+    PRIMARY KEY,
+  createdAt timestamp default current_timestamp() not null,
+  filename varchar(255) not null
+)
