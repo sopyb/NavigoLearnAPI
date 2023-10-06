@@ -1,10 +1,10 @@
 import EnvVars from '@src/constants/EnvVars';
 import { createPool, Pool } from 'mariadb';
-import fs from 'fs';
 import path from 'path';
 import logger from 'jet-logger';
 import { User } from '@src/types/models/User';
 import { GenericModelClass } from '@src/types/models/GenericModelClass';
+import {readFileSync} from 'fs';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -486,34 +486,13 @@ class Database {
   }
 
   protected async _setup() {
-    // get setup.sql file
-    let setupSql = fs.readFileSync(
-      path.join(__dirname, '..', '..', 'sql', 'setup.sql'),
-      'utf8',
-    );
-
-    // remove comments
-    setupSql = setupSql.replace(/--.*/g, '');
-
-    // remove empty lines
-    setupSql = setupSql.replace(/^\s*[\r, \n]/gm, '');
-
-    // split sql queries
-    const queries = setupSql.split(';');
-
-    // get connection from pool
-    const conn = await Database.pool.getConnection();
+    const pathToSQLScripts = path.join(__dirname, '..', '..', 'sql');
 
     try {
-      // execute each query
-      for (const query of queries) {
-        if (query) await conn.query(query);
-      }
+      await this._executeFile(path.join(pathToSQLScripts, 'create.sql'));
     } catch (e) {
       logger.err(e);
     } finally {
-      // release connection
-      await conn.release();
       Database.isSetup = true;
     }
 
@@ -529,6 +508,32 @@ class Database {
     if (existingUser) {
       await this.update('users', user.id, user, false);
     } else await this.insert('users', user, false);
+  }
+
+  protected async _executeFile(path: string) {
+    let fileContent = readFileSync(path, {
+      encoding: 'utf8',
+    }).toString();
+
+    if (!fileContent) return;
+
+    // remove comments
+    fileContent = fileContent.replace(/--.*/g, '');
+
+    // remove empty lines
+    fileContent = fileContent.replace(/^\s*[\r, \n]/gm, '');
+
+    // split sql queries
+    const queries = fileContent.split(';');
+
+    // get connection from pool
+    const conn = await Database.pool.getConnection();
+
+    for(const query of queries) {
+      if (query) await conn.query(query);
+    }
+
+    await conn.release();
   }
 
   private _buildWhereQuery = (
