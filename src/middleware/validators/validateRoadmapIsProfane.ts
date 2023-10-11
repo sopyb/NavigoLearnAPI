@@ -108,7 +108,7 @@ export function validateRoadmapIsProfane(
 
   // check if data is profane
   checkObjectProfanity(data)
-    ? req.body.isProfane = true
+    ? req.body.isProfane = false
     : req.body.isProfane = false;
 
   next();
