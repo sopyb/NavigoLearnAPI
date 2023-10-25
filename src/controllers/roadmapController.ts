@@ -16,7 +16,8 @@ import {
   responseRoadmapDeleted,
   responseRoadmapNotFound,
   responseRoadmapNotRated,
-  responseRoadmapProgressFound, responseRoadmapProgressNotFound,
+  responseRoadmapProgressFound,
+  responseRoadmapProgressNotFound,
   responseRoadmapProgressUpdated,
   responseRoadmapRated,
   responseRoadmapUnrated,
@@ -25,13 +26,16 @@ import {
 import {
   deleteDBRoadmap,
   deleteRoadmapLike,
+  getRoadmapLike,
   getRoadmapObject,
-  getRoadmapLike, getRoadmapProgress,
+  getRoadmapProgress,
   getUser,
   insertRoadmap,
   insertRoadmapLike,
+  insertRoadmapProgress,
   updateRoadmap,
-  updateRoadmapLike, updateRoadmapProgress, insertRoadmapProgress,
+  updateRoadmapLike,
+  updateRoadmapProgress,
 } from '@src/helpers/databaseManagement';
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { Roadmap, RoadmapTopic } from '@src/types/models/Roadmap';
@@ -39,6 +43,8 @@ import { ResFullRoadmap } from '@src/types/response/ResFullRoadmap';
 import { addRoadmapView } from '@src/util/Views';
 import logger from 'jet-logger';
 import { RoadmapProgress } from '@src/types/models/RoadmapProgress';
+
+const profanityCheckEnabled = false;
 
 export async function createRoadmap(req: RequestWithBody, res: Response) {
   // guaranteed to exist by middleware
@@ -57,7 +63,9 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = RoadmapTopic.PROGRAMMING;
 
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
   if (!isPublic) isDraft = true;
 
@@ -109,8 +117,8 @@ export async function getRoadmap(req: RequestWithSession, res: Response) {
     1,
   );
   const isLiked =
-    userId !== undefined && userId !== null ?
-      await db.sumWhere(
+    userId !== undefined && userId !== null
+      ? await db.sumWhere(
         'roadmapLikes',
         'value',
         'roadmapId',
@@ -153,7 +161,9 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
 
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : roadmap.isPublic;
 
   roadmap.set({
     name: name as string,
@@ -193,7 +203,9 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (!Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     return responseInvalidBody(res);
 
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : roadmap.isPublic;
   if (!isPublic) isDraft = true;
 
   roadmap.set({
@@ -227,7 +239,7 @@ export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { name } = req.body;
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled;
 
   if (!name) return responseServerError(res);
 
@@ -261,7 +273,9 @@ export async function updateDescriptionRoadmap(
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { description } = req.body;
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : roadmap.isPublic;
 
   if (!description) return responseServerError(res);
 
@@ -292,7 +306,9 @@ export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { data } = req.body;
-  const isPublic = !Boolean(req.body.isProfane);
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : roadmap.isPublic;
 
   if (!data) return responseServerError(res);
 
