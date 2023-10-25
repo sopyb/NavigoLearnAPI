@@ -1,10 +1,10 @@
 import EnvVars from '@src/constants/EnvVars';
-import { createPool, Pool } from 'mariadb';
-import fs from 'fs';
+import {createPool, Pool} from 'mariadb';
 import path from 'path';
 import logger from 'jet-logger';
-import { User } from '@src/types/models/User';
-import { GenericModelClass } from '@src/types/models/GenericModelClass';
+import {User} from '@src/types/models/User';
+import {GenericModelClass} from '@src/types/models/GenericModelClass';
+import {readdirSync, readFileSync} from 'fs';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -59,6 +59,9 @@ const trustedColumns = [
   // session
   'token',
   'expires',
+
+  // migrations
+  'filename',
 ];
 
 // data interface
@@ -88,6 +91,12 @@ interface CountDataPacket extends RowDataPacket {
 
 interface CountQueryPacket extends RowDataPacket {
   result: bigint;
+}
+
+interface IMigrations {
+  id: bigint;
+  created_at: Date;
+  filename: string;
 }
 
 export interface ResultSetHeader {
@@ -418,6 +427,59 @@ class Database {
     }
   }
 
+  // TODO: less duplicate code
+  protected async _insertUnsafe(
+    table: string,
+    data: object | Record<string, DataType>,
+    discardId = true,
+  ): Promise<bigint> {
+    const { keys, values } = processData(data, discardId);
+
+    // create sql query - insert into table (keys) values (values)
+    // ? for values to be replaced by params
+    const sql = `INSERT INTO ${table} (${keys.join(',')})
+                 VALUES (${values.map(() => '?').join(',')})`;
+    // execute query
+    const result = (await this._queryUnsafe(sql, values)) as ResultSetHeader;
+
+    // return insert id
+    let insertId = -1n;
+    if (result) {
+      insertId = BigInt(result.insertId);
+    }
+    return insertId;
+  }
+
+  protected async getAllUnsafe<T>(table: string): Promise<T[] | null> {
+    // create sql query - select * from table
+    const sql = `SELECT *
+                 FROM ${table}`;
+
+    // execute query
+    const result = await this._queryUnsafe(sql);
+
+    // check if T has any properties that are JSON
+    // if so parse them
+    return parseResult(result) as T[] | null;
+  }
+
+  protected async _queryUnsafe(
+    sql: string,
+    params?: unknown[],
+  ): Promise<ResultSetHeader | RowDataPacket[]> {
+    if (!sql) return Promise.reject(new Error('No SQL query'));
+
+    // get connection from pool
+    const conn = await Database.pool.getConnection();
+    try {
+      // execute query and return result
+      return await conn.query(sql, params);
+    } finally {
+      // release connection
+      await conn.release();
+    }
+  }
+
   protected async _getWhere<T>(
     table: string,
     like: boolean,
@@ -465,7 +527,7 @@ class Database {
     const result = await this._query(sql, queryBuilderResult.params);
 
     return BigInt(
-      (result as CountDataPacket[])[0][`SUM(${column})`] as number || 0,
+      ((result as CountDataPacket[])[0][`SUM(${column})`] as number) || 0,
     );
   }
 
@@ -486,34 +548,62 @@ class Database {
   }
 
   protected async _setup() {
-    // get setup.sql file
-    let setupSql = fs.readFileSync(
-      path.join(__dirname, '..', '..', 'sql', 'setup.sql'),
-      'utf8',
-    );
+    const pathToSQLScripts = path.join(__dirname, '..', '..', 'sql');
 
-    // remove comments
-    setupSql = setupSql.replace(/--.*/g, '');
+    const numberRegex = /^\d+/gi;
 
-    // remove empty lines
-    setupSql = setupSql.replace(/^\s*[\r, \n]/gm, '');
+    // run the setup sql
+    await this._executeFile(path.join(pathToSQLScripts, 'setup.sql'));
 
-    // split sql queries
-    const queries = setupSql.split(';');
+    // read the migrations directory and sort files by number id
+    const migrationFiles = readdirSync(
+      path.join(pathToSQLScripts, 'migrations'),
+    )
+      .filter((file) => file.endsWith('.sql'))
+      .sort((fileA, fileB) => {
+        const numberA = parseInt(fileA.match(numberRegex)?.[0] || '');
+        const numberB = parseInt(fileB.match(numberRegex)?.[0] || '');
 
-    // get connection from pool
-    const conn = await Database.pool.getConnection();
+        return numberA - numberB;
+      });
 
     try {
-      // execute each query
-      for (const query of queries) {
-        if (query) await conn.query(query);
+      await this._executeFile(path.join(pathToSQLScripts, 'setup.sql'));
+    } catch (e) {
+      logger.err(e);
+    }
+
+    const migrations = await this.getAllUnsafe<IMigrations>('migrations');
+
+    if (!!migrations) {
+      migrations.forEach((migration) => {
+        const index = migrationFiles.indexOf(migration.filename);
+        if (index > -1) migrationFiles.splice(index, 1);
+      });
+    }
+
+    try {
+      if (migrationFiles.length) logger.info('Starting migrations...');
+      for (const migrationFile of migrationFiles) {
+        logger.info(`Now running: ${migrationFile}...`);
+        await this._executeFile(
+          path.join(pathToSQLScripts, 'migrations', migrationFile),
+        );
+
+        const success = await this._insertUnsafe('migrations', {
+          id: -1n,
+          createdAt: new Date(),
+          filename: migrationFile,
+        });
+
+        if (success < 0n) {
+          throw new Error('Failed to insert migration file into database');
+        }
+        logger.info(`Successfully ran: ${migrationFile}`);
       }
     } catch (e) {
       logger.err(e);
     } finally {
-      // release connection
-      await conn.release();
       Database.isSetup = true;
     }
 
@@ -529,6 +619,32 @@ class Database {
     if (existingUser) {
       await this.update('users', user.id, user, false);
     } else await this.insert('users', user, false);
+  }
+
+  protected async _executeFile(path: string) {
+    let fileContent = readFileSync(path, {
+      encoding: 'utf8',
+    }).toString();
+
+    if (!fileContent) return;
+
+    // remove comments
+    fileContent = fileContent.replace(/--.*/g, '');
+
+    // remove empty lines
+    fileContent = fileContent.replace(/^\s*[\r, \n]/gm, '');
+
+    // split sql queries
+    const queries = fileContent.split(';');
+
+    // get connection from pool
+    const conn = await Database.pool.getConnection();
+
+    for (const query of queries) {
+      if (query) await conn.query(query);
+    }
+
+    await conn.release();
   }
 
   private _buildWhereQuery = (
