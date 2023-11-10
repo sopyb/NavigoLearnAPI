@@ -63,11 +63,8 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
   if (!topic || !Object.values(RoadmapTopic).includes(topic as RoadmapTopic))
     topic = RoadmapTopic.PROGRAMMING;
 
-  const isPublic = profanityCheckEnabled
-    ? !Boolean(req.body.isprofane)
-    : true;
+  const isPublic = profanityCheckEnabled ? !Boolean(req.body.isprofane) : true;
   if (isDraft !== true && isDraft !== false) isDraft = false;
-  if (!isPublic) isDraft = true;
 
   const roadmap = new Roadmap({
     name: name as string,
@@ -75,7 +72,7 @@ export async function createRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic | undefined,
     userId,
     isPublic,
-    isDraft,
+    isDraft: profanityCheckEnabled ? !Boolean(req.body.isprofane) : isDraft,
     data: data as string,
     miscData: miscData as string,
     version: version as string,
@@ -171,7 +168,9 @@ export async function updateAboutRoadmap(req: RequestWithBody, res: Response) {
     topic: topic as RoadmapTopic,
     miscData: miscData as string,
     isPublic,
-    isDraft: !isPublic,
+    isDraft: profanityCheckEnabled
+      ? !Boolean(req.body.isprofane)
+      : roadmap.isDraft,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -195,7 +194,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { name, description, data, topic, miscData } = req.body;
-  let { isDraft } = req.body;
+  const { isDraft } = req.body;
 
   if (!name || !description || !data || !topic || !miscData || !isDraft)
     return responseServerError(res);
@@ -206,7 +205,6 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
   const isPublic = profanityCheckEnabled
     ? !Boolean(req.body.isprofane)
     : roadmap.isPublic;
-  if (!isPublic) isDraft = true;
 
   roadmap.set({
     name: name as string,
@@ -214,7 +212,7 @@ export async function updateAllRoadmap(req: RequestWithBody, res: Response) {
     data: data as string,
     topic: topic as RoadmapTopic,
     miscData: miscData as string,
-    isDraft: Boolean(isDraft),
+    isDraft: Boolean(profanityCheckEnabled ? !req.body.isprofane : isDraft),
     isPublic,
   });
 
@@ -239,14 +237,18 @@ export async function updateNameRoadmap(req: RequestWithBody, res: Response) {
   if (roadmap.userId !== userId) return responseNotAllowed(res);
 
   const { name } = req.body;
-  const isPublic = profanityCheckEnabled;
+  const isPublic = profanityCheckEnabled
+    ? !Boolean(req.body.isprofane)
+    : roadmap.isPublic;
 
   if (!name) return responseServerError(res);
 
   roadmap.set({
     name: name as string,
     isPublic,
-    isDraft: !isPublic,
+    isDraft: profanityCheckEnabled
+      ? !Boolean(req.body.isprofane)
+      : roadmap.isDraft,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -282,7 +284,9 @@ export async function updateDescriptionRoadmap(
   roadmap.set({
     description: description as string,
     isPublic,
-    isDraft: !isPublic,
+    isDraft: profanityCheckEnabled
+      ? !Boolean(req.body.isprofane)
+      : roadmap.isDraft,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
@@ -315,7 +319,9 @@ export async function updateDataRoadmap(req: RequestWithBody, res: Response) {
   roadmap.set({
     data: data as string,
     isPublic,
-    isDraft: !isPublic,
+    isDraft: profanityCheckEnabled
+      ? !Boolean(req.body.isprofane)
+      : roadmap.isDraft,
   });
 
   if (await updateRoadmap(db, roadmap.id, roadmap))
