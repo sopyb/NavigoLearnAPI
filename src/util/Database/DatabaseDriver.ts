@@ -5,6 +5,8 @@ import logger from 'jet-logger';
 import {User} from '@src/types/models/User';
 import {GenericModelClass} from '@src/types/models/GenericModelClass';
 import {readdirSync, readFileSync} from 'fs';
+import MigrationJsFile from '@src/sql/MigrationJsFile';
+import * as process from 'process';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -190,7 +192,7 @@ class Database {
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
-                 VALUES (${values.map(() => '?').join(',')})`;
+                     VALUES (${values.map(() => '?').join(',')})`;
     // execute query
     const result = (await this._query(sql, values)) as ResultSetHeader;
 
@@ -214,11 +216,38 @@ class Database {
     // ? for values to be replaced by params
     const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
-                 SET ${sqlKeys}
-                 WHERE id = ?`;
+                     SET ${sqlKeys}
+                     WHERE id = ?`;
     const params = [...values, id];
     // execute query
     const result = (await this._query(sql, params)) as ResultSetHeader;
+
+    let affectedRows = -1;
+    if (result) {
+      affectedRows = result.affectedRows || -1;
+    }
+
+    // return true if affected rows > 0 else false
+    return affectedRows > 0;
+  }
+
+  public async updateUnsafe(
+    table: string,
+    id: bigint,
+    data: object | Record<string, DataType>,
+    discardId = true,
+  ): Promise<boolean> {
+    const { keys, values } = processData(data, discardId);
+
+    // create sql query - update table set key = ?, key = ? where id = ?
+    // ? for values to be replaced by params
+    const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
+    const sql = `UPDATE ${table}
+                     SET ${sqlKeys}
+                     WHERE id = ?`;
+    const params = [...values, id];
+    // execute query
+    const result = (await this._queryUnsafe(sql, params)) as ResultSetHeader;
 
     let affectedRows = -1;
     if (result) {
@@ -243,8 +272,8 @@ class Database {
     // ? for values to be replaced by params
     const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
-                 SET ${sqlKeys}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     SET ${sqlKeys}
+                     WHERE ${queryBuilderResult.keyString}`;
     const params = [...dataValues, ...queryBuilderResult.params];
 
     // execute query
@@ -261,8 +290,8 @@ class Database {
 
   public async delete(table: string, id: bigint): Promise<boolean> {
     const sql = `DELETE
-                 FROM ${table}
-                 WHERE id = ?`;
+                     FROM ${table}
+                     WHERE id = ?`;
     const result = (await this._query(sql, [id])) as ResultSetHeader;
 
     // return true if affected rows > 0 else false
@@ -277,8 +306,8 @@ class Database {
     if (!queryBuilderResult) return false;
 
     const sql = `DELETE
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     FROM ${table}
+                     WHERE ${queryBuilderResult.keyString}`;
     const result = (await this._query(
       sql,
       queryBuilderResult.params,
@@ -298,8 +327,8 @@ class Database {
   public async get<T>(table: string, id: bigint): Promise<T | null> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT *
-                 FROM ${table}
-                 WHERE id = ?`;
+                     FROM ${table}
+                     WHERE id = ?`;
     // execute query
     const result = await this._query(sql, [id]);
 
@@ -325,7 +354,7 @@ class Database {
   public async getAll<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
-                 FROM ${table}`;
+                     FROM ${table}`;
 
     // execute query
     const result = await this._query(sql);
@@ -351,7 +380,7 @@ class Database {
 
   public async sum(table: string, column: string): Promise<bigint> {
     const sql = `SELECT SUM(${column})
-                 FROM ${table}`;
+                     FROM ${table}`;
     const result = await this._query(sql);
 
     return ((result as CountDataPacket[])[0][`SUM(${column})`] as bigint) || 0n;
@@ -386,7 +415,7 @@ class Database {
   public async count(table: string): Promise<bigint> {
     // create sql query - select count(*) from table
     const sql = `SELECT COUNT(*)
-                 FROM ${table}`;
+                     FROM ${table}`;
 
     // execute query
     const result = await this._query(sql);
@@ -428,7 +457,7 @@ class Database {
   }
 
   // TODO: less duplicate code
-  protected async _insertUnsafe(
+  public async _insertUnsafe(
     table: string,
     data: object | Record<string, DataType>,
     discardId = true,
@@ -438,7 +467,7 @@ class Database {
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
-                 VALUES (${values.map(() => '?').join(',')})`;
+                     VALUES (${values.map(() => '?').join(',')})`;
     // execute query
     const result = (await this._queryUnsafe(sql, values)) as ResultSetHeader;
 
@@ -450,10 +479,10 @@ class Database {
     return insertId;
   }
 
-  protected async getAllUnsafe<T>(table: string): Promise<T[] | null> {
+  public async getAllUnsafe<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
-                 FROM ${table}`;
+                     FROM ${table}`;
 
     // execute query
     const result = await this._queryUnsafe(sql);
@@ -463,7 +492,7 @@ class Database {
     return parseResult(result) as T[] | null;
   }
 
-  protected async _queryUnsafe(
+  public async _queryUnsafe(
     sql: string,
     params?: unknown[],
   ): Promise<ResultSetHeader | RowDataPacket[]> {
@@ -489,8 +518,8 @@ class Database {
     if (!queryBuilderResult) return null;
 
     const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     FROM ${table}
+                     WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return getFirstResult<T>(result);
@@ -505,8 +534,8 @@ class Database {
     if (!queryBuilderResult) return null;
 
     const sql = `SELECT *
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     FROM ${table}
+                     WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return parseResult(result) as T[] | null;
@@ -522,8 +551,8 @@ class Database {
     if (!queryBuilderResult) return 0n;
 
     const sql = `SELECT SUM(${column})
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     FROM ${table}
+                     WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return BigInt(
@@ -540,8 +569,8 @@ class Database {
     if (!queryBuilderResult) return 0n;
 
     const sql = `SELECT COUNT(*)
-                 FROM ${table}
-                 WHERE ${queryBuilderResult.keyString}`;
+                     FROM ${table}
+                     WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return (result as CountDataPacket[])[0]['COUNT(*)'];
@@ -559,7 +588,10 @@ class Database {
     const migrationFiles = readdirSync(
       path.join(pathToSQLScripts, 'migrations'),
     )
-      .filter((file) => file.endsWith('.sql'))
+      .filter(
+        (file) =>
+          file.endsWith('.sql') || file.endsWith('.js') || file.endsWith('.ts'),
+      )
       .sort((fileA, fileB) => {
         const numberA = parseInt(fileA.match(numberRegex)?.[0] || '');
         const numberB = parseInt(fileB.match(numberRegex)?.[0] || '');
@@ -586,9 +618,26 @@ class Database {
       if (migrationFiles.length) logger.info('Starting migrations...');
       for (const migrationFile of migrationFiles) {
         logger.info(`Now running: ${migrationFile}...`);
-        await this._executeFile(
-          path.join(pathToSQLScripts, 'migrations', migrationFile),
-        );
+
+        switch (migrationFile.split('.').pop()) {
+          case 'sql':
+            await this._executeFile(
+              path.join(pathToSQLScripts, 'migrations', migrationFile),
+            );
+            break;
+          case 'js':
+          case 'ts':
+            await (
+              (await import(
+                path.join(
+                  pathToSQLScripts,
+                  'migrations',
+                  migrationFile.split('.js')[0].split('.ts')[0],
+                )
+              )) as MigrationJsFile
+            ).up();
+            break;
+        }
 
         const success = await this._insertUnsafe('migrations', {
           id: -1n,
@@ -603,6 +652,8 @@ class Database {
       }
     } catch (e) {
       logger.err(e);
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
     } finally {
       Database.isSetup = true;
     }
