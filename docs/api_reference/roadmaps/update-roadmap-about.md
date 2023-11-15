@@ -17,7 +17,7 @@ This endpoint is used to update the about section of a roadmap.
   "name": "string",
   "description": "string",
   "topic": "string: programming, math, physics, biology",
-  "miscData": "string: Base64 encoded JSON"
+  "miscData": "JSON"
 }
 ```
 
