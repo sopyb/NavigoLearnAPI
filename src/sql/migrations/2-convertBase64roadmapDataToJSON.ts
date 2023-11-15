@@ -38,8 +38,8 @@ export const down = async () => {
     let { data, miscData } = roadmap;
 
     // convert data from JSON to base64
-    data = Buffer.from(data).toString('base64');
-    miscData = Buffer.from(miscData).toString('base64');
+    data = Buffer.from(JSON.stringify(data)).toString('base64');
+    miscData = Buffer.from(JSON.stringify(miscData)).toString('base64');
 
     // update the roadmap's data
     await database.update('roadmaps', roadmap.id, { data, miscData });
