@@ -89,6 +89,7 @@
   "include": [
     "src/**/*.ts",
     "spec/**/*.ts",
+    "src/**/*.js",
     "build.ts"
   ],
   "exclude": [
