@@ -16,9 +16,9 @@ Post all data related to a roadmap.
 {
   "name": "string",
   "description": "string", 
-  "data": "string: Base64 encoded JSON",
+  "data": "JSON",
   "topic": "string: programming, math, physics, biology",
-  "miscData": "string: Base64 encoded JSON",
+  "miscData": "JSON",
   "__COMMENT__": "The following fields are optional. If they are not included, they will not be updated.",
   "isDraft": "boolean"
 }

@@ -1,6 +1,5 @@
 import { RequestWithBody } from '@src/middleware/validators/validateBody';
 import { NextFunction, Response } from 'express';
-import { Base64Decode } from '@src/util/misc';
 import { responseInvalidBody } from '@src/helpers/responses/generalResponses';
 import {
   checkObjectProfanity, checkStringProfanity,
@@ -77,7 +76,7 @@ export function validateRoadmapIsProfane(
 
   // decode data and parse it
   try {
-    data = JSON.parse(Base64Decode(data)) as Record<string, unknown>;
+    data = JSON.parse(data) as Record<string, unknown>;
   } catch (err) {
     if (err instanceof SyntaxError)
       return responseInvalidBody(res, 'data is not a valid JSON string');

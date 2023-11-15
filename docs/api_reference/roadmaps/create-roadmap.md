@@ -16,11 +16,11 @@ None
 {
     "name": "string",
     "description": "string",
-    "data": "string: Base64 encoded JSON",
+    "data": "JSON",
     "isPublic": "boolean",
     "isDraft": "boolean",
     "version": "number",
-    "miscData": "string: Base64 encoded JSON"
+    "miscData": "JSON"
 }
 ```
 
