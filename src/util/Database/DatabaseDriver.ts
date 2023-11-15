@@ -1,12 +1,13 @@
 import EnvVars from '@src/constants/EnvVars';
-import {createPool, Pool} from 'mariadb';
+import { createPool, Pool } from 'mariadb';
 import path from 'path';
 import logger from 'jet-logger';
-import {User} from '@src/types/models/User';
-import {GenericModelClass} from '@src/types/models/GenericModelClass';
-import {readdirSync, readFileSync} from 'fs';
+import { User } from '@src/types/models/User';
+import { GenericModelClass } from '@src/types/models/GenericModelClass';
+import { readdirSync, readFileSync } from 'fs';
 import MigrationJsFile from '@src/sql/MigrationJsFile';
 import * as process from 'process';
+import { NodeEnvs } from '@src/constants/misc';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -192,7 +193,7 @@ class Database {
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
-                     VALUES (${values.map(() => '?').join(',')})`;
+                 VALUES (${values.map(() => '?').join(',')})`;
     // execute query
     const result = (await this._query(sql, values)) as ResultSetHeader;
 
@@ -216,9 +217,9 @@ class Database {
     // ? for values to be replaced by params
     const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
-                     SET ${sqlKeys}
-                     WHERE id = ?`;
-    const params = [...values, id];
+                 SET ${sqlKeys}
+                 WHERE id = ?`;
+    const params = [ ...values, id ];
     // execute query
     const result = (await this._query(sql, params)) as ResultSetHeader;
 
@@ -243,9 +244,9 @@ class Database {
     // ? for values to be replaced by params
     const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
-                     SET ${sqlKeys}
-                     WHERE id = ?`;
-    const params = [...values, id];
+                 SET ${sqlKeys}
+                 WHERE id = ?`;
+    const params = [ ...values, id ];
     // execute query
     const result = (await this._queryUnsafe(sql, params)) as ResultSetHeader;
 
@@ -272,9 +273,9 @@ class Database {
     // ? for values to be replaced by params
     const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
     const sql = `UPDATE ${table}
-                     SET ${sqlKeys}
-                     WHERE ${queryBuilderResult.keyString}`;
-    const params = [...dataValues, ...queryBuilderResult.params];
+                 SET ${sqlKeys}
+                 WHERE ${queryBuilderResult.keyString}`;
+    const params = [ ...dataValues, ...queryBuilderResult.params ];
 
     // execute query
     const result = (await this._query(sql, params)) as ResultSetHeader;
@@ -290,9 +291,9 @@ class Database {
 
   public async delete(table: string, id: bigint): Promise<boolean> {
     const sql = `DELETE
-                     FROM ${table}
-                     WHERE id = ?`;
-    const result = (await this._query(sql, [id])) as ResultSetHeader;
+                 FROM ${table}
+                 WHERE id = ?`;
+    const result = (await this._query(sql, [ id ])) as ResultSetHeader;
 
     // return true if affected rows > 0 else false
     return result.affectedRows > 0;
@@ -306,8 +307,8 @@ class Database {
     if (!queryBuilderResult) return false;
 
     const sql = `DELETE
-                     FROM ${table}
-                     WHERE ${queryBuilderResult.keyString}`;
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
     const result = (await this._query(
       sql,
       queryBuilderResult.params,
@@ -327,10 +328,10 @@ class Database {
   public async get<T>(table: string, id: bigint): Promise<T | null> {
     // create sql query - select * from table where id = ?
     const sql = `SELECT *
-                     FROM ${table}
-                     WHERE id = ?`;
+                 FROM ${table}
+                 WHERE id = ?`;
     // execute query
-    const result = await this._query(sql, [id]);
+    const result = await this._query(sql, [ id ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -354,7 +355,7 @@ class Database {
   public async getAll<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
-                     FROM ${table}`;
+                 FROM ${table}`;
 
     // execute query
     const result = await this._query(sql);
@@ -380,7 +381,7 @@ class Database {
 
   public async sum(table: string, column: string): Promise<bigint> {
     const sql = `SELECT SUM(${column})
-                     FROM ${table}`;
+                 FROM ${table}`;
     const result = await this._query(sql);
 
     return ((result as CountDataPacket[])[0][`SUM(${column})`] as bigint) || 0n;
@@ -415,7 +416,7 @@ class Database {
   public async count(table: string): Promise<bigint> {
     // create sql query - select count(*) from table
     const sql = `SELECT COUNT(*)
-                     FROM ${table}`;
+                 FROM ${table}`;
 
     // execute query
     const result = await this._query(sql);
@@ -467,7 +468,7 @@ class Database {
     // create sql query - insert into table (keys) values (values)
     // ? for values to be replaced by params
     const sql = `INSERT INTO ${table} (${keys.join(',')})
-                     VALUES (${values.map(() => '?').join(',')})`;
+                 VALUES (${values.map(() => '?').join(',')})`;
     // execute query
     const result = (await this._queryUnsafe(sql, values)) as ResultSetHeader;
 
@@ -482,7 +483,7 @@ class Database {
   public async getAllUnsafe<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
-                     FROM ${table}`;
+                 FROM ${table}`;
 
     // execute query
     const result = await this._queryUnsafe(sql);
@@ -518,8 +519,8 @@ class Database {
     if (!queryBuilderResult) return null;
 
     const sql = `SELECT *
-                     FROM ${table}
-                     WHERE ${queryBuilderResult.keyString}`;
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return getFirstResult<T>(result);
@@ -534,8 +535,8 @@ class Database {
     if (!queryBuilderResult) return null;
 
     const sql = `SELECT *
-                     FROM ${table}
-                     WHERE ${queryBuilderResult.keyString}`;
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return parseResult(result) as T[] | null;
@@ -551,8 +552,8 @@ class Database {
     if (!queryBuilderResult) return 0n;
 
     const sql = `SELECT SUM(${column})
-                     FROM ${table}
-                     WHERE ${queryBuilderResult.keyString}`;
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return BigInt(
@@ -569,8 +570,8 @@ class Database {
     if (!queryBuilderResult) return 0n;
 
     const sql = `SELECT COUNT(*)
-                     FROM ${table}
-                     WHERE ${queryBuilderResult.keyString}`;
+                 FROM ${table}
+                 WHERE ${queryBuilderResult.keyString}`;
     const result = await this._query(sql, queryBuilderResult.params);
 
     return (result as CountDataPacket[])[0]['COUNT(*)'];
@@ -584,13 +585,17 @@ class Database {
     // run the setup sql
     await this._executeFile(path.join(pathToSQLScripts, 'setup.sql'));
 
+    const scriptExtension =
+      EnvVars.NodeEnv === NodeEnvs.Production ||
+      EnvVars.NodeEnv === NodeEnvs.Staging
+        ? '.js' : '.ts';
+
     // read the migrations directory and sort files by number id
     const migrationFiles = readdirSync(
       path.join(pathToSQLScripts, 'migrations'),
     )
       .filter(
-        (file) =>
-          file.endsWith('.sql') || file.endsWith('.js') || file.endsWith('.ts'),
+        (file) => file.endsWith('.sql') || file.endsWith(scriptExtension),
       )
       .sort((fileA, fileB) => {
         const numberA = parseInt(fileA.match(numberRegex)?.[0] || '');
@@ -632,7 +637,7 @@ class Database {
                 path.join(
                   pathToSQLScripts,
                   'migrations',
-                  migrationFile.split('.js')[0].split('.ts')[0],
+                  migrationFile.split(scriptExtension)[0],
                 )
               )) as MigrationJsFile
             ).up();
@@ -716,11 +721,11 @@ class Database {
           .join(' OR ');
         keyString += i > 0 ? ' AND ' : '';
         keyString += `(${subKeyString})`;
-        params = [...params, ...arrayParams];
+        params = [ ...params, ...arrayParams ];
       } else {
         if (i > 0) keyString += ' AND ';
         keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-        params = [...params, values[i + 1]];
+        params = [ ...params, values[i + 1] ];
       }
     }
 
