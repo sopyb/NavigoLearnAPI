@@ -29,7 +29,7 @@ None
     "name": "string",
     "description": "string",
     "topic": "string: programming, math, physics, biology",
-    "data": "string: Base64 encoded JSON",
+    "data": "JSON",
     "isFeatured": "boolean",
     "isPublic": "boolean",
     "isDraft": "boolean",
@@ -40,7 +40,7 @@ None
     "likeCount": "number",
     "viewCount": "number",
     "isLiked": "boolean",
-    "miscData": "string: Base64 encoded JSON",
+    "miscData": "JSON",
     "version": "number"
   }
 }

@@ -1,10 +1,13 @@
 import EnvVars from '@src/constants/EnvVars';
-import {createPool, Pool} from 'mariadb';
+import { createPool, Pool } from 'mariadb';
 import path from 'path';
 import logger from 'jet-logger';
-import {User} from '@src/types/models/User';
-import {GenericModelClass} from '@src/types/models/GenericModelClass';
-import {readdirSync, readFileSync} from 'fs';
+import { User } from '@src/types/models/User';
+import { GenericModelClass } from '@src/types/models/GenericModelClass';
+import { readdirSync, readFileSync } from 'fs';
+import MigrationJsFile from '@src/sql/MigrationJsFile';
+import * as process from 'process';
+import { NodeEnvs } from '@src/constants/misc';
 
 // database credentials
 const { DBCred } = EnvVars;
@@ -216,9 +219,36 @@ class Database {
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE id = ?`;
-    const params = [...values, id];
+    const params = [ ...values, id ];
     // execute query
     const result = (await this._query(sql, params)) as ResultSetHeader;
+
+    let affectedRows = -1;
+    if (result) {
+      affectedRows = result.affectedRows || -1;
+    }
+
+    // return true if affected rows > 0 else false
+    return affectedRows > 0;
+  }
+
+  public async updateUnsafe(
+    table: string,
+    id: bigint,
+    data: object | Record<string, DataType>,
+    discardId = true,
+  ): Promise<boolean> {
+    const { keys, values } = processData(data, discardId);
+
+    // create sql query - update table set key = ?, key = ? where id = ?
+    // ? for values to be replaced by params
+    const sqlKeys = keys.map((key) => `${key} = ?`).join(',');
+    const sql = `UPDATE ${table}
+                 SET ${sqlKeys}
+                 WHERE id = ?`;
+    const params = [ ...values, id ];
+    // execute query
+    const result = (await this._queryUnsafe(sql, params)) as ResultSetHeader;
 
     let affectedRows = -1;
     if (result) {
@@ -245,7 +275,7 @@ class Database {
     const sql = `UPDATE ${table}
                  SET ${sqlKeys}
                  WHERE ${queryBuilderResult.keyString}`;
-    const params = [...dataValues, ...queryBuilderResult.params];
+    const params = [ ...dataValues, ...queryBuilderResult.params ];
 
     // execute query
     const result = (await this._query(sql, params)) as ResultSetHeader;
@@ -263,7 +293,7 @@ class Database {
     const sql = `DELETE
                  FROM ${table}
                  WHERE id = ?`;
-    const result = (await this._query(sql, [id])) as ResultSetHeader;
+    const result = (await this._query(sql, [ id ])) as ResultSetHeader;
 
     // return true if affected rows > 0 else false
     return result.affectedRows > 0;
@@ -301,7 +331,7 @@ class Database {
                  FROM ${table}
                  WHERE id = ?`;
     // execute query
-    const result = await this._query(sql, [id]);
+    const result = await this._query(sql, [ id ]);
 
     // check if T has any properties that are JSON
     // if so parse them
@@ -428,7 +458,7 @@ class Database {
   }
 
   // TODO: less duplicate code
-  protected async _insertUnsafe(
+  public async _insertUnsafe(
     table: string,
     data: object | Record<string, DataType>,
     discardId = true,
@@ -450,7 +480,7 @@ class Database {
     return insertId;
   }
 
-  protected async getAllUnsafe<T>(table: string): Promise<T[] | null> {
+  public async getAllUnsafe<T>(table: string): Promise<T[] | null> {
     // create sql query - select * from table
     const sql = `SELECT *
                  FROM ${table}`;
@@ -463,7 +493,7 @@ class Database {
     return parseResult(result) as T[] | null;
   }
 
-  protected async _queryUnsafe(
+  public async _queryUnsafe(
     sql: string,
     params?: unknown[],
   ): Promise<ResultSetHeader | RowDataPacket[]> {
@@ -555,11 +585,18 @@ class Database {
     // run the setup sql
     await this._executeFile(path.join(pathToSQLScripts, 'setup.sql'));
 
+    const scriptExtension =
+      EnvVars.NodeEnv === NodeEnvs.Production ||
+      EnvVars.NodeEnv === NodeEnvs.Staging
+        ? '.js' : '.ts';
+
     // read the migrations directory and sort files by number id
     const migrationFiles = readdirSync(
       path.join(pathToSQLScripts, 'migrations'),
     )
-      .filter((file) => file.endsWith('.sql'))
+      .filter(
+        (file) => file.endsWith('.sql') || file.endsWith(scriptExtension),
+      )
       .sort((fileA, fileB) => {
         const numberA = parseInt(fileA.match(numberRegex)?.[0] || '');
         const numberB = parseInt(fileB.match(numberRegex)?.[0] || '');
@@ -586,9 +623,26 @@ class Database {
       if (migrationFiles.length) logger.info('Starting migrations...');
       for (const migrationFile of migrationFiles) {
         logger.info(`Now running: ${migrationFile}...`);
-        await this._executeFile(
-          path.join(pathToSQLScripts, 'migrations', migrationFile),
-        );
+
+        switch (migrationFile.split('.').pop()) {
+          case 'sql':
+            await this._executeFile(
+              path.join(pathToSQLScripts, 'migrations', migrationFile),
+            );
+            break;
+          case 'js':
+          case 'ts':
+            await (
+              (await import(
+                path.join(
+                  pathToSQLScripts,
+                  'migrations',
+                  migrationFile.split(scriptExtension)[0],
+                )
+              )) as MigrationJsFile
+            ).up();
+            break;
+        }
 
         const success = await this._insertUnsafe('migrations', {
           id: -1n,
@@ -603,6 +657,8 @@ class Database {
       }
     } catch (e) {
       logger.err(e);
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
     } finally {
       Database.isSetup = true;
     }
@@ -665,11 +721,11 @@ class Database {
           .join(' OR ');
         keyString += i > 0 ? ' AND ' : '';
         keyString += `(${subKeyString})`;
-        params = [...params, ...arrayParams];
+        params = [ ...params, ...arrayParams ];
       } else {
         if (i > 0) keyString += ' AND ';
         keyString += `${key} ${like ? 'LIKE' : '='} ?`;
-        params = [...params, values[i + 1]];
+        params = [ ...params, values[i + 1] ];
       }
     }
 

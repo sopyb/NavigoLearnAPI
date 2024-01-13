@@ -24,7 +24,7 @@ None
 {
   "success": true,
   "message": "Roadmap progress found",
-  "data": "string: Base64 encoded JSON string"
+  "data": "JSON string"
 }
 ```
 

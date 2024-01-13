@@ -14,7 +14,7 @@ This endpoint is used to update the data of a roadmap.
 
 ```json
 {
-  "data": "string: Base64 encoded JSON data"
+  "data": "JSON"
 }
 ```
 
